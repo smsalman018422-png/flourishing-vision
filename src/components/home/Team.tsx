@@ -131,7 +131,7 @@ export function Team() {
                       className="rounded-full p-2 bg-primary/10 hover:bg-primary/20 text-primary transition"
                       aria-label={`${f.name} on LinkedIn`}
                     >
-                      <Linkedin className="h-4 w-4" />
+                      <LinkedinIcon className="h-4 w-4" />
                     </a>
                   )}
                 </div>
@@ -277,7 +277,7 @@ export function Team() {
                       rel="noreferrer"
                       className="inline-flex items-center gap-2 mt-6 px-4 py-2.5 rounded-full bg-primary text-primary-foreground font-medium hover:opacity-90 transition"
                     >
-                      <Linkedin className="h-4 w-4" />
+                      <LinkedinIcon className="h-4 w-4" />
                       View LinkedIn
                     </a>
                   )}
