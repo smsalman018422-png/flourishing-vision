@@ -77,6 +77,48 @@ export type Database = {
         }
         Relationships: []
       }
+      team_members: {
+        Row: {
+          bio: string | null
+          category: string
+          created_at: string
+          id: string
+          is_founder: boolean
+          linkedin_url: string | null
+          name: string
+          photo_url: string | null
+          role: string
+          skills: string[] | null
+          sort_order: number
+        }
+        Insert: {
+          bio?: string | null
+          category: string
+          created_at?: string
+          id?: string
+          is_founder?: boolean
+          linkedin_url?: string | null
+          name: string
+          photo_url?: string | null
+          role: string
+          skills?: string[] | null
+          sort_order?: number
+        }
+        Update: {
+          bio?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          is_founder?: boolean
+          linkedin_url?: string | null
+          name?: string
+          photo_url?: string | null
+          role?: string
+          skills?: string[] | null
+          sort_order?: number
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
