@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Linkedin, X } from "lucide-react";
+import { Linkedin as LinkedinIcon, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 type TeamMember = {
