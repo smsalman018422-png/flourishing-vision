@@ -1,4 +1,4 @@
-import { Leaf, Twitter, Linkedin, Instagram, Github } from "lucide-react";
+import { Leaf, Send, Briefcase, Camera, Code2 } from "lucide-react";
 
 const cols = [
   {
@@ -34,7 +34,7 @@ export function Footer() {
               A digital growth studio helping ambitious brands compound traffic, revenue, and reputation.
             </p>
             <div className="mt-6 flex items-center gap-2">
-              {[Twitter, Linkedin, Instagram, Github].map((Icon, i) => (
+              {[Send, Briefcase, Camera, Code2].map((Icon, i) => (
                 <a
                   key={i}
                   href="#"
