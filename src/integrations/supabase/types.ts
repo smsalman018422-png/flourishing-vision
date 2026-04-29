@@ -14,7 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      portfolio: {
+        Row: {
+          after_image_url: string | null
+          before_image_url: string | null
+          category: string
+          challenge: string | null
+          client_name: string
+          cover_image_url: string | null
+          created_at: string
+          growth_pct: number | null
+          id: string
+          project_title: string
+          results: string | null
+          revenue_label: string | null
+          roi_pct: number | null
+          solution: string | null
+          sort_order: number
+          testimonial_author: string | null
+          testimonial_quote: string | null
+          testimonial_role: string | null
+        }
+        Insert: {
+          after_image_url?: string | null
+          before_image_url?: string | null
+          category: string
+          challenge?: string | null
+          client_name: string
+          cover_image_url?: string | null
+          created_at?: string
+          growth_pct?: number | null
+          id?: string
+          project_title: string
+          results?: string | null
+          revenue_label?: string | null
+          roi_pct?: number | null
+          solution?: string | null
+          sort_order?: number
+          testimonial_author?: string | null
+          testimonial_quote?: string | null
+          testimonial_role?: string | null
+        }
+        Update: {
+          after_image_url?: string | null
+          before_image_url?: string | null
+          category?: string
+          challenge?: string | null
+          client_name?: string
+          cover_image_url?: string | null
+          created_at?: string
+          growth_pct?: number | null
+          id?: string
+          project_title?: string
+          results?: string | null
+          revenue_label?: string | null
+          roi_pct?: number | null
+          solution?: string | null
+          sort_order?: number
+          testimonial_author?: string | null
+          testimonial_quote?: string | null
+          testimonial_role?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
