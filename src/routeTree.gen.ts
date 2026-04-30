@@ -46,7 +46,7 @@ const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/services.lazy').then((d) => d.Route))
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
