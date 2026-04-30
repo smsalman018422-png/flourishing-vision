@@ -61,6 +61,37 @@ function ServicesPage() {
             <p className="mt-3 text-muted-foreground">
               Add services from the admin panel to populate this page.
             </p>
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((s, i) => {
+              const Icon = ICONS[s.icon_name] ?? Sparkles;
+              return (
+                <motion.div
+                  key={s.id}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-60px" }}
+                  transition={{ duration: 0.5, delay: i * 0.05 }}
+                >
+                  <Link
+                    to="/services/$slug"
+                    params={{ slug: s.slug }}
+                    className="group relative flex h-full flex-col overflow-hidden glass rounded-2xl p-7 hover:-translate-y-1 hover:shadow-glow hover:border-accent/50 transition-all"
+                  >
+                    <div
+                      className="pointer-events-none absolute -top-16 -right-16 h-44 w-44 rounded-full bg-accent/20 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    />
+                    <span className="relative grid place-items-center h-14 w-14 rounded-2xl bg-gradient-primary shadow-glow">
+                      <Icon className="h-6 w-6 text-primary-foreground" strokeWidth={2.25} />
+                    </span>
+
+                    <h3 className="relative mt-5 text-xl font-display font-semibold tracking-tight">
+                      {s.title}
+                    </h3>
+                    <p className="relative mt-2 text-sm text-muted-foreground leading-relaxed">
+                      {s.short_description}
+                    </p>
 
                     {s.features && s.features.length > 0 && (
                       <ul className="relative mt-5 space-y-2">
@@ -99,6 +130,7 @@ function ServicesPage() {
             })}
           </div>
         )}
+
 
         {/* Bottom CTA */}
         <div className="mt-20">
