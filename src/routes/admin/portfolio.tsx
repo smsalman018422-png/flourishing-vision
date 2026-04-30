@@ -6,8 +6,8 @@ import { Drawer } from "@/components/admin/Drawer";
 import { ImageUpload, MultiImageUpload } from "@/components/admin/ImageUpload";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
-import { supabase } from "@/integrations/supabase/client";
-import { adminData } from "@/lib/admin-data";
+import { adminData, adminWrite } from "@/lib/admin-data";
+import { subscribeToTable } from "@/lib/realtime";
 import { Edit2, Eye, EyeOff, Plus, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -110,6 +110,7 @@ function PortfolioAdmin() {
   };
   useEffect(() => {
     load();
+    return subscribeToTable("portfolio", load, "admin-portfolio-changes");
   }, []);
 
   const filtered = useMemo(
@@ -146,8 +147,8 @@ function PortfolioAdmin() {
     };
     const isNew = !editing.id;
     const { error } = isNew
-      ? await supabase.from("portfolio").insert({ ...payload, sort_order: rows.length })
-      : await supabase.from("portfolio").update(payload).eq("id", editing.id);
+      ? await adminWrite({ table: "portfolio", op: "insert", values: { ...payload, sort_order: rows.length } })
+      : await adminWrite({ table: "portfolio", op: "update", values: payload, match: [{ column: "id", value: editing.id }] });
     setBusy(false);
     if (error) {
       toast.error(error.message);
@@ -162,9 +163,9 @@ function PortfolioAdmin() {
     const next = !p[key];
     setRows((r) => r.map((x) => (x.id === p.id ? { ...x, [key]: next } : x)));
     const patch = key === "is_visible" ? { is_visible: next } : { is_featured: next };
-    const { error } = await supabase.from("portfolio").update(patch).eq("id", p.id);
+    const { error } = await adminWrite({ table: "portfolio", op: "update", values: patch, match: [{ column: "id", value: p.id }] });
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       load();
     }
   };
@@ -174,9 +175,9 @@ function PortfolioAdmin() {
     const id = confirmDelete.id;
     setRows((r) => r.filter((x) => x.id !== id));
     setConfirmDelete(null);
-    const { error } = await supabase.from("portfolio").delete().eq("id", id);
+    const { error } = await adminWrite({ table: "portfolio", op: "delete", match: [{ column: "id", value: id }] });
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       load();
     } else toast.success("Removed");
   };
