@@ -1,0 +1,2 @@
+ALTER TABLE public.portfolio ADD COLUMN IF NOT EXISTS is_featured boolean NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS portfolio_featured_idx ON public.portfolio (is_featured) WHERE is_featured = true;

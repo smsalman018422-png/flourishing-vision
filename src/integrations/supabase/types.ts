@@ -121,6 +121,7 @@ export type Database = {
           created_at: string
           growth_pct: number | null
           id: string
+          is_featured: boolean
           project_title: string
           results: string | null
           revenue_label: string | null
@@ -141,6 +142,7 @@ export type Database = {
           created_at?: string
           growth_pct?: number | null
           id?: string
+          is_featured?: boolean
           project_title: string
           results?: string | null
           revenue_label?: string | null
@@ -161,6 +163,7 @@ export type Database = {
           created_at?: string
           growth_pct?: number | null
           id?: string
+          is_featured?: boolean
           project_title?: string
           results?: string | null
           revenue_label?: string | null
