@@ -151,7 +151,7 @@ function PortfolioAdmin() {
       : await adminWrite({ table: "portfolio", op: "update", values: payload, match: [{ column: "id", value: editing.id }] });
     setBusy(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       return;
     }
     toast.success(isNew ? "Case study added" : "Saved");
