@@ -31,7 +31,8 @@ export function Testimonials() {
       const { data } = await supabase
         .from("testimonials")
         .select("*")
-        .order("sort_order", { ascending: true });
+        .order("sort_order", { ascending: true })
+        .limit(50);
       if (alive) setItems((data ?? []) as Testimonial[]);
     })();
     return () => {
