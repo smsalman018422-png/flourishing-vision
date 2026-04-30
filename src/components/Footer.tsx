@@ -97,7 +97,7 @@ export function Footer() {
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 py-16">
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-12 text-center md:text-left md:grid-cols-2 lg:grid-cols-4">
           {/* COL 1 — Brand */}
           <div>
             <div className="flex items-center gap-2">
@@ -111,7 +111,7 @@ export function Footer() {
             <p className="mt-4 text-sm text-muted-foreground max-w-xs">
               Growing brands globally since 2025.
             </p>
-            <div className="mt-6 flex items-center gap-2">
+            <div className="mt-6 flex items-center justify-center md:justify-start gap-2">
               {socials.map(({ Icon, label, href }) => (
                 <a
                   key={label}
@@ -197,7 +197,7 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-14 pt-6 border-t border-border/60 flex flex-col gap-4 md:flex-row md:items-center md:justify-between text-xs text-muted-foreground">
+        <div className="mt-14 pt-6 border-t border-border/60 flex flex-col items-center gap-4 text-center md:flex-row md:items-center md:justify-between md:text-left text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} LetUGrow. All rights reserved.</p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
