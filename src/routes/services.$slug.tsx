@@ -57,14 +57,7 @@ function slugify(s: string) {
 
 export const Route = createFileRoute("/services/$slug")({
   loader: async ({ params }) => {
-    const { data, error } = await (supabase as any)
-      .from("services")
-      .select("*")
-      .eq("slug", params.slug)
-      .eq("is_visible", true)
-      .maybeSingle();
-
-    if (error) throw error;
+    const data = await getServiceBySlug({ data: { slug: params.slug } });
     if (!data) throw notFound();
     return data as ServiceRow;
   },
