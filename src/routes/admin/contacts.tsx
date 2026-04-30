@@ -6,7 +6,7 @@ import { Drawer } from "@/components/admin/Drawer";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { supabase } from "@/integrations/supabase/client";
-import { loadList } from "@/lib/admin-data";
+import { adminData } from "@/lib/admin-data";
 import { Download, Mail, Phone, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -52,9 +52,12 @@ function ContactsAdmin() {
   const load = async () => {
     setLoading(true);
     setLoadError(null);
-    const { data, error } = await loadList<Submission>("contact_submissions", (q) =>
-      q.select("*").order("created_at", { ascending: false }).limit(500),
-    );
+    const { data, error } = await adminData<Submission>({
+      table: "contact_submissions",
+      select: "*",
+      orders: [{ column: "created_at", ascending: false }],
+      limit: 500,
+    });
     if (error) {
       setLoadError(error);
       setLoading(false);

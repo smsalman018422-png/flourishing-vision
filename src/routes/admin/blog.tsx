@@ -8,7 +8,7 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { supabase } from "@/integrations/supabase/client";
-import { loadList } from "@/lib/admin-data";
+import { adminData } from "@/lib/admin-data";
 import { Edit2, Eye, Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -71,12 +71,11 @@ function BlogAdmin() {
   const load = async () => {
     setLoading(true);
     setLoadError(null);
-    const { data, error } = await loadList<Post>("blog_posts", (q) =>
-      q
-        .select("*")
-        .order("published_at", { ascending: false, nullsFirst: false })
-        .order("created_at", { ascending: false }),
-    );
+    const { data, error } = await adminData<Post>({
+      table: "blog_posts",
+      select: "*",
+      orders: [{ column: "published_at", ascending: false, nullsFirst: false }, { column: "created_at", ascending: false }],
+    });
     if (error) {
       setLoadError(error);
       setLoading(false);

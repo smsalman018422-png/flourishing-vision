@@ -7,7 +7,7 @@ import { ImageUpload, MultiImageUpload } from "@/components/admin/ImageUpload";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { supabase } from "@/integrations/supabase/client";
-import { loadList } from "@/lib/admin-data";
+import { adminData } from "@/lib/admin-data";
 import { Edit2, Eye, EyeOff, Plus, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -95,9 +95,11 @@ function PortfolioAdmin() {
   const load = async () => {
     setLoading(true);
     setLoadError(null);
-    const { data, error } = await loadList<Project>("portfolio", (q) =>
-      q.select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: false }),
-    );
+    const { data, error } = await adminData<Project>({
+      table: "portfolio",
+      select: "*",
+      orders: [{ column: "sort_order", ascending: true }, { column: "created_at", ascending: false }],
+    });
     if (error) {
       setLoadError(error);
       setLoading(false);
