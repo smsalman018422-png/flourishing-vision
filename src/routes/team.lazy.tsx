@@ -3,7 +3,13 @@ import { PageShell, PageHeader } from "@/components/layout/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, ExternalLink } from "lucide-react";
 
@@ -55,7 +61,9 @@ function TeamPage() {
         setMembers((data ?? []) as Member[]);
         setLoading(false);
       });
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const founders = useMemo(() => members.filter((m) => m.is_founder), [members]);
@@ -157,7 +165,9 @@ function TeamPage() {
             We're always looking for sharp, kind operators. Tell us what you do best.
           </p>
           <Button asChild size="lg" variant="secondary" className="mt-6">
-            <Link to="/contact">Careers <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            <Link to="/contact">
+              Careers <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
         </div>
       </section>
@@ -167,7 +177,15 @@ function TeamPage() {
   );
 }
 
-function FounderCard({ member, index, onOpen }: { member: Member; index: number; onOpen: () => void }) {
+function FounderCard({
+  member,
+  index,
+  onOpen,
+}: {
+  member: Member;
+  index: number;
+  onOpen: () => void;
+}) {
   return (
     <motion.button
       type="button"
@@ -181,7 +199,11 @@ function FounderCard({ member, index, onOpen }: { member: Member; index: number;
       <div className="rounded-[calc(1.5rem-2px)] glass-strong p-6 h-full">
         <div className="aspect-square rounded-2xl overflow-hidden bg-muted mb-5 relative">
           {member.photo_url ? (
-            <img src={member.photo_url} alt={member.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+            <img
+              src={member.photo_url}
+              alt={member.name}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
           ) : (
             <div className="h-full w-full bg-gradient-to-br from-primary/20 to-amber-300/20 flex items-center justify-center">
               <Sparkles className="h-10 w-10 text-primary/50" />
@@ -219,7 +241,12 @@ function MemberCard({ member, onOpen }: { member: Member; onOpen: () => void }) 
     >
       <div className="mx-auto h-28 w-28 sm:h-32 sm:w-32 rounded-full overflow-hidden bg-muted ring-2 ring-transparent group-hover:ring-primary transition-all">
         {member.photo_url ? (
-          <img src={member.photo_url} alt={member.name} loading="lazy" className="h-full w-full object-cover" />
+          <img
+            src={member.photo_url}
+            alt={member.name}
+            loading="lazy"
+            className="h-full w-full object-cover"
+          />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-2xl font-display text-primary/60">
             {member.name.slice(0, 1)}
@@ -247,7 +274,11 @@ function MemberDialog({ member, onClose }: { member: Member | null; onClose: () 
               <div className="flex items-center gap-4">
                 <div className="h-20 w-20 rounded-full overflow-hidden bg-muted shrink-0 ring-2 ring-primary">
                   {member.photo_url ? (
-                    <img src={member.photo_url} alt={member.name} className="h-full w-full object-cover" />
+                    <img
+                      src={member.photo_url}
+                      alt={member.name}
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
                     <div className="h-full w-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-xl font-display text-primary/60">
                       {member.name.slice(0, 1)}
@@ -261,12 +292,19 @@ function MemberDialog({ member, onClose }: { member: Member | null; onClose: () 
               </div>
             </DialogHeader>
             {member.bio && (
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{member.bio}</p>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                {member.bio}
+              </p>
             )}
             {member.skills && member.skills.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {member.skills.map((s) => (
-                  <span key={s} className="rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">{s}</span>
+                  <span
+                    key={s}
+                    className="rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground"
+                  >
+                    {s}
+                  </span>
                 ))}
               </div>
             )}

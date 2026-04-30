@@ -29,7 +29,10 @@ export const Route = createFileRoute("/blog/$slug")({
   head: ({ params }) => ({
     meta: [
       { title: `${params.slug} — LetUsGrow Blog` },
-      { name: "description", content: "Insights on growth, marketing and brand from the LetUsGrow team." },
+      {
+        name: "description",
+        content: "Insights on growth, marketing and brand from the LetUsGrow team.",
+      },
       { property: "og:title", content: params.slug },
       { property: "og:description", content: "Insights on growth, marketing and brand." },
     ],
@@ -39,7 +42,9 @@ export const Route = createFileRoute("/blog/$slug")({
       <div className="mx-auto max-w-3xl px-4 py-32 text-center">
         <h1 className="text-3xl font-display font-semibold">Something went wrong</h1>
         <p className="mt-3 text-muted-foreground">{error.message}</p>
-        <Button asChild className="mt-6"><Link to="/blog">Back to blog</Link></Button>
+        <Button asChild className="mt-6">
+          <Link to="/blog">Back to blog</Link>
+        </Button>
       </div>
     </PageShell>
   ),
@@ -47,7 +52,9 @@ export const Route = createFileRoute("/blog/$slug")({
     <PageShell>
       <div className="mx-auto max-w-3xl px-4 py-32 text-center">
         <h1 className="text-3xl font-display font-semibold">Post not found</h1>
-        <Button asChild className="mt-6"><Link to="/blog">Back to blog</Link></Button>
+        <Button asChild className="mt-6">
+          <Link to="/blog">Back to blog</Link>
+        </Button>
       </div>
     </PageShell>
   ),
@@ -79,9 +86,13 @@ function BlogPostPage() {
         setPost(postBody.data);
 
         const relatedRes = await fetch("/api/public/blog");
-        const relatedBody = relatedRes.ok ? ((await relatedRes.json()) as { data?: Post[] }) : { data: [] };
+        const relatedBody = relatedRes.ok
+          ? ((await relatedRes.json()) as { data?: Post[] })
+          : { data: [] };
         if (!cancelled) {
-          setRelated((relatedBody.data ?? []).filter((item) => item.id !== postBody.data?.id).slice(0, 3));
+          setRelated(
+            (relatedBody.data ?? []).filter((item) => item.id !== postBody.data?.id).slice(0, 3),
+          );
         }
       } catch {
         if (!cancelled) setMissing(true);
@@ -107,18 +118,30 @@ function BlogPostPage() {
 
   if (missing || !post) throw notFound();
 
-  const date = post.published_at ? new Date(post.published_at).toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" }) : null;
+  const date = post.published_at
+    ? new Date(post.published_at).toLocaleDateString(undefined, {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
   const url = typeof window !== "undefined" ? window.location.href : "";
   const shareText = encodeURIComponent(post.title);
   const shareUrl = encodeURIComponent(url);
 
   const subscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.includes("@")) { toast.error("Enter a valid email"); return; }
+    if (!email.includes("@")) {
+      toast.error("Enter a valid email");
+      return;
+    }
     setSubscribing(true);
     const { error } = await supabase.from("newsletter_subscribers").insert({ email: email.trim() });
     setSubscribing(false);
-    if (error) { toast.error("Couldn't subscribe — already on the list?"); return; }
+    if (error) {
+      toast.error("Couldn't subscribe — already on the list?");
+      return;
+    }
     toast.success("Subscribed — welcome aboard.");
     setEmail("");
   };
@@ -132,33 +155,72 @@ function BlogPostPage() {
     <PageShell>
       {/* Hero */}
       <article className="mx-auto max-w-3xl px-4 sm:px-6 pt-4 pb-16">
-        <Link to="/blog" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6">
+        <Link
+          to="/blog"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-6"
+        >
           <ArrowLeft className="h-4 w-4" /> All posts
         </Link>
-        {post.category && <span className="text-xs uppercase tracking-wider text-primary font-medium">{post.category}</span>}
-        <h1 className="mt-3 text-3xl sm:text-5xl font-display font-semibold leading-tight">{post.title}</h1>
+        {post.category && (
+          <span className="text-xs uppercase tracking-wider text-primary font-medium">
+            {post.category}
+          </span>
+        )}
+        <h1 className="mt-3 text-3xl sm:text-5xl font-display font-semibold leading-tight">
+          {post.title}
+        </h1>
         <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
-          {post.author_name && <span className="font-medium text-foreground">{post.author_name}</span>}
-          {date && <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" />{date}</span>}
-          {post.read_time_minutes && <span className="inline-flex items-center gap-1"><Clock className="h-3.5 w-3.5" />{post.read_time_minutes} min read</span>}
+          {post.author_name && (
+            <span className="font-medium text-foreground">{post.author_name}</span>
+          )}
+          {date && (
+            <span className="inline-flex items-center gap-1">
+              <Calendar className="h-3.5 w-3.5" />
+              {date}
+            </span>
+          )}
+          {post.read_time_minutes && (
+            <span className="inline-flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" />
+              {post.read_time_minutes} min read
+            </span>
+          )}
         </div>
         {post.cover_image_url && (
           <div className="mt-8 aspect-video rounded-2xl overflow-hidden bg-muted">
-            <img src={post.cover_image_url} alt={post.title} className="h-full w-full object-cover" />
+            <img
+              src={post.cover_image_url}
+              alt={post.title}
+              className="h-full w-full object-cover"
+            />
           </div>
         )}
 
         {/* Content */}
         <div className="prose prose-invert prose-lg mt-10 max-w-none prose-headings:font-display prose-a:text-primary prose-img:rounded-xl">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content ?? post.excerpt ?? ""}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {post.content ?? post.excerpt ?? ""}
+          </ReactMarkdown>
         </div>
 
         {/* Share */}
         <div className="mt-12 flex flex-wrap items-center gap-3 border-t border-border pt-8">
           <span className="text-sm text-muted-foreground mr-2">Share:</span>
-          <ShareBtn href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`} icon={TwitterIcon} label="Twitter" />
-          <ShareBtn href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`} icon={LinkedInIcon} label="LinkedIn" />
-          <ShareBtn href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`} icon={FacebookIcon} label="Facebook" />
+          <ShareBtn
+            href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`}
+            icon={TwitterIcon}
+            label="Twitter"
+          />
+          <ShareBtn
+            href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`}
+            icon={LinkedInIcon}
+            label="LinkedIn"
+          />
+          <ShareBtn
+            href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
+            icon={FacebookIcon}
+            label="Facebook"
+          />
           <button
             onClick={copyLink}
             className="h-10 inline-flex items-center gap-2 rounded-full glass px-4 text-sm hover:bg-primary hover:text-primary-foreground transition-colors"
@@ -172,7 +234,11 @@ function BlogPostPage() {
           <div className="mt-12 glass rounded-2xl p-6 flex items-start gap-4">
             <div className="h-14 w-14 rounded-full overflow-hidden bg-muted shrink-0">
               {post.author_avatar_url ? (
-                <img src={post.author_avatar_url} alt={post.author_name} className="h-full w-full object-cover" />
+                <img
+                  src={post.author_avatar_url}
+                  alt={post.author_name}
+                  className="h-full w-full object-cover"
+                />
               ) : (
                 <div className="h-full w-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-lg font-display text-primary/60">
                   {post.author_name.slice(0, 1)}
@@ -181,7 +247,9 @@ function BlogPostPage() {
             </div>
             <div>
               <p className="font-semibold">{post.author_name}</p>
-              {post.author_role && <p className="text-sm text-muted-foreground">{post.author_role}</p>}
+              {post.author_role && (
+                <p className="text-sm text-muted-foreground">{post.author_role}</p>
+              )}
             </div>
           </div>
         )}
@@ -201,13 +269,22 @@ function BlogPostPage() {
               >
                 <div className="aspect-video bg-muted overflow-hidden">
                   {r.cover_image_url ? (
-                    <img src={r.cover_image_url} alt={r.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    <img
+                      src={r.cover_image_url}
+                      alt={r.title}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
                   ) : (
                     <div className="h-full w-full bg-gradient-to-br from-primary/20 to-accent/20" />
                   )}
                 </div>
                 <div className="p-5">
-                  {r.category && <span className="text-xs uppercase tracking-wider text-primary">{r.category}</span>}
+                  {r.category && (
+                    <span className="text-xs uppercase tracking-wider text-primary">
+                      {r.category}
+                    </span>
+                  )}
                   <h3 className="mt-2 font-semibold line-clamp-2">{r.title}</h3>
                 </div>
               </Link>
@@ -219,9 +296,16 @@ function BlogPostPage() {
       {/* Newsletter CTA */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16">
         <div className="rounded-3xl bg-gradient-to-br from-primary to-primary/70 p-10 sm:p-16 text-center text-primary-foreground">
-          <h2 className="text-2xl sm:text-4xl font-display font-semibold">Get the next one in your inbox</h2>
-          <p className="mt-3 text-primary-foreground/90">One growth essay a week. No fluff. Unsubscribe anytime.</p>
-          <form onSubmit={subscribe} className="mt-6 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+          <h2 className="text-2xl sm:text-4xl font-display font-semibold">
+            Get the next one in your inbox
+          </h2>
+          <p className="mt-3 text-primary-foreground/90">
+            One growth essay a week. No fluff. Unsubscribe anytime.
+          </p>
+          <form
+            onSubmit={subscribe}
+            className="mt-6 flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+          >
             <Input
               type="email"
               required

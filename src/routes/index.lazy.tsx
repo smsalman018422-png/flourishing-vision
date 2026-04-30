@@ -5,11 +5,19 @@ import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/home/Hero";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 
-const Services = lazy(() => import("@/components/home/Services").then((m) => ({ default: m.Services })));
+const Services = lazy(() =>
+  import("@/components/home/Services").then((m) => ({ default: m.Services })),
+);
 const Stats = lazy(() => import("@/components/home/Stats").then((m) => ({ default: m.Stats })));
-const PortfolioPreview = lazy(() => import("@/components/home/PortfolioPreview").then((m) => ({ default: m.PortfolioPreview })));
-const Process = lazy(() => import("@/components/home/Process").then((m) => ({ default: m.Process })));
-const Testimonials = lazy(() => import("@/components/home/Testimonials").then((m) => ({ default: m.Testimonials })));
+const PortfolioPreview = lazy(() =>
+  import("@/components/home/PortfolioPreview").then((m) => ({ default: m.PortfolioPreview })),
+);
+const Process = lazy(() =>
+  import("@/components/home/Process").then((m) => ({ default: m.Process })),
+);
+const Testimonials = lazy(() =>
+  import("@/components/home/Testimonials").then((m) => ({ default: m.Testimonials })),
+);
 const CTA = lazy(() => import("@/components/home/CTA").then((m) => ({ default: m.CTA })));
 
 export const Route = createLazyFileRoute("/")({

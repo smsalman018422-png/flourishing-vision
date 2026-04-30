@@ -4,7 +4,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Check, X, ArrowRight, Sparkles } from "lucide-react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const PLANS = [
   {
@@ -19,7 +24,13 @@ const PLANS = [
     name: "Growth",
     monthly: 999,
     tagline: "Most popular for scaling brands",
-    features: ["3 channels managed", "Twice-weekly reporting", "Up to 24 creatives/mo", "Slack support", "Quarterly strategy"],
+    features: [
+      "3 channels managed",
+      "Twice-weekly reporting",
+      "Up to 24 creatives/mo",
+      "Slack support",
+      "Quarterly strategy",
+    ],
     cta: "Get Started",
     popular: true,
   },
@@ -27,7 +38,13 @@ const PLANS = [
     name: "Enterprise",
     monthly: null,
     tagline: "Custom growth pods",
-    features: ["Unlimited channels", "Realtime dashboards", "Unlimited creatives", "Dedicated team", "On-call strategy"],
+    features: [
+      "Unlimited channels",
+      "Realtime dashboards",
+      "Unlimited creatives",
+      "Dedicated team",
+      "On-call strategy",
+    ],
     cta: "Book a Call",
     popular: false,
   },
@@ -36,7 +53,12 @@ const PLANS = [
 const COMPARISON = [
   { feature: "Channels managed", starter: "1", growth: "3", enterprise: "Unlimited" },
   { feature: "Creatives per month", starter: "8", growth: "24", enterprise: "Unlimited" },
-  { feature: "Reporting cadence", starter: "Weekly", growth: "Twice weekly", enterprise: "Realtime" },
+  {
+    feature: "Reporting cadence",
+    starter: "Weekly",
+    growth: "Twice weekly",
+    enterprise: "Realtime",
+  },
   { feature: "Strategy reviews", starter: "—", growth: "Quarterly", enterprise: "Monthly" },
   { feature: "Dedicated team", starter: false, growth: false, enterprise: true },
   { feature: "Slack channel", starter: false, growth: true, enterprise: true },
@@ -44,12 +66,30 @@ const COMPARISON = [
 ];
 
 const FAQS = [
-  { q: "Are there long-term contracts?", a: "No. All plans are month-to-month after a 90-day initial engagement." },
-  { q: "Can I switch plans later?", a: "Anytime. Upgrades are prorated; downgrades take effect on your next cycle." },
-  { q: "Do you work with agencies?", a: "Yes — we partner with agencies as a white-label growth team." },
-  { q: "What's included in onboarding?", a: "Audit, strategy session, channel setup, creative kickoff, and a 30-day roadmap." },
-  { q: "Do you guarantee results?", a: "We guarantee process, transparency and effort. Outcomes depend on many factors we forecast together." },
-  { q: "Which industries do you serve?", a: "Mostly DTC, SaaS, and services brands doing $500k–$50M in revenue." },
+  {
+    q: "Are there long-term contracts?",
+    a: "No. All plans are month-to-month after a 90-day initial engagement.",
+  },
+  {
+    q: "Can I switch plans later?",
+    a: "Anytime. Upgrades are prorated; downgrades take effect on your next cycle.",
+  },
+  {
+    q: "Do you work with agencies?",
+    a: "Yes — we partner with agencies as a white-label growth team.",
+  },
+  {
+    q: "What's included in onboarding?",
+    a: "Audit, strategy session, channel setup, creative kickoff, and a 30-day roadmap.",
+  },
+  {
+    q: "Do you guarantee results?",
+    a: "We guarantee process, transparency and effort. Outcomes depend on many factors we forecast together.",
+  },
+  {
+    q: "Which industries do you serve?",
+    a: "Mostly DTC, SaaS, and services brands doing $500k–$50M in revenue.",
+  },
 ];
 
 export const Route = createLazyFileRoute("/pricing")({
@@ -80,7 +120,10 @@ function PricingPage() {
             onClick={() => setYearly(true)}
             className={`px-4 py-2 rounded-full min-h-[40px] font-medium transition-colors flex items-center gap-2 ${yearly ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
           >
-            Yearly <span className="text-[10px] uppercase tracking-wider rounded bg-primary/20 text-primary px-1.5 py-0.5">Save 20%</span>
+            Yearly{" "}
+            <span className="text-[10px] uppercase tracking-wider rounded bg-primary/20 text-primary px-1.5 py-0.5">
+              Save 20%
+            </span>
           </button>
         </div>
       </div>
@@ -92,7 +135,8 @@ function PricingPage() {
             .sort((a, b) => (a.popular === b.popular ? 0 : a.popular ? -1 : 1))
             .map((p) => {
               const popular = p.popular;
-              const price = p.monthly == null ? null : yearly ? Math.round(p.monthly * 0.8) : p.monthly;
+              const price =
+                p.monthly == null ? null : yearly ? Math.round(p.monthly * 0.8) : p.monthly;
               return (
                 <motion.div
                   key={p.name}
@@ -118,7 +162,9 @@ function PricingPage() {
                       <span className="text-4xl font-display font-semibold">Custom</span>
                     ) : (
                       <>
-                        <span className="text-4xl sm:text-5xl font-display font-semibold">${price.toLocaleString()}</span>
+                        <span className="text-4xl sm:text-5xl font-display font-semibold">
+                          ${price.toLocaleString()}
+                        </span>
                         <span className="text-muted-foreground">/mo</span>
                       </>
                     )}
@@ -133,8 +179,15 @@ function PricingPage() {
                       </li>
                     ))}
                   </ul>
-                  <Button asChild size="lg" className="mt-8 w-full" variant={popular ? "default" : "outline"}>
-                    <Link to="/contact">{p.cta} <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="mt-8 w-full"
+                    variant={popular ? "default" : "outline"}
+                  >
+                    <Link to="/contact">
+                      {p.cta} <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
                   </Button>
                 </motion.div>
               );
@@ -177,7 +230,12 @@ function PricingPage() {
                 <AccordionContent>
                   <ul className="space-y-3 pb-2">
                     {COMPARISON.map((row) => {
-                      const v = plan === "Starter" ? row.starter : plan === "Growth" ? row.growth : row.enterprise;
+                      const v =
+                        plan === "Starter"
+                          ? row.starter
+                          : plan === "Growth"
+                            ? row.growth
+                            : row.enterprise;
                       return (
                         <li key={row.feature} className="flex justify-between text-sm">
                           <span className="text-muted-foreground">{row.feature}</span>
@@ -210,9 +268,13 @@ function PricingPage() {
       <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-20">
         <div className="rounded-3xl glass p-10 sm:p-16 text-center">
           <h2 className="text-2xl sm:text-3xl font-display font-semibold">Still have questions?</h2>
-          <p className="mt-3 text-muted-foreground">Talk to us — we'll match you with the right plan.</p>
+          <p className="mt-3 text-muted-foreground">
+            Talk to us — we'll match you with the right plan.
+          </p>
           <Button asChild size="lg" className="mt-6">
-            <Link to="/contact">Talk to us <ArrowRight className="ml-2 h-4 w-4" /></Link>
+            <Link to="/contact">
+              Talk to us <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
           </Button>
         </div>
       </section>

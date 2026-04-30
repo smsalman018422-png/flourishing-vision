@@ -84,7 +84,10 @@ function BlogPage() {
                   return (
                     <button
                       key={c}
-                      onClick={() => { setActiveCat(c); setPage(1); }}
+                      onClick={() => {
+                        setActiveCat(c);
+                        setPage(1);
+                      }}
                       className={`relative px-4 py-3 text-sm font-medium whitespace-nowrap min-h-[44px] capitalize transition-colors ${
                         isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                       }`}
@@ -124,16 +127,30 @@ function BlogPage() {
             <div className="grid md:grid-cols-2 gap-0">
               <div className="relative aspect-video md:aspect-auto bg-muted overflow-hidden">
                 {featured.cover_image_url ? (
-                  <img src={featured.cover_image_url} alt={featured.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                  <img
+                    src={featured.cover_image_url}
+                    alt={featured.title}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
                 ) : (
                   <div className="h-full w-full bg-gradient-to-br from-primary/20 to-accent/20" />
                 )}
               </div>
               <div className="p-6 sm:p-10 flex flex-col justify-center">
-                <span className="inline-flex w-fit rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-medium uppercase tracking-wider">Featured</span>
-                {featured.category && <span className="mt-3 text-xs uppercase tracking-wider text-muted-foreground">{featured.category}</span>}
-                <h2 className="mt-2 text-2xl sm:text-4xl font-display font-semibold leading-tight">{featured.title}</h2>
-                {featured.excerpt && <p className="mt-4 text-muted-foreground">{featured.excerpt}</p>}
+                <span className="inline-flex w-fit rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-medium uppercase tracking-wider">
+                  Featured
+                </span>
+                {featured.category && (
+                  <span className="mt-3 text-xs uppercase tracking-wider text-muted-foreground">
+                    {featured.category}
+                  </span>
+                )}
+                <h2 className="mt-2 text-2xl sm:text-4xl font-display font-semibold leading-tight">
+                  {featured.title}
+                </h2>
+                {featured.excerpt && (
+                  <p className="mt-4 text-muted-foreground">{featured.excerpt}</p>
+                )}
                 <PostMeta post={featured} className="mt-5" />
               </div>
             </div>
@@ -178,15 +195,26 @@ function PostCard({ post }: { post: Post }) {
     >
       <div className="aspect-video bg-muted overflow-hidden">
         {post.cover_image_url ? (
-          <img src={post.cover_image_url} alt={post.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          <img
+            src={post.cover_image_url}
+            alt={post.title}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-primary/20 to-accent/20" />
         )}
       </div>
       <div className="p-5">
-        {post.category && <span className="text-xs uppercase tracking-wider text-primary font-medium">{post.category}</span>}
+        {post.category && (
+          <span className="text-xs uppercase tracking-wider text-primary font-medium">
+            {post.category}
+          </span>
+        )}
         <h3 className="mt-2 text-lg font-semibold leading-snug line-clamp-2">{post.title}</h3>
-        {post.excerpt && <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>}
+        {post.excerpt && (
+          <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>
+        )}
         <PostMeta post={post} className="mt-4" />
         <div className="mt-4 inline-flex items-center gap-1 text-sm text-primary group-hover:gap-2 transition-all">
           Read more <ArrowRight className="h-4 w-4" />
@@ -197,12 +225,30 @@ function PostCard({ post }: { post: Post }) {
 }
 
 function PostMeta({ post, className }: { post: Post; className?: string }) {
-  const date = post.published_at ? new Date(post.published_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : null;
+  const date = post.published_at
+    ? new Date(post.published_at).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
   return (
-    <div className={`flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground ${className ?? ""}`}>
+    <div
+      className={`flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground ${className ?? ""}`}
+    >
       {post.author_name && <span className="font-medium text-foreground">{post.author_name}</span>}
-      {date && <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{date}</span>}
-      {post.read_time_minutes && <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{post.read_time_minutes} min</span>}
+      {date && (
+        <span className="inline-flex items-center gap-1">
+          <Calendar className="h-3 w-3" />
+          {date}
+        </span>
+      )}
+      {post.read_time_minutes && (
+        <span className="inline-flex items-center gap-1">
+          <Clock className="h-3 w-3" />
+          {post.read_time_minutes} min
+        </span>
+      )}
     </div>
   );
 }

@@ -6,7 +6,10 @@ export const Route = createFileRoute("/blog")({
       { title: "Blog — LetUsGrow" },
       { name: "description", content: "Tactics, case studies, and lessons from scaling brands." },
       { property: "og:title", content: "Blog — LetUsGrow" },
-      { property: "og:description", content: "Tactics, case studies, and lessons from scaling brands." },
+      {
+        property: "og:description",
+        content: "Tactics, case studies, and lessons from scaling brands.",
+      },
     ],
   }),
 });

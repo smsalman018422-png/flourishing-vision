@@ -28,7 +28,16 @@ type Post = {
   published_at: string | null;
 };
 
-const CATEGORIES = ["Growth", "Paid Ads", "SEO", "Branding", "Design", "Social Media", "Strategy", "Case Study"];
+const CATEGORIES = [
+  "Growth",
+  "Paid Ads",
+  "SEO",
+  "Branding",
+  "Design",
+  "Social Media",
+  "Strategy",
+  "Case Study",
+];
 
 const empty = (): Post => ({
   id: "",
@@ -48,7 +57,13 @@ const empty = (): Post => ({
 });
 
 const slugify = (s: string) =>
-  s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").slice(0, 80);
+  s
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .slice(0, 80);
 
 export const Route = createFileRoute("/admin/blog")({
   head: () => ({ meta: [{ title: "Blog — Admin" }, { name: "robots", content: "noindex" }] }),
@@ -73,7 +88,10 @@ function BlogAdmin() {
     const { data, error } = await adminData<Post>({
       table: "blog_posts",
       select: "*",
-      orders: [{ column: "published_at", ascending: false, nullsFirst: false }, { column: "created_at", ascending: false }],
+      orders: [
+        { column: "published_at", ascending: false, nullsFirst: false },
+        { column: "created_at", ascending: false },
+      ],
     });
     if (error) {
       setLoadError(error);
@@ -108,12 +126,19 @@ function BlogAdmin() {
       read_time_minutes: editing.read_time_minutes,
       is_featured: editing.is_featured,
       published: willPublish,
-      published_at: willPublish ? editing.published_at ?? new Date().toISOString() : editing.published_at,
+      published_at: willPublish
+        ? (editing.published_at ?? new Date().toISOString())
+        : editing.published_at,
     };
     const isNew = !editing.id;
     const { error } = isNew
       ? await adminWrite({ table: "blog_posts", op: "insert", values: payload })
-      : await adminWrite({ table: "blog_posts", op: "update", values: payload, match: [{ column: "id", value: editing.id }] });
+      : await adminWrite({
+          table: "blog_posts",
+          op: "update",
+          values: payload,
+          match: [{ column: "id", value: editing.id }],
+        });
     setBusy(false);
     if (error) {
       toast.error(error);
@@ -129,7 +154,11 @@ function BlogAdmin() {
     const id = confirmDelete.id;
     setRows((r) => r.filter((x) => x.id !== id));
     setConfirmDelete(null);
-    const { error } = await adminWrite({ table: "blog_posts", op: "delete", match: [{ column: "id", value: id }] });
+    const { error } = await adminWrite({
+      table: "blog_posts",
+      op: "delete",
+      match: [{ column: "id", value: id }],
+    });
     if (error) {
       toast.error(error);
       load();
@@ -153,14 +182,25 @@ function BlogAdmin() {
         ) : loadError ? (
           <ErrorState message={loadError} onRetry={load} />
         ) : rows.length === 0 ? (
-          <EmptyState title="No posts yet." actionLabel="Write your first post" onAction={() => setEditing(empty())} />
+          <EmptyState
+            title="No posts yet."
+            actionLabel="Write your first post"
+            onAction={() => setEditing(empty())}
+          />
         ) : (
           <ul className="divide-y divide-border/60">
             {rows.map((p) => (
-              <li key={p.id} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 hover:bg-muted/20 transition">
+              <li
+                key={p.id}
+                className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 hover:bg-muted/20 transition"
+              >
                 <div className="h-14 w-20 rounded-lg overflow-hidden bg-muted/30 shrink-0 grid place-items-center">
                   {p.cover_image_url ? (
-                    <img src={p.cover_image_url} alt={p.title} className="h-full w-full object-cover" />
+                    <img
+                      src={p.cover_image_url}
+                      alt={p.title}
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
                     <span className="text-[10px] text-muted-foreground">No cover</span>
                   )}
@@ -170,13 +210,17 @@ function BlogAdmin() {
                     <span className="text-sm font-medium truncate">{p.title}</span>
                     <span
                       className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                        p.published ? "bg-primary/15 text-primary" : "bg-muted/40 text-muted-foreground"
+                        p.published
+                          ? "bg-primary/15 text-primary"
+                          : "bg-muted/40 text-muted-foreground"
                       }`}
                     >
                       {p.published ? "Published" : "Draft"}
                     </span>
                     {p.is_featured && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/15 text-accent-foreground">Featured</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent/15 text-accent-foreground">
+                        Featured
+                      </span>
                     )}
                   </div>
                   <div className="text-xs text-muted-foreground truncate">
@@ -243,7 +287,11 @@ function BlogAdmin() {
                 value={editing.title}
                 onChange={(e) => {
                   const t = e.target.value;
-                  setEditing({ ...editing, title: t, slug: editing.id ? editing.slug : slugify(t) });
+                  setEditing({
+                    ...editing,
+                    title: t,
+                    slug: editing.id ? editing.slug : slugify(t),
+                  });
                 }}
               />
             </Field>
@@ -256,7 +304,10 @@ function BlogAdmin() {
                 />
               </Field>
               <Field label="Category">
-                <Select value={editing.category ?? ""} onChange={(e) => setEditing({ ...editing, category: e.target.value })}>
+                <Select
+                  value={editing.category ?? ""}
+                  onChange={(e) => setEditing({ ...editing, category: e.target.value })}
+                >
                   {CATEGORIES.map((c) => (
                     <option key={c} value={c}>
                       {c}
