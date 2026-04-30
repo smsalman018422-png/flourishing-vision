@@ -1,4 +1,5 @@
-import { createLazyFileRoute, getRouteApi, Link } from "@tanstack/react-router";
+import { createLazyFileRoute, getRouteApi, Link, useRouter } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -13,6 +14,7 @@ import {
 } from "lucide-react";
 import { PageShell, PageHeader } from "@/components/layout/PageShell";
 import type { PublicService } from "@/server/services.functions";
+import { subscribeToTable } from "@/lib/realtime";
 
 const ICONS: Record<string, LucideIcon> = {
   Hash,
@@ -31,6 +33,9 @@ export const Route = createLazyFileRoute("/services")({
 
 function ServicesPage() {
   const items = routeApi.useLoaderData() as PublicService[];
+  const router = useRouter();
+
+  useEffect(() => subscribeToTable("services", () => router.invalidate(), "public-services-changes"), [router]);
 
   return (
     <PageShell>
