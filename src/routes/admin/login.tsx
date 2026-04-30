@@ -51,21 +51,15 @@ function AdminLogin() {
         return;
       }
 
-      // 2. Check admin status against user_roles
-      const { data: roleRow, error: roleError } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", authData.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
+      // 2. Check admin status on the server to avoid client schema-cache failures
+      const adminRes = await fetch("/api/admin-check", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${authData.session?.access_token ?? ""}` },
+      });
+      const adminCheck = (await adminRes.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
 
-      if (roleError) {
-        toast.error("Database error: " + roleError.message);
-        await supabase.auth.signOut();
-        return;
-      }
-      if (!roleRow) {
-        toast.error("You are not authorized as admin");
+      if (!adminRes.ok || !adminCheck?.ok) {
+        toast.error(adminCheck?.error ?? "Unable to verify admin access");
         await supabase.auth.signOut();
         return;
       }
