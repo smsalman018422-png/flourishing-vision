@@ -1,19 +1,21 @@
 import { motion } from "framer-motion";
+import { Link } from "@tanstack/react-router";
 import { Hash, Target, Search, Sparkles, Palette, BarChart, ArrowRight, type LucideIcon } from "lucide-react";
 
 type Service = {
   Icon: LucideIcon;
   title: string;
   desc: string;
+  slug: string;
 };
 
 const services: Service[] = [
-  { Icon: Hash, title: "Social Media Marketing", desc: "Build engaged communities across all platforms." },
-  { Icon: Target, title: "Paid Advertising", desc: "Meta, Google, TikTok ads with proven ROI." },
-  { Icon: Search, title: "SEO & Content", desc: "Rank higher and convert better with strategic content." },
-  { Icon: Sparkles, title: "Brand Strategy", desc: "Position your brand to dominate your niche." },
-  { Icon: Palette, title: "Creative Design", desc: "Stunning visuals that stop the scroll." },
-  { Icon: BarChart, title: "Analytics & Reporting", desc: "Data-driven insights that drive decisions." },
+  { Icon: Hash, title: "Social Media Marketing", desc: "Build engaged communities across all platforms.", slug: "social-media" },
+  { Icon: Target, title: "Paid Advertising", desc: "Meta, Google, TikTok ads with proven ROI.", slug: "paid-ads" },
+  { Icon: Search, title: "SEO & Content", desc: "Rank higher and convert better with strategic content.", slug: "seo" },
+  { Icon: Sparkles, title: "Brand Strategy", desc: "Position your brand to dominate your niche.", slug: "branding" },
+  { Icon: Palette, title: "Creative Design", desc: "Stunning visuals that stop the scroll.", slug: "design" },
+  { Icon: BarChart, title: "Analytics & Reporting", desc: "Data-driven insights that drive decisions.", slug: "analytics" },
 ];
 
 export function Services() {
@@ -46,43 +48,56 @@ export function Services() {
 
         <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {services.map((s, i) => (
-            <motion.a
-              key={s.title}
-              href="#contact"
+            <motion.div
+              key={s.slug}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.5, delay: i * 0.06, ease: "easeOut" }}
               whileHover={{ y: -8 }}
-              className="group relative glass rounded-2xl p-7 overflow-hidden transition-all duration-300
-                         hover:border-accent/60 hover:shadow-glow hover:bg-card/40"
             >
-              {/* glow ring */}
-              <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                   style={{ boxShadow: "inset 0 0 0 1px oklch(0.82 0.19 145 / 0.45)" }} />
-              <div className="pointer-events-none absolute -top-16 -right-16 h-44 w-44 rounded-full bg-accent/25 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <Link
+                to="/services/$slug"
+                params={{ slug: s.slug }}
+                className="group relative block h-full glass rounded-2xl p-7 overflow-hidden transition-all duration-300
+                           hover:border-accent/60 hover:shadow-glow hover:bg-card/40"
+              >
+                {/* glow ring */}
+                <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                     style={{ boxShadow: "inset 0 0 0 1px oklch(0.82 0.19 145 / 0.45)" }} />
+                <div className="pointer-events-none absolute -top-16 -right-16 h-44 w-44 rounded-full bg-accent/25 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-              <div className="relative">
-                <motion.div
-                  whileHover={{ rotate: 8, scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 260, damping: 18 }}
-                  className="grid place-items-center h-12 w-12 rounded-full bg-gradient-primary shadow-glow
-                             group-hover:rotate-6 transition-transform duration-300"
-                >
-                  <s.Icon className="h-5 w-5 text-primary-foreground" strokeWidth={2.25} />
-                </motion.div>
+                <div className="relative">
+                  <motion.div
+                    whileHover={{ rotate: 8, scale: 1.05 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 18 }}
+                    className="grid place-items-center h-12 w-12 rounded-full bg-gradient-primary shadow-glow
+                               group-hover:rotate-6 transition-transform duration-300"
+                  >
+                    <s.Icon className="h-5 w-5 text-primary-foreground" strokeWidth={2.25} />
+                  </motion.div>
 
-                <h3 className="mt-5 text-xl font-semibold tracking-tight">{s.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+                  <h3 className="mt-5 text-xl font-semibold tracking-tight">{s.title}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
 
-                <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-accent
-                                 group-hover:gap-2.5 transition-all">
-                  Learn more
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </span>
-              </div>
-            </motion.a>
+                  <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-accent
+                                   group-hover:gap-2.5 transition-all">
+                    Learn More
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </div>
+              </Link>
+            </motion.div>
           ))}
+        </div>
+
+        <div className="mt-12 flex justify-center">
+          <Link
+            to="/services"
+            className="inline-flex items-center gap-2 h-12 px-7 rounded-xl bg-gradient-primary text-primary-foreground font-medium shadow-glow hover:-translate-y-0.5 transition-transform"
+          >
+            View All Services <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </div>
     </section>
