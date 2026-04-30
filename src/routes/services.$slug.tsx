@@ -132,9 +132,9 @@ function ServiceDetail() {
     };
   }, [data.service_type]);
 
-  const process = Array.isArray(data.process) ? data.process : [];
-  const packages = Array.isArray(data.packages) ? data.packages : [];
-  const features = Array.isArray(data.features) ? data.features : [];
+  const process: { title: string; desc: string }[] = Array.isArray(data.process) ? (data.process as { title: string; desc: string }[]) : [];
+  const packages: { name: string; price: number; features: string[] }[] = Array.isArray(data.packages) ? (data.packages as { name: string; price: number; features: string[] }[]) : [];
+  const features: string[] = Array.isArray(data.features) ? (data.features as string[]) : [];
 
   return (
     <PageShell>
