@@ -1,5 +1,14 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase as supabaseClient } from "@/integrations/supabase/client";
+// Loose-typed alias for dynamic table names in this generic CRUD helper.
+const supabase = supabaseClient as unknown as {
+  from: (t: string) => {
+    select: (s: string) => { order: (c: string, o: { ascending: boolean }) => { limit: (n: number) => Promise<{ data: Record<string, unknown>[] | null; error: { message: string } | null }> } };
+    insert: (d: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
+    update: (d: Record<string, unknown>) => { eq: (c: string, v: string) => Promise<{ error: { message: string } | null }> };
+    delete: () => { eq: (c: string, v: string) => Promise<{ error: { message: string } | null }> };
+  };
+};
 import { Button, Card, Field, PageTitle, Select, TextArea, TextInput } from "./ui";
 import { Edit2, Loader2, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -39,7 +48,7 @@ export function CrudPage({
   const load = () => {
     setLoading(true);
     supabase
-      .from(table as never)
+      .from(table)
       .select("*")
       .order(orderBy, { ascending })
       .limit(200)
@@ -53,20 +62,26 @@ export function CrudPage({
 
   const remove = async (id: string) => {
     if (!confirm("Delete this item? This cannot be undone.")) return;
-    const { error } = await supabase.from(table as never).delete().eq("id", id);
+    const { error } = await supabase.from(table).delete().eq("id", id);
     if (error) return toast.error(error.message);
     toast.success("Deleted");
     load();
   };
 
-  const save = async (data: Record<string, unknown>) => {
+  const save = async (data: Record<string, unknown>): Promise<void> => {
     if (editing) {
-      const { error } = await supabase.from(table as never).update(data).eq("id", editing.id);
-      if (error) return toast.error(error.message);
+      const { error } = await supabase.from(table).update(data).eq("id", editing.id);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
       toast.success("Saved");
     } else {
-      const { error } = await supabase.from(table as never).insert(data);
-      if (error) return toast.error(error.message);
+      const { error } = await supabase.from(table).insert(data);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
       toast.success("Created");
     }
     setEditing(null);
