@@ -34,33 +34,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Listener FIRST
+    let cancelled = false;
+
+    // Listener FIRST — does not block render
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
       if (s?.user) {
-        // Defer role lookup to avoid deadlock inside callback
+        // Defer admin check; never blocks UI
         setTimeout(() => {
-          checkAdmin(s.access_token).then(setIsAdmin);
+          checkAdmin(s.access_token).then((admin) => {
+            if (!cancelled) setIsAdmin(admin);
+          });
         }, 0);
       } else {
         setIsAdmin(false);
       }
     });
 
+    // Resolve loading state immediately so public pages render without waiting
     supabase.auth.getSession().then(({ data }) => {
+      if (cancelled) return;
       setSession(data.session);
+      setLoading(false);
       if (data.session?.user) {
-        checkAdmin(data.session.access_token)
-          .then((admin) => {
-            setIsAdmin(admin);
-            setLoading(false);
-          });
-      } else {
-        setLoading(false);
+        checkAdmin(data.session.access_token).then((admin) => {
+          if (!cancelled) setIsAdmin(admin);
+        });
       }
     });
 
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   const value: AuthCtx = {
