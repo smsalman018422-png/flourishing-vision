@@ -8,7 +8,6 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { SortableList } from "@/components/admin/SortableList";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { adminData, adminWrite } from "@/lib/admin-data";
-import { subscribeToTable } from "@/lib/realtime";
 import { Edit2, Eye, EyeOff, Plus, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -76,7 +75,6 @@ function TeamAdmin() {
   };
   useEffect(() => {
     load();
-    return subscribeToTable("team_members", load, "admin-team-members-changes");
   }, []);
 
   const save = async () => {

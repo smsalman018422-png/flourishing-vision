@@ -6,7 +6,6 @@ import { Drawer } from "@/components/admin/Drawer";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { adminData, adminWrite } from "@/lib/admin-data";
-import { subscribeToTable } from "@/lib/realtime";
 import { Download, Mail, Phone, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -68,7 +67,6 @@ function ContactsAdmin() {
   };
   useEffect(() => {
     load();
-    return subscribeToTable("contact_submissions", load, "admin-contact-submissions-changes");
   }, []);
 
   const filtered = useMemo(() => {

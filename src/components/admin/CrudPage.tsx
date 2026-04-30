@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { adminData, adminWrite } from "@/lib/admin-data";
-import { subscribeToTable } from "@/lib/realtime";
 import { Button, Card, Field, PageTitle, Select, TextArea, TextInput } from "./ui";
 import { Edit2, Loader2, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -48,7 +47,6 @@ export function CrudPage({
   };
   useEffect(() => {
     load();
-    return subscribeToTable(table, load, `admin-crud-${table}-changes`);
   }, [table, orderBy, ascending]);
 
   const remove = async (id: string) => {

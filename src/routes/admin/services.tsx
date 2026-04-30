@@ -7,7 +7,6 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { SortableList } from "@/components/admin/SortableList";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { adminData, adminWrite } from "@/lib/admin-data";
-import { subscribeToTable } from "@/lib/realtime";
 import { Edit2, Eye, EyeOff, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -95,7 +94,6 @@ function ServicesAdmin() {
   };
   useEffect(() => {
     load();
-    return subscribeToTable("services", load, "admin-services-changes");
   }, []);
 
   const save = async () => {

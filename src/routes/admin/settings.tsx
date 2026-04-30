@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Button, Card, Field, PageTitle, TextArea, TextInput } from "@/components/admin/ui";
 import { adminData, adminWrite } from "@/lib/admin-data";
-import { subscribeToTable } from "@/lib/realtime";
 import { Loader2, Save, Trash2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
@@ -115,7 +114,6 @@ function SettingsSection({
 
   useEffect(() => {
     load();
-    return subscribeToTable("site_settings", load, "admin-site-settings-changes");
   }, [fields]);
 
   const dirty = JSON.stringify(values) !== JSON.stringify(initial);
@@ -198,7 +196,6 @@ function AdminsSection() {
   };
   useEffect(() => {
     load();
-    return subscribeToTable("user_roles", load, "admin-user-roles-changes");
   }, []);
 
   const grant = async (e: React.FormEvent) => {
