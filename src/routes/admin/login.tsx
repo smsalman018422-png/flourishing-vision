@@ -27,18 +27,53 @@ function AdminLogin() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
-    const fn = mode === "signin" ? signIn : signUp;
-    const { error } = await fn(email, password);
-    setBusy(false);
-    if (error) {
-      toast.error(error);
-      return;
-    }
-    if (mode === "signup") {
-      toast.success("Account created. Check your email to confirm, then sign in.");
-      setMode("signin");
-    } else {
+    try {
+      if (mode === "signup") {
+        const { error } = await signUp(email, password);
+        if (error) { toast.error(error); return; }
+        toast.success("Account created. Check your email to confirm, then sign in.");
+        setMode("signin");
+        return;
+      }
+
+      // 1. Sign in
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (authError) {
+        toast.error(authError.message);
+        return;
+      }
+      if (!authData.user) {
+        toast.error("Sign-in failed: no user returned");
+        return;
+      }
+
+      // 2. Check admin status against user_roles
+      const { data: roleRow, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", authData.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (roleError) {
+        toast.error("Database error: " + roleError.message);
+        await supabase.auth.signOut();
+        return;
+      }
+      if (!roleRow) {
+        toast.error("You are not authorized as admin");
+        await supabase.auth.signOut();
+        return;
+      }
+
       toast.success("Welcome back");
+      navigate({ to: "/admin" });
+    } finally {
+      setBusy(false);
     }
   };
 
