@@ -5,8 +5,10 @@ import { Button, Card, Field, PageTitle, Select, TextArea, TextInput } from "@/c
 import { Drawer } from "@/components/admin/Drawer";
 import { ImageUpload, MultiImageUpload } from "@/components/admin/ImageUpload";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { supabase } from "@/integrations/supabase/client";
-import { Edit2, Eye, EyeOff, Loader2, Plus, Star, Trash2 } from "lucide-react";
+import { loadList } from "@/lib/admin-data";
+import { Edit2, Eye, EyeOff, Plus, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Project = {
