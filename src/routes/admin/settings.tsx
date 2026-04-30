@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Button, Card, Field, PageTitle, TextArea, TextInput } from "@/components/admin/ui";
-import { supabase } from "@/integrations/supabase/client";
-import { adminData } from "@/lib/admin-data";
+import { adminData, adminWrite } from "@/lib/admin-data";
+import { subscribeToTable } from "@/lib/realtime";
 import { Loader2, Save, Trash2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
@@ -93,7 +93,7 @@ function SettingsSection({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
+  const load = () => {
     setLoading(true);
     adminData<{ key: string; value: { v?: string } | null }>({
       table: "site_settings",
@@ -111,6 +111,11 @@ function SettingsSection({
       setInitial(map);
       setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    load();
+    return subscribeToTable("site_settings", load, "admin-site-settings-changes");
   }, [fields]);
 
   const dirty = JSON.stringify(values) !== JSON.stringify(initial);
@@ -123,9 +128,9 @@ function SettingsSection({
       return;
     }
     const rows = changed.map((f) => ({ key: f.key, value: { v: values[f.key] ?? "" } }));
-    const { error } = await supabase.from("site_settings").upsert(rows, { onConflict: "key" });
+    const { error } = await adminWrite({ table: "site_settings", op: "upsert", values: rows, onConflict: "key" });
     setSaving(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(error);
     setInitial(values);
     toast.success("Saved");
   };
@@ -191,15 +196,18 @@ function AdminsSection() {
       setLoading(false);
     });
   };
-  useEffect(load, []);
+  useEffect(() => {
+    load();
+    return subscribeToTable("user_roles", load, "admin-user-roles-changes");
+  }, []);
 
   const grant = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newAdminId.trim()) return;
     setGrantBusy(true);
-    const { error } = await supabase.from("user_roles").insert({ user_id: newAdminId.trim(), role: "admin" });
+    const { error } = await adminWrite({ table: "user_roles", op: "insert", values: { user_id: newAdminId.trim(), role: "admin" } });
     setGrantBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) return toast.error(error);
     toast.success("Admin granted");
     setNewAdminId("");
     load();
@@ -208,8 +216,8 @@ function AdminsSection() {
   const revoke = async (id: string, userId: string) => {
     if (userId === user?.id) return toast.error("You can't revoke your own admin access.");
     if (!confirm("Revoke admin from this user?")) return;
-    const { error } = await supabase.from("user_roles").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    const { error } = await adminWrite({ table: "user_roles", op: "delete", match: [{ column: "id", value: id }] });
+    if (error) return toast.error(error);
     toast.success("Revoked");
     load();
   };
