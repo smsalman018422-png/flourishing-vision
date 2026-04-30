@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, ExternalLink } from "lucide-react";
+import { subscribeToTable } from "@/lib/realtime";
 
 type Member = {
   id: string;
@@ -51,7 +52,7 @@ function TeamPage() {
 
   useEffect(() => {
     let cancelled = false;
-    supabase
+    const loadMembers = () => supabase
       .from("team_members")
       .select("*")
       .eq("is_visible", true)
@@ -61,8 +62,11 @@ function TeamPage() {
         setMembers((data ?? []) as Member[]);
         setLoading(false);
       });
+    loadMembers();
+    const unsubscribe = subscribeToTable("team_members", loadMembers, "public-team-members-changes");
     return () => {
       cancelled = true;
+      unsubscribe();
     };
   }, []);
 
