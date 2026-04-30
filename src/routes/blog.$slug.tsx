@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { PageShell } from "@/components/layout/PageShell";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
+import { type ComponentType, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -325,7 +325,7 @@ function BlogPostPage() {
   );
 }
 
-function ShareBtn({ href, icon: Icon, label }: { href: string; icon: any; label: string }) {
+function ShareBtn({ href, icon: Icon, label }: { href: string; icon: ComponentType<{ className?: string }>; label: string }) {
   return (
     <a
       href={href}
