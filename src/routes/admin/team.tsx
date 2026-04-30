@@ -109,7 +109,7 @@ function TeamAdmin() {
       : await adminWrite({ table: "team_members", op: "update", values: payload, match: [{ column: "id", value: editing.id }] });
     setBusy(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       load();
       return;
     }
@@ -122,7 +122,7 @@ function TeamAdmin() {
     setRows((r) => r.map((x) => (x.id === m.id ? { ...x, is_visible: !x.is_visible } : x)));
     const { error } = await adminWrite({ table: "team_members", op: "update", values: { is_visible: !m.is_visible }, match: [{ column: "id", value: m.id }] });
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       setRows((r) => r.map((x) => (x.id === m.id ? { ...x, is_visible: m.is_visible } : x)));
     }
   };
@@ -134,7 +134,7 @@ function TeamAdmin() {
     setConfirmDelete(null);
     const { error } = await adminWrite({ table: "team_members", op: "delete", match: [{ column: "id", value: id }] });
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       load();
     } else toast.success("Removed");
   };
