@@ -47,7 +47,8 @@ export function Team() {
       const { data } = await supabase
         .from("team_members")
         .select("*")
-        .order("sort_order", { ascending: true });
+        .order("sort_order", { ascending: true })
+        .limit(100);
       if (alive) {
         setMembers((data ?? []) as TeamMember[]);
         setLoading(false);

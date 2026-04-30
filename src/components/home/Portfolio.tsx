@@ -280,7 +280,8 @@ export function Portfolio() {
       const { data, error } = await supabase
         .from("portfolio")
         .select("*")
-        .order("sort_order", { ascending: true });
+        .order("sort_order", { ascending: true })
+        .limit(50);
       if (cancelled) return;
       if (error) console.error(error);
       setItems(data ?? []);
