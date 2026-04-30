@@ -16,16 +16,25 @@ const Ctx = createContext<AuthCtx | null>(null);
 
 async function checkAdmin(accessToken?: string) {
   if (!accessToken) return false;
-  try {
-    const res = await fetch("/api/admin-check", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    const body = (await res.json().catch(() => null)) as { ok?: boolean } | null;
-    return res.ok && body?.ok === true;
-  } catch {
-    return false;
+
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const res = await fetch("/api/admin-check", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const body = (await res.json().catch(() => null)) as { ok?: boolean } | null;
+
+      if (res.ok && body?.ok === true) return true;
+      if (res.status === 403) return false;
+    } catch {
+      // Retry transient network/backend warm-up failures before marking the user unauthorized.
+    }
+
+    await new Promise((resolve) => window.setTimeout(resolve, 350 * (attempt + 1)));
   }
+
+  return false;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
