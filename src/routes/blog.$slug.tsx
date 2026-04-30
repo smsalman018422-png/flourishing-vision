@@ -1,6 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { PageShell } from "@/components/layout/PageShell";
-import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,25 +65,32 @@ function BlogPostPage() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("blog_posts")
-        .select("*")
-        .eq("slug", slug)
-        .eq("published", true)
-        .maybeSingle();
-      if (cancelled) return;
-      if (!data) { setMissing(true); setLoading(false); return; }
-      setPost(data as Post);
-      const { data: rel } = await supabase
-        .from("blog_posts")
-        .select("id, slug, title, excerpt, cover_image_url, author_name, category, read_time_minutes, published_at")
-        .eq("published", true)
-        .neq("id", data.id)
-        .limit(3);
-      if (!cancelled) setRelated((rel ?? []) as Post[]);
-      setLoading(false);
+      try {
+        const postRes = await fetch(`/api/public/blog?slug=${encodeURIComponent(slug)}`);
+        if (!postRes.ok) throw new Error("Failed to load post");
+        const postBody = (await postRes.json()) as { data?: Post | null };
+        if (cancelled) return;
+        if (!postBody.data) {
+          setMissing(true);
+          setLoading(false);
+          return;
+        }
+        setPost(postBody.data);
+
+        const relatedRes = await fetch("/api/public/blog");
+        const relatedBody = relatedRes.ok ? ((await relatedRes.json()) as { data?: Post[] }) : { data: [] };
+        if (!cancelled) {
+          setRelated((relatedBody.data ?? []).filter((item) => item.id !== postBody.data?.id).slice(0, 3));
+        }
+      } catch {
+        if (!cancelled) setMissing(true);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   if (loading) {
