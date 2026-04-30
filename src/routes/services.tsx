@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import {
@@ -13,19 +12,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { PageShell, PageHeader } from "@/components/layout/PageShell";
-import { supabase } from "@/integrations/supabase/client";
-
-type ServiceRow = {
-  id: string;
-  slug: string;
-  title: string;
-  short_description: string;
-  icon_name: string;
-  features: string[];
-  starts_at_price: number | null;
-  order_index: number;
-  is_visible: boolean;
-};
+import { getPublicServices, type PublicService } from "@/server/services.functions";
 
 const ICONS: Record<string, LucideIcon> = {
   Hash,
