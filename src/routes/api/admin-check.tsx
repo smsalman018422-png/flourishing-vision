@@ -6,6 +6,19 @@ const json = (body: unknown, status = 200) =>
     headers: { "Content-Type": "application/json" },
   });
 
+async function withDirectDb<T>(run: (sql: any) => Promise<T>) {
+  const databaseUrl = process.env.SUPABASE_DB_URL;
+  if (!databaseUrl) throw new Error("Database connection is not configured");
+
+  const { default: postgres } = await import("postgres");
+  const sql = postgres(databaseUrl, { max: 1, idle_timeout: 1, connect_timeout: 10, prepare: false });
+  try {
+    return await run(sql);
+  } finally {
+    await sql.end({ timeout: 5 });
+  }
+}
+
 export const Route = createFileRoute("/api/admin-check")({
   server: {
     handlers: {
@@ -23,19 +36,14 @@ export const Route = createFileRoute("/api/admin-check")({
           return json({ ok: false, error: userError?.message ?? "Invalid auth token" }, 401);
         }
 
-        const { data: roleRow, error: roleError } = await supabaseAdmin
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", userData.user.id)
-          .eq("role", "admin")
-          .maybeSingle();
-
-        if (roleError) {
-          return json({ ok: false, error: "Database error: " + roleError.message }, 500);
-        }
-
-        if (!roleRow) {
-          return json({ ok: false, error: "You are not authorized as admin" }, 403);
+        try {
+          const roleRows = await withDirectDb((sql) =>
+            sql`select role from public.user_roles where user_id = ${userData.user.id} and role = 'admin'::public.app_role limit 1`,
+          );
+          if (!roleRows.length) return json({ ok: false, error: "You are not authorized as admin" }, 403);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Database error";
+          return json({ ok: false, error: "Database error: " + message }, 500);
         }
 
         return json({ ok: true });
