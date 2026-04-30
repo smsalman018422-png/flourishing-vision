@@ -5,8 +5,8 @@ import { Button, Card, PageTitle, Select, TextInput } from "@/components/admin/u
 import { Drawer } from "@/components/admin/Drawer";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
-import { supabase } from "@/integrations/supabase/client";
-import { adminData } from "@/lib/admin-data";
+import { adminData, adminWrite } from "@/lib/admin-data";
+import { subscribeToTable } from "@/lib/realtime";
 import { Download, Mail, Phone, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -68,6 +68,7 @@ function ContactsAdmin() {
   };
   useEffect(() => {
     load();
+    return subscribeToTable("contact_submissions", load, "admin-contact-submissions-changes");
   }, []);
 
   const filtered = useMemo(() => {
@@ -93,9 +94,9 @@ function ContactsAdmin() {
   const setStatus = async (s: Submission, status: Status) => {
     setRows((r) => r.map((x) => (x.id === s.id ? { ...x, status } : x)));
     if (open?.id === s.id) setOpen({ ...open, status });
-    const { error } = await supabase.from("contact_submissions").update({ status }).eq("id", s.id);
+    const { error } = await adminWrite({ table: "contact_submissions", op: "update", values: { status }, match: [{ column: "id", value: s.id }] });
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       load();
     } else toast.success(`Marked as ${STATUS_META[status].label.toLowerCase()}`);
   };
@@ -106,9 +107,9 @@ function ContactsAdmin() {
     setRows((r) => r.filter((x) => x.id !== id));
     if (open?.id === id) setOpen(null);
     setConfirmDelete(null);
-    const { error } = await supabase.from("contact_submissions").delete().eq("id", id);
+    const { error } = await adminWrite({ table: "contact_submissions", op: "delete", match: [{ column: "id", value: id }] });
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       load();
     } else toast.success("Deleted");
   };
