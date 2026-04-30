@@ -6,8 +6,10 @@ import { Drawer } from "@/components/admin/Drawer";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { SortableList } from "@/components/admin/SortableList";
+import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { supabase } from "@/integrations/supabase/client";
-import { Edit2, Loader2, Plus, Star, Trash2, Video } from "lucide-react";
+import { loadList } from "@/lib/admin-data";
+import { Edit2, Plus, Star, Trash2, Video } from "lucide-react";
 import { toast } from "sonner";
 
 type Testimonial = {
@@ -48,18 +50,23 @@ export const Route = createFileRoute("/admin/testimonials")({
 function TestimonialsAdmin() {
   const [rows, setRows] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Testimonial | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Testimonial | null>(null);
   const [busy, setBusy] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("testimonials")
-      .select("*")
-      .order("sort_order", { ascending: true });
-    if (error) toast.error(error.message);
-    setRows((data ?? []) as Testimonial[]);
+    setLoadError(null);
+    const { data, error } = await loadList<Testimonial>("testimonials", (q) =>
+      q.select("*").order("sort_order", { ascending: true }),
+    );
+    if (error) {
+      setLoadError(error);
+      setLoading(false);
+      return;
+    }
+    setRows(data);
     setLoading(false);
   };
   useEffect(() => {
@@ -129,11 +136,11 @@ function TestimonialsAdmin() {
 
       <Card className="p-0 overflow-hidden">
         {loading ? (
-          <div className="p-12 grid place-items-center">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          </div>
+          <LoadingState />
+        ) : loadError ? (
+          <ErrorState message={loadError} onRetry={load} />
         ) : rows.length === 0 ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">No testimonials yet.</div>
+          <EmptyState title="No testimonials yet." actionLabel="Add your first testimonial" onAction={() => setEditing(empty())} />
         ) : (
           <SortableList
             items={rows}

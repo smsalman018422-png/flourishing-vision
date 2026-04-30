@@ -5,8 +5,10 @@ import { Button, Card, Field, PageTitle, Select, TextArea, TextInput } from "@/c
 import { Drawer } from "@/components/admin/Drawer";
 import { ImageUpload, MultiImageUpload } from "@/components/admin/ImageUpload";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { supabase } from "@/integrations/supabase/client";
-import { Edit2, Eye, EyeOff, Loader2, Plus, Star, Trash2 } from "lucide-react";
+import { loadList } from "@/lib/admin-data";
+import { Edit2, Eye, EyeOff, Plus, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Project = {
@@ -84,6 +86,7 @@ export const Route = createFileRoute("/admin/portfolio")({
 function PortfolioAdmin() {
   const [rows, setRows] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Project | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Project | null>(null);
   const [busy, setBusy] = useState(false);
@@ -91,13 +94,16 @@ function PortfolioAdmin() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("portfolio")
-      .select("*")
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: false });
-    if (error) toast.error(error.message);
-    setRows(((data ?? []) as Project[]).map((r) => ({ ...r, gallery_images: r.gallery_images ?? [] })));
+    setLoadError(null);
+    const { data, error } = await loadList<Project>("portfolio", (q) =>
+      q.select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: false }),
+    );
+    if (error) {
+      setLoadError(error);
+      setLoading(false);
+      return;
+    }
+    setRows(data.map((r) => ({ ...r, gallery_images: r.gallery_images ?? [] })));
     setLoading(false);
   };
   useEffect(() => {
@@ -202,11 +208,15 @@ function PortfolioAdmin() {
 
       <Card className="p-0 overflow-hidden">
         {loading ? (
-          <div className="p-12 grid place-items-center">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          </div>
+          <LoadingState />
+        ) : loadError ? (
+          <ErrorState message={loadError} onRetry={load} />
         ) : filtered.length === 0 ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">No case studies in this view.</div>
+          rows.length === 0 ? (
+            <EmptyState title="No case studies yet." actionLabel="Add your first case study" onAction={() => setEditing(empty())} />
+          ) : (
+            <div className="p-12 text-center text-sm text-muted-foreground">No case studies in this view.</div>
+          )
         ) : (
           <ul className="divide-y divide-border/60">
             {filtered.map((p) => (

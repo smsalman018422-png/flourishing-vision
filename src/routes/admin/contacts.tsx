@@ -4,8 +4,10 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { Button, Card, PageTitle, Select, TextInput } from "@/components/admin/ui";
 import { Drawer } from "@/components/admin/Drawer";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { supabase } from "@/integrations/supabase/client";
-import { Download, Loader2, Mail, Phone, Search, Trash2 } from "lucide-react";
+import { loadList } from "@/lib/admin-data";
+import { Download, Mail, Phone, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Status = "new" | "contacted" | "closed";
@@ -41,6 +43,7 @@ export const Route = createFileRoute("/admin/contacts")({
 function ContactsAdmin() {
   const [rows, setRows] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [open, setOpen] = useState<Submission | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Submission | null>(null);
   const [statusFilter, setStatusFilter] = useState<"all" | Status>("all");
@@ -48,13 +51,16 @@ function ContactsAdmin() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("contact_submissions")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(500);
-    if (error) toast.error(error.message);
-    setRows(((data ?? []) as Submission[]).map((r) => ({ ...r, status: (r.status as Status) ?? "new" })));
+    setLoadError(null);
+    const { data, error } = await loadList<Submission>("contact_submissions", (q) =>
+      q.select("*").order("created_at", { ascending: false }).limit(500),
+    );
+    if (error) {
+      setLoadError(error);
+      setLoading(false);
+      return;
+    }
+    setRows(data.map((r) => ({ ...r, status: (r.status as Status) ?? "new" })));
     setLoading(false);
   };
   useEffect(() => {
@@ -169,9 +175,9 @@ function ContactsAdmin() {
 
       <Card className="p-0 overflow-hidden">
         {loading ? (
-          <div className="p-12 grid place-items-center">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          </div>
+          <LoadingState />
+        ) : loadError ? (
+          <ErrorState message={loadError} onRetry={load} />
         ) : filtered.length === 0 ? (
           <div className="p-12 text-center text-sm text-muted-foreground">
             {rows.length === 0 ? "No submissions yet." : "Nothing matches this filter."}
