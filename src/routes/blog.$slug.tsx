@@ -325,7 +325,15 @@ function BlogPostPage() {
   );
 }
 
-function ShareBtn({ href, icon: Icon, label }: { href: string; icon: ComponentType<{ className?: string }>; label: string }) {
+function ShareBtn({
+  href,
+  icon: Icon,
+  label,
+}: {
+  href: string;
+  icon: ComponentType<{ className?: string }>;
+  label: string;
+}) {
   return (
     <a
       href={href}
