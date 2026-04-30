@@ -68,8 +68,6 @@ const TABLE_COLUMNS: Record<string, readonly string[]> = {
 const ARRAY_COLUMNS = new Set(["gallery_urls", "features"]);
 const JSON_COLUMNS = new Set(["metrics", "value"]);
 
-const TRANSIENT_PATTERN = /schema cache|database client|retrying|timeout|network|terminating connection|connection terminated/i;
-
 type AdminWriteRequest = {
   table?: string;
   op?: "insert" | "update" | "delete" | "upsert";
@@ -78,52 +76,8 @@ type AdminWriteRequest = {
   onConflict?: string;
 };
 
-const isTransient = (error: { code?: string; message?: string } | null | undefined) =>
-  !!error &&
-  (error.code === "PGRST002" ||
-    error.code === "503" ||
-    error.code === "40001" ||
-    error.code === "40P01" ||
-    TRANSIENT_PATTERN.test(error.message ?? ""));
-
-const normalizeError = (error: unknown) => ({
-  code: typeof error === "object" && error && "code" in error ? String((error as { code?: unknown }).code ?? "") : undefined,
-  message: error instanceof Error ? error.message : "Database write failed",
-});
-
-async function withRetries<T extends { error: { code?: string; message?: string } | null }>(
-  run: () => PromiseLike<T> | Promise<T> | T,
-) {
-  let last: T | null = null;
-  for (let attempt = 0; attempt < 4; attempt += 1) {
-    last = await run();
-    if (!last.error || !isTransient(last.error)) return last;
-    await new Promise((resolve) => setTimeout(resolve, 700 * (attempt + 1)));
-  }
-  return last!;
-}
-
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
-
-async function withDirectDb<T>(run: (sql: any) => Promise<T>) {
-  const databaseUrl = process.env.SUPABASE_DB_URL;
-  if (!databaseUrl) throw new Error("Database connection is not configured");
-
-  const { default: postgres } = await import("postgres");
-  const sql = postgres(databaseUrl, {
-    max: 1,
-    idle_timeout: 1,
-    connect_timeout: 10,
-    prepare: false,
-  });
-
-  try {
-    return await run(sql);
-  } finally {
-    await sql.end({ timeout: 5 });
-  }
-}
 
 async function assertAdmin(request: Request) {
   const authHeader = request.headers.get("authorization");
@@ -136,19 +90,15 @@ async function assertAdmin(request: Request) {
     return { ok: false as const, status: 401, error: userError?.message ?? "Invalid auth token" };
   }
 
-  const { data: roleRows, error: roleError } = await withRetries(async () => {
-    try {
-      const rows = await withDirectDb((sql) =>
-        sql`select role from public.user_roles where user_id = ${userData.user.id} and role = 'admin'::public.app_role limit 1`,
-      );
-      return { data: rows as unknown[], error: null };
-    } catch (error) {
-      return { data: null, error: normalizeError(error) };
-    }
-  });
+  const { data: roles, error: rolesError } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userData.user.id)
+    .eq("role", "admin")
+    .limit(1);
 
-  if (roleError) return { ok: false as const, status: 500, error: roleError.message };
-  if (!roleRows?.length) return { ok: false as const, status: 403, error: "Not authorized" };
+  if (rolesError) return { ok: false as const, status: 500, error: rolesError.message };
+  if (!roles || roles.length === 0) return { ok: false as const, status: 403, error: "Not authorized" };
   return { ok: true as const, userId: userData.user.id };
 }
 
@@ -185,61 +135,6 @@ function validateMatches(table: string, match: AdminWriteRequest["match"]) {
   return match;
 }
 
-function parseConflict(table: string, onConflict?: string) {
-  const allowed = new Set(["id", ...(TABLE_COLUMNS[table] ?? [])]);
-  const columns = (onConflict || "id")
-    .split(",")
-    .map((column) => column.trim())
-    .filter(Boolean);
-  if (!columns.length || columns.some((column) => !allowed.has(column))) throw new Error("Unsupported conflict column");
-  return columns;
-}
-
-function buildWhere(sql: any, table: string, match: AdminWriteRequest["match"]) {
-  const conditions = validateMatches(table, match);
-  return conditions.reduce(
-    (fragment, item, index) =>
-      index === 0
-        ? sql`where ${sql(item.column)} = ${item.value}`
-        : sql`${fragment} and ${sql(item.column)} = ${item.value}`,
-    sql``,
-  );
-}
-
-async function runDirectWrite(body: AdminWriteRequest) {
-  const table = body.table!;
-  const op = body.op!;
-
-  return withDirectDb(async (sql) => {
-    if (op === "insert") {
-      const rows = cleanRows(table, body.values);
-      const columns = Object.keys(rows[0]);
-      return sql`insert into public.${sql(table)} ${sql(rows, columns)} returning *`;
-    }
-
-    if (op === "upsert") {
-      const rows = cleanRows(table, body.values);
-      const columns = Object.keys(rows[0]);
-      const conflictColumns = parseConflict(table, body.onConflict);
-      return sql`
-        insert into public.${sql(table)} ${sql(rows, columns)}
-        on conflict (${sql(conflictColumns)}) do update set ${sql(rows[0], columns)}
-        returning *
-      `;
-    }
-
-    if (op === "update") {
-      const [row] = cleanRows(table, body.values);
-      const columns = Object.keys(row);
-      const where = buildWhere(sql, table, body.match);
-      return sql`update public.${sql(table)} set ${sql(row, columns)} ${where} returning *`;
-    }
-
-    const where = buildWhere(sql, table, body.match);
-    return sql`delete from public.${sql(table)} ${where} returning *`;
-  });
-}
-
 export const Route = createFileRoute("/api/admin-write")({
   server: {
     handlers: {
@@ -255,19 +150,48 @@ export const Route = createFileRoute("/api/admin-write")({
           return json({ ok: false, error: "Unsupported op" }, 400);
         }
 
-        const { data, error } = await withRetries<{ data: unknown[] | null; error: { code?: string; message?: string } | null }>(
-          async () => {
-            try {
-              const rows = await runDirectWrite(body);
-              return { data: rows as unknown[], error: null };
-            } catch (error) {
-              return { data: null, error: normalizeError(error) };
-            }
-          },
-        );
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        if (error) return json({ ok: false, error: error.message, code: error.code }, 500);
-        return json({ ok: true, data: data ?? [] });
+        try {
+          if (op === "insert") {
+            const rows = cleanRows(table, body!.values);
+            const { data, error } = await supabaseAdmin.from(table as any).insert(rows as any).select();
+            if (error) return json({ ok: false, error: error.message, code: error.code }, 500);
+            return json({ ok: true, data: data ?? [] });
+          }
+
+          if (op === "upsert") {
+            const rows = cleanRows(table, body!.values);
+            const onConflict = body!.onConflict || "id";
+            const { data, error } = await supabaseAdmin
+              .from(table as any)
+              .upsert(rows as any, { onConflict })
+              .select();
+            if (error) return json({ ok: false, error: error.message, code: error.code }, 500);
+            return json({ ok: true, data: data ?? [] });
+          }
+
+          if (op === "update") {
+            const [row] = cleanRows(table, body!.values);
+            const matches = validateMatches(table, body!.match);
+            let q = supabaseAdmin.from(table as any).update(row as any);
+            for (const m of matches) q = q.eq(m.column, m.value as any);
+            const { data, error } = await q.select();
+            if (error) return json({ ok: false, error: error.message, code: error.code }, 500);
+            return json({ ok: true, data: data ?? [] });
+          }
+
+          // delete
+          const matches = validateMatches(table, body!.match);
+          let q = supabaseAdmin.from(table as any).delete();
+          for (const m of matches) q = q.eq(m.column, m.value as any);
+          const { data, error } = await q.select();
+          if (error) return json({ ok: false, error: error.message, code: error.code }, 500);
+          return json({ ok: true, data: data ?? [] });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Database write failed";
+          return json({ ok: false, error: message }, 500);
+        }
       },
     },
   },
