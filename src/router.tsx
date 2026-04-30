@@ -60,10 +60,9 @@ export const getRouter = () => {
     context: {},
     scrollRestoration: true,
     defaultPreload: "intent",
-    defaultPreloadStaleTime: 30_000,
+    defaultPreloadStaleTime: Infinity,
     defaultErrorComponent: DefaultErrorComponent,
     defaultStaleTime: Infinity,
-    defaultPreloadStaleTime: Infinity,
   });
 
   return router;
