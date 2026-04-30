@@ -122,7 +122,7 @@ function ServicesAdmin() {
       : await adminWrite({ table: "services", op: "update", values: payload, match: [{ column: "id", value: editing.id }] });
     setBusy(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       return;
     }
     toast.success(isNew ? "Service added" : "Saved");
