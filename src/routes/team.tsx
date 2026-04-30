@@ -56,6 +56,7 @@ function TeamPage() {
     supabase
       .from("team_members")
       .select("*")
+      .eq("is_visible", true)
       .order("sort_order", { ascending: true })
       .then(({ data }) => {
         if (cancelled) return;
