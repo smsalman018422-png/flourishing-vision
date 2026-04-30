@@ -75,13 +75,32 @@ function AdminLogin() {
             </Button>
           </form>
 
-          <button
-            type="button"
-            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-            className="mt-4 w-full text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {mode === "signin" ? "First-time setup? Create the first admin →" : "← Back to sign in"}
-          </button>
+          <div className="mt-4 flex flex-col gap-2 text-center">
+            {mode === "signin" && (
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!email) { toast.error("Enter your email first"); return; }
+                  const { supabase } = await import("@/integrations/supabase/client");
+                  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/reset-password`,
+                  });
+                  if (error) toast.error(error.message);
+                  else toast.success("Check your email for a reset link.");
+                }}
+                className="text-xs text-primary hover:underline"
+              >
+                Forgot password?
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {mode === "signin" ? "First-time setup? Create the first admin →" : "← Back to sign in"}
+            </button>
+          </div>
         </div>
         <Link to="/" className="mt-6 block text-center text-xs text-muted-foreground hover:text-foreground">
           ← Back to site
