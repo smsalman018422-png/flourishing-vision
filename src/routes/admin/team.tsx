@@ -6,8 +6,9 @@ import { Drawer } from "@/components/admin/Drawer";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { SortableList } from "@/components/admin/SortableList";
+import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { supabase } from "@/integrations/supabase/client";
-import { Edit2, Eye, EyeOff, Loader2, Plus, Star, Trash2 } from "lucide-react";
+import { Edit2, Eye, EyeOff, Plus, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Member = {
@@ -50,18 +51,25 @@ export const Route = createFileRoute("/admin/team")({
 function TeamAdmin() {
   const [rows, setRows] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Member | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Member | null>(null);
   const [busy, setBusy] = useState(false);
 
   const load = async () => {
     setLoading(true);
+    setLoadError(null);
     const { data, error } = await supabase
       .from("team_members")
       .select("*")
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: true });
-    if (error) toast.error(error.message);
+    if (error) {
+      console.error("Supabase error (team_members):", error);
+      setLoadError(error.message);
+      setLoading(false);
+      return;
+    }
     setRows((data ?? []) as Member[]);
     setLoading(false);
   };
@@ -157,11 +165,11 @@ function TeamAdmin() {
 
       <Card className="p-0 overflow-hidden">
         {loading ? (
-          <div className="p-12 grid place-items-center">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          </div>
+          <LoadingState />
+        ) : loadError ? (
+          <ErrorState message={loadError} onRetry={load} />
         ) : rows.length === 0 ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">No team members yet.</div>
+          <EmptyState title="No team members yet." actionLabel="Add your first member" onAction={() => setEditing(empty())} />
         ) : (
           <SortableList
             items={rows}
