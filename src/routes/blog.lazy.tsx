@@ -1,0 +1,216 @@
+import { createLazyFileRoute, Link } from "@tanstack/react-router";
+import { PageShell, PageHeader } from "@/components/layout/PageShell";
+import { useEffect, useMemo, useState } from "react";
+import { motion, LayoutGroup } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Calendar, Clock, BookOpen } from "lucide-react";
+
+type Post = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  cover_image_url: string | null;
+  author_name: string | null;
+  author_avatar_url: string | null;
+  category: string | null;
+  read_time_minutes: number | null;
+  published_at: string | null;
+  is_featured: boolean;
+};
+
+const PAGE_SIZE = 6;
+
+export const Route = createLazyFileRoute("/blog")({
+  head: () => ({
+    meta: [
+      { title: "Blog — LetUsGrow" },
+      { name: "description", content: "Tactics, case studies, and lessons from scaling brands." },
+      { property: "og:title", content: "Blog — LetUsGrow" },
+      { property: "og:description", content: "Tactics, case studies, and lessons from scaling brands." },
+    ],
+  }),
+  component: BlogPage,
+});
+
+function BlogPage() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeCat, setActiveCat] = useState<string>("all");
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/public/blog")
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Failed to load posts"))))
+      .then((body: { data?: Post[] }) => {
+        if (!cancelled) setPosts(body.data ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setPosts([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    posts.forEach((p) => p.category && set.add(p.category));
+    return ["all", ...Array.from(set)];
+  }, [posts]);
+
+  const filtered = useMemo(() => {
+    if (activeCat === "all") return posts;
+    return posts.filter((p) => p.category === activeCat);
+  }, [posts, activeCat]);
+
+  const featured = filtered.find((p) => p.is_featured) ?? filtered[0];
+  const rest = filtered.filter((p) => p.id !== featured?.id);
+  const visible = rest.slice(0, page * PAGE_SIZE);
+  const hasMore = rest.length > visible.length;
+
+  return (
+    <PageShell>
+      <PageHeader
+        eyebrow="Insights"
+        title="Notes from the growth desk"
+        subtitle="Tactics, case studies, and lessons from scaling brands across categories."
+      />
+
+      {/* Category tabs */}
+      {categories.length > 1 && (
+        <section className="mx-auto max-w-7xl px-4 sm:px-6">
+          <LayoutGroup>
+            <div className="-mx-4 sm:mx-0 overflow-x-auto scrollbar-hide">
+              <div className="flex gap-1 px-4 sm:px-0 min-w-max sm:min-w-0 border-b border-border">
+                {categories.map((c) => {
+                  const isActive = activeCat === c;
+                  return (
+                    <button
+                      key={c}
+                      onClick={() => { setActiveCat(c); setPage(1); }}
+                      className={`relative px-4 py-3 text-sm font-medium whitespace-nowrap min-h-[44px] capitalize transition-colors ${
+                        isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {c === "all" ? "All" : c}
+                      {isActive && (
+                        <motion.span
+                          layoutId="blog-underline"
+                          className="absolute left-2 right-2 -bottom-px h-0.5 bg-primary rounded-full"
+                          transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </LayoutGroup>
+        </section>
+      )}
+
+      {/* Featured */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-12">
+        {loading ? (
+          <div className="aspect-[16/9] rounded-3xl glass animate-pulse" />
+        ) : !featured ? (
+          <div className="text-center py-24 glass rounded-2xl">
+            <BookOpen className="h-10 w-10 text-muted-foreground/50 mx-auto" />
+            <p className="mt-4 text-lg text-muted-foreground">No posts yet — check back soon.</p>
+          </div>
+        ) : (
+          <Link
+            to="/blog/$slug"
+            params={{ slug: featured.slug }}
+            className="group block rounded-3xl overflow-hidden glass hover:shadow-elegant transition-all"
+          >
+            <div className="grid md:grid-cols-2 gap-0">
+              <div className="relative aspect-video md:aspect-auto bg-muted overflow-hidden">
+                {featured.cover_image_url ? (
+                  <img src={featured.cover_image_url} alt={featured.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                ) : (
+                  <div className="h-full w-full bg-gradient-to-br from-primary/20 to-accent/20" />
+                )}
+              </div>
+              <div className="p-6 sm:p-10 flex flex-col justify-center">
+                <span className="inline-flex w-fit rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-medium uppercase tracking-wider">Featured</span>
+                {featured.category && <span className="mt-3 text-xs uppercase tracking-wider text-muted-foreground">{featured.category}</span>}
+                <h2 className="mt-2 text-2xl sm:text-4xl font-display font-semibold leading-tight">{featured.title}</h2>
+                {featured.excerpt && <p className="mt-4 text-muted-foreground">{featured.excerpt}</p>}
+                <PostMeta post={featured} className="mt-5" />
+              </div>
+            </div>
+          </Link>
+        )}
+      </section>
+
+      {/* Grid */}
+      {rest.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {visible.map((p, i) => (
+              <motion.div
+                key={p.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: Math.min(i * 0.04, 0.3) }}
+              >
+                <PostCard post={p} />
+              </motion.div>
+            ))}
+          </div>
+          {hasMore && (
+            <div className="mt-10 flex justify-center">
+              <Button variant="outline" size="lg" onClick={() => setPage((p) => p + 1)}>
+                Load more
+              </Button>
+            </div>
+          )}
+        </section>
+      )}
+    </PageShell>
+  );
+}
+
+function PostCard({ post }: { post: Post }) {
+  return (
+    <Link
+      to="/blog/$slug"
+      params={{ slug: post.slug }}
+      className="group block h-full rounded-2xl overflow-hidden glass hover:shadow-elegant transition-all hover:-translate-y-1"
+    >
+      <div className="aspect-video bg-muted overflow-hidden">
+        {post.cover_image_url ? (
+          <img src={post.cover_image_url} alt={post.title} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        ) : (
+          <div className="h-full w-full bg-gradient-to-br from-primary/20 to-accent/20" />
+        )}
+      </div>
+      <div className="p-5">
+        {post.category && <span className="text-xs uppercase tracking-wider text-primary font-medium">{post.category}</span>}
+        <h3 className="mt-2 text-lg font-semibold leading-snug line-clamp-2">{post.title}</h3>
+        {post.excerpt && <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{post.excerpt}</p>}
+        <PostMeta post={post} className="mt-4" />
+        <div className="mt-4 inline-flex items-center gap-1 text-sm text-primary group-hover:gap-2 transition-all">
+          Read more <ArrowRight className="h-4 w-4" />
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function PostMeta({ post, className }: { post: Post; className?: string }) {
+  const date = post.published_at ? new Date(post.published_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : null;
+  return (
+    <div className={`flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground ${className ?? ""}`}>
+      {post.author_name && <span className="font-medium text-foreground">{post.author_name}</span>}
+      {date && <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{date}</span>}
+      {post.read_time_minutes && <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{post.read_time_minutes} min</span>}
+    </div>
+  );
+}
