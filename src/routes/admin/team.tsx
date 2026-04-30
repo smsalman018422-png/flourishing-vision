@@ -8,6 +8,7 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { SortableList } from "@/components/admin/SortableList";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { supabase } from "@/integrations/supabase/client";
+import { adminData } from "@/lib/admin-data";
 import { Edit2, Eye, EyeOff, Plus, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -59,14 +60,14 @@ function TeamAdmin() {
   const load = async () => {
     setLoading(true);
     setLoadError(null);
-    const { data, error } = await supabase
-      .from("team_members")
-      .select("*")
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: true });
+    const { data, error } = await adminData<Member>({
+      table: "team_members",
+      select: "*",
+      orders: [{ column: "sort_order", ascending: true }, { column: "created_at", ascending: true }],
+    });
     if (error) {
-      console.error("Supabase error (team_members):", error);
-      setLoadError(error.message);
+      console.error("Admin data error (team_members):", error);
+      setLoadError(error);
       setLoading(false);
       return;
     }

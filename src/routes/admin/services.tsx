@@ -7,6 +7,7 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { SortableList } from "@/components/admin/SortableList";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { supabase } from "@/integrations/supabase/client";
+import { adminData } from "@/lib/admin-data";
 import { Edit2, Eye, EyeOff, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -78,20 +79,14 @@ function ServicesAdmin() {
   const load = async () => {
     setLoading(true);
     setLoadError(null);
-    let { data, error } = await supabase
-      .from("services")
-      .select("*")
-      .order("order_index", { ascending: true });
-    if (error && (error as { code?: string }).code === "PGRST002") {
-      // Transient schema-cache hiccup — retry once
-      await new Promise((r) => setTimeout(r, 1500));
-      const retry = await supabase.from("services").select("*").order("order_index", { ascending: true });
-      data = retry.data;
-      error = retry.error;
-    }
+    const { data, error } = await adminData<Service>({
+      table: "services",
+      select: "*",
+      orders: [{ column: "order_index", ascending: true }],
+    });
     if (error) {
-      console.error("Supabase error (services):", error);
-      setLoadError(error.message);
+      console.error("Admin data error (services):", error);
+      setLoadError(error);
       setLoading(false);
       return;
     }

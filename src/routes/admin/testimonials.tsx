@@ -8,7 +8,7 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { SortableList } from "@/components/admin/SortableList";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { supabase } from "@/integrations/supabase/client";
-import { loadList } from "@/lib/admin-data";
+import { adminData } from "@/lib/admin-data";
 import { Edit2, Plus, Star, Trash2, Video } from "lucide-react";
 import { toast } from "sonner";
 
@@ -58,9 +58,11 @@ function TestimonialsAdmin() {
   const load = async () => {
     setLoading(true);
     setLoadError(null);
-    const { data, error } = await loadList<Testimonial>("testimonials", (q) =>
-      q.select("*").order("sort_order", { ascending: true }),
-    );
+    const { data, error } = await adminData<Testimonial>({
+      table: "testimonials",
+      select: "*",
+      orders: [{ column: "sort_order", ascending: true }],
+    });
     if (error) {
       setLoadError(error);
       setLoading(false);
