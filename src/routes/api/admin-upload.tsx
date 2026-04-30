@@ -9,6 +9,22 @@ const json = (body: unknown, status = 200) =>
     headers: { "Content-Type": "application/json" },
   });
 
+const isTransient = (error: { code?: string; message?: string } | null | undefined) =>
+  !!error &&
+  (error.code === "PGRST002" ||
+    error.code === "503" ||
+    /schema cache|database client|retrying|timeout|network/i.test(error.message ?? ""));
+
+async function withRetries<T extends { error: { code?: string; message?: string } | null }>(run: () => PromiseLike<T> | Promise<T> | T) {
+  let last: T | null = null;
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    last = await run();
+    if (!last.error || !isTransient(last.error)) return last;
+    await new Promise((resolve) => setTimeout(resolve, 700 * (attempt + 1)));
+  }
+  return last!;
+}
+
 async function assertAdmin(request: Request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader?.startsWith("Bearer ")) return { ok: false as const, status: 401, error: "Missing auth token" };
@@ -18,12 +34,14 @@ async function assertAdmin(request: Request) {
   const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
   if (userError || !userData.user) return { ok: false as const, status: 401, error: userError?.message ?? "Invalid auth token" };
 
-  const { data: roleRow, error: roleError } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userData.user.id)
-    .eq("role", "admin")
-    .maybeSingle();
+  const { data: roleRow, error: roleError } = await withRetries(async () =>
+    supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userData.user.id)
+      .eq("role", "admin")
+      .maybeSingle(),
+  );
 
   if (roleError) return { ok: false as const, status: 500, error: roleError.message };
   if (!roleRow) return { ok: false as const, status: 403, error: "Not authorized" };
