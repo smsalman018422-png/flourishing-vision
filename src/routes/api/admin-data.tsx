@@ -28,7 +28,7 @@ const isTransient = (error: { code?: string; message?: string } | null | undefin
     error.code === "503" ||
     /schema cache|database client|retrying|timeout|network/i.test(error.message ?? ""));
 
-async function withRetries<T extends { error: { code?: string; message?: string } | null }>(run: () => Promise<T> | T) {
+async function withRetries<T extends { error: { code?: string; message?: string } | null }>(run: () => PromiseLike<T> | Promise<T> | T) {
   let last: T | null = null;
   for (let attempt = 0; attempt < 4; attempt += 1) {
     last = await run();
@@ -55,7 +55,7 @@ async function assertAdmin(request: Request) {
     return { ok: false as const, status: 401, error: userError?.message ?? "Invalid auth token" };
   }
 
-  const { data: roleRow, error: roleError } = await withRetries(() =>
+  const { data: roleRow, error: roleError } = await withRetries(async () =>
     supabaseAdmin
       .from("user_roles")
       .select("role")
@@ -99,7 +99,9 @@ export const Route = createFileRoute("/api/admin-data")({
           return query;
         };
 
-        const { data, count, error } = await withRetries(() => buildQuery());
+        const { data, count, error } = await withRetries<{ data: unknown[] | null; count: number | null; error: { code?: string; message?: string } | null }>(
+          async () => buildQuery(),
+        );
         if (error) return json({ ok: false, error: error.message, code: error.code }, 500);
         return json({ ok: true, data: data ?? [], count: count ?? null });
       },
