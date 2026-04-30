@@ -14,6 +14,20 @@ type AuthCtx = {
 
 const Ctx = createContext<AuthCtx | null>(null);
 
+async function checkAdmin(accessToken?: string) {
+  if (!accessToken) return false;
+  try {
+    const res = await fetch("/api/admin-check", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const body = (await res.json().catch(() => null)) as { ok?: boolean } | null;
+    return res.ok && body?.ok === true;
+  } catch {
+    return false;
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -26,13 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (s?.user) {
         // Defer role lookup to avoid deadlock inside callback
         setTimeout(() => {
-          supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", s.user.id)
-            .eq("role", "admin")
-            .maybeSingle()
-            .then(({ data }) => setIsAdmin(!!data));
+          checkAdmin(s.access_token).then(setIsAdmin);
         }, 0);
       } else {
         setIsAdmin(false);
@@ -42,14 +50,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       if (data.session?.user) {
-        supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", data.session.user.id)
-          .eq("role", "admin")
-          .maybeSingle()
-          .then(({ data: r }) => {
-            setIsAdmin(!!r);
+        checkAdmin(data.session.access_token)
+          .then((admin) => {
+            setIsAdmin(admin);
             setLoading(false);
           });
       } else {
