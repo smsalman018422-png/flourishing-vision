@@ -82,6 +82,7 @@ export type Database = {
           message: string | null
           phone: string | null
           service: string | null
+          status: Database["public"]["Enums"]["contact_status"]
         }
         Insert: {
           budget?: string | null
@@ -93,6 +94,7 @@ export type Database = {
           message?: string | null
           phone?: string | null
           service?: string | null
+          status?: Database["public"]["Enums"]["contact_status"]
         }
         Update: {
           budget?: string | null
@@ -104,6 +106,7 @@ export type Database = {
           message?: string | null
           phone?: string | null
           service?: string | null
+          status?: Database["public"]["Enums"]["contact_status"]
         }
         Relationships: []
       }
@@ -282,6 +285,7 @@ export type Database = {
           created_at: string
           id: string
           is_founder: boolean
+          is_visible: boolean
           linkedin_url: string | null
           name: string
           photo_url: string | null
@@ -295,6 +299,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_founder?: boolean
+          is_visible?: boolean
           linkedin_url?: string | null
           name: string
           photo_url?: string | null
@@ -308,6 +313,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_founder?: boolean
+          is_visible?: boolean
           linkedin_url?: string | null
           name?: string
           photo_url?: string | null
@@ -395,6 +401,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      contact_status: "new" | "contacted" | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -523,6 +530,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      contact_status: ["new", "contacted", "closed"],
     },
   },
 } as const
