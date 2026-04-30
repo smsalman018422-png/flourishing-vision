@@ -5,8 +5,9 @@ import { Button, Card, Field, PageTitle, Select, TextArea, TextInput } from "@/c
 import { Drawer } from "@/components/admin/Drawer";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { SortableList } from "@/components/admin/SortableList";
+import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { supabase } from "@/integrations/supabase/client";
-import { Edit2, Eye, EyeOff, Loader2, Plus, Trash2, X } from "lucide-react";
+import { Edit2, Eye, EyeOff, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 type Service = {
@@ -68,6 +69,7 @@ export const Route = createFileRoute("/admin/services")({
 function ServicesAdmin() {
   const [rows, setRows] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Service | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Service | null>(null);
   const [busy, setBusy] = useState(false);
@@ -75,23 +77,23 @@ function ServicesAdmin() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    setLoadError(null);
+    let { data, error } = await supabase
       .from("services")
       .select("*")
       .order("order_index", { ascending: true });
+    if (error && (error as { code?: string }).code === "PGRST002") {
+      // Transient schema-cache hiccup — retry once
+      await new Promise((r) => setTimeout(r, 1500));
+      const retry = await supabase.from("services").select("*").order("order_index", { ascending: true });
+      data = retry.data;
+      error = retry.error;
+    }
     if (error) {
-      // Transient schema-cache hiccups return PGRST002. Retry quietly once.
-      const isTransient = (error as { code?: string }).code === "PGRST002";
-      if (isTransient) {
-        await new Promise((r) => setTimeout(r, 1500));
-        const retry = await supabase.from("services").select("*").order("order_index", { ascending: true });
-        if (!retry.error) {
-          setRows(((retry.data ?? []) as Service[]).map((s) => ({ ...s, features: s.features ?? [] })));
-          setLoading(false);
-          return;
-        }
-      }
-      toast.error(error.message);
+      console.error("Supabase error (services):", error);
+      setLoadError(error.message);
+      setLoading(false);
+      return;
     }
     setRows(((data ?? []) as Service[]).map((s) => ({ ...s, features: s.features ?? [] })));
     setLoading(false);
@@ -181,11 +183,11 @@ function ServicesAdmin() {
 
       <Card className="p-0 overflow-hidden">
         {loading ? (
-          <div className="p-12 grid place-items-center">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          </div>
+          <LoadingState />
+        ) : loadError ? (
+          <ErrorState message={loadError} onRetry={load} />
         ) : rows.length === 0 ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">No services yet.</div>
+          <EmptyState title="No services yet." actionLabel="Add your first service" onAction={() => setEditing(empty())} />
         ) : (
           <SortableList
             items={rows}
