@@ -126,6 +126,7 @@ export type Database = {
           results: string | null
           revenue_label: string | null
           roi_pct: number | null
+          service_type: string | null
           solution: string | null
           sort_order: number
           testimonial_author: string | null
@@ -147,6 +148,7 @@ export type Database = {
           results?: string | null
           revenue_label?: string | null
           roi_pct?: number | null
+          service_type?: string | null
           solution?: string | null
           sort_order?: number
           testimonial_author?: string | null
@@ -168,11 +170,66 @@ export type Database = {
           results?: string | null
           revenue_label?: string | null
           roi_pct?: number | null
+          service_type?: string | null
           solution?: string | null
           sort_order?: number
           testimonial_author?: string | null
           testimonial_quote?: string | null
           testimonial_role?: string | null
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          created_at: string
+          features: string[]
+          icon_name: string
+          id: string
+          is_visible: boolean
+          long_description: string | null
+          order_index: number
+          packages: Json
+          process: Json
+          service_type: string | null
+          short_description: string
+          slug: string
+          starts_at_price: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          features?: string[]
+          icon_name?: string
+          id?: string
+          is_visible?: boolean
+          long_description?: string | null
+          order_index?: number
+          packages?: Json
+          process?: Json
+          service_type?: string | null
+          short_description: string
+          slug: string
+          starts_at_price?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          features?: string[]
+          icon_name?: string
+          id?: string
+          is_visible?: boolean
+          long_description?: string | null
+          order_index?: number
+          packages?: Json
+          process?: Json
+          service_type?: string | null
+          short_description?: string
+          slug?: string
+          starts_at_price?: number | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
