@@ -14,11 +14,7 @@ const LIST_COLUMNS = [
   "is_featured",
 ] as const;
 
-const DETAIL_COLUMNS = [
-  ...LIST_COLUMNS,
-  "content",
-  "author_role",
-] as const;
+const DETAIL_COLUMNS = [...LIST_COLUMNS, "content", "author_role"] as const;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -29,7 +25,12 @@ const json = (body: unknown, status = 200) =>
     },
   });
 
-async function withDirectDb<T>(run: (sql: any) => Promise<T>) {
+type SqlClient = {
+  (...args: unknown[]): unknown;
+  end: (options?: { timeout?: number }) => Promise<void>;
+};
+
+async function withDirectDb<T>(run: (sql: SqlClient) => Promise<T>) {
   const databaseUrl = process.env.SUPABASE_DB_URL;
   if (!databaseUrl) throw new Error("Database connection is not configured");
 
@@ -39,7 +40,7 @@ async function withDirectDb<T>(run: (sql: any) => Promise<T>) {
     idle_timeout: 1,
     connect_timeout: 10,
     prepare: false,
-  });
+  }) as unknown as SqlClient;
 
   try {
     return await run(sql);
