@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, ImageOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { subscribeToTable } from "@/lib/realtime";
 
 type Item = Tables<"portfolio">;
 
@@ -20,7 +21,7 @@ export function PortfolioPreview() {
 
   useEffect(() => {
     let alive = true;
-    (async () => {
+    const loadItems = async () => {
       // Try featured first
       const { data: featured } = await supabase
         .from("portfolio")
@@ -44,9 +45,12 @@ export function PortfolioPreview() {
         setItems(list);
         setLoading(false);
       }
-    })();
+    };
+    loadItems();
+    const unsubscribe = subscribeToTable("portfolio", loadItems, "home-portfolio-changes");
     return () => {
       alive = false;
+      unsubscribe();
     };
   }, []);
 
