@@ -6,8 +6,10 @@ import { Drawer } from "@/components/admin/Drawer";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { supabase } from "@/integrations/supabase/client";
-import { Edit2, Eye, Loader2, Plus, Trash2 } from "lucide-react";
+import { loadList } from "@/lib/admin-data";
+import { Edit2, Eye, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Post = {
@@ -61,19 +63,26 @@ export const Route = createFileRoute("/admin/blog")({
 function BlogAdmin() {
   const [rows, setRows] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Post | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Post | null>(null);
   const [busy, setBusy] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("blog_posts")
-      .select("*")
-      .order("published_at", { ascending: false, nullsFirst: false })
-      .order("created_at", { ascending: false });
-    if (error) toast.error(error.message);
-    setRows((data ?? []) as Post[]);
+    setLoadError(null);
+    const { data, error } = await loadList<Post>("blog_posts", (q) =>
+      q
+        .select("*")
+        .order("published_at", { ascending: false, nullsFirst: false })
+        .order("created_at", { ascending: false }),
+    );
+    if (error) {
+      setLoadError(error);
+      setLoading(false);
+      return;
+    }
+    setRows(data);
     setLoading(false);
   };
   useEffect(() => {
