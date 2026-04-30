@@ -113,8 +113,8 @@ function BlogAdmin() {
     };
     const isNew = !editing.id;
     const { error } = isNew
-      ? await supabase.from("blog_posts").insert(payload)
-      : await supabase.from("blog_posts").update(payload).eq("id", editing.id);
+      ? await adminWrite({ table: "blog_posts", op: "insert", values: payload })
+      : await adminWrite({ table: "blog_posts", op: "update", values: payload, match: [{ column: "id", value: editing.id }] });
     setBusy(false);
     if (error) {
       toast.error(error.message);
