@@ -57,14 +57,14 @@ export const Route = createFileRoute("/api/public/blog")({
         const slug = url.searchParams.get("slug")?.trim();
 
         try {
-          const data = await withDirectDb(async (sql) => {
+          const data = await withDirectDb<unknown[]>(async (sql) => {
             if (slug) {
               return sql`
                 select ${sql(DETAIL_COLUMNS)}
                 from public.blog_posts
                 where published = true and slug = ${slug}
                 limit 1
-              `;
+              ` as unknown[];
             }
 
             return sql`
@@ -73,7 +73,7 @@ export const Route = createFileRoute("/api/public/blog")({
               where published = true
               order by published_at desc nulls last, created_at desc
               limit 100
-            `;
+            ` as unknown[];
           });
 
           if (slug) return json({ ok: true, data: data[0] ?? null });
