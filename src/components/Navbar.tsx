@@ -5,10 +5,12 @@ import { Leaf, Moon, Sun, Menu, X } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 
 const links = [
-  { label: "Services", href: "/#services" },
-  { label: "Work", href: "/#work" },
-  { label: "Process", href: "/#process" },
-  { label: "Contact", href: "/#contact" },
+  { label: "Services", href: "/services" },
+  { label: "Work", href: "/portfolio" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "About", href: "/about" },
+  { label: "Blog", href: "/blog" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export function Navbar() {
