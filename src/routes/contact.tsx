@@ -95,9 +95,9 @@ function ContactPage() {
               <p className="text-sm uppercase tracking-wider text-muted-foreground mb-3">Follow us</p>
               <div className="flex items-center gap-3">
                 {[
-                  { Icon: Twitter, href: "https://twitter.com" },
-                  { Icon: LinkedinSvg, href: "https://linkedin.com" },
-                  { Icon: Instagram, href: "https://instagram.com" },
+                  { Icon: TwitterIcon, href: "https://twitter.com" },
+                  { Icon: LinkedInIcon, href: "https://linkedin.com" },
+                  { Icon: InstagramIcon, href: "https://instagram.com" },
                 ].map(({ Icon, href }, i) => (
                   <a
                     key={i}

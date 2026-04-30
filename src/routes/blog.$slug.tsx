@@ -149,9 +149,9 @@ function BlogPostPage() {
         {/* Share */}
         <div className="mt-12 flex flex-wrap items-center gap-3 border-t border-border pt-8">
           <span className="text-sm text-muted-foreground mr-2">Share:</span>
-          <ShareBtn href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`} icon={Twitter} label="Twitter" />
-          <ShareBtn href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`} icon={LinkedinSvg} label="LinkedIn" />
-          <ShareBtn href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`} icon={Facebook} label="Facebook" />
+          <ShareBtn href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`} icon={TwitterIcon} label="Twitter" />
+          <ShareBtn href={`https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`} icon={LinkedInIcon} label="LinkedIn" />
+          <ShareBtn href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`} icon={FacebookIcon} label="Facebook" />
           <button
             onClick={copyLink}
             className="h-10 inline-flex items-center gap-2 rounded-full glass px-4 text-sm hover:bg-primary hover:text-primary-foreground transition-colors"
