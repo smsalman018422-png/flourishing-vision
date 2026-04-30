@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Eye, Sparkles, Lightbulb, Target, Sparkles as SparkIcon } from "lucide-react";
+import { subscribeToTable } from "@/lib/realtime";
 
 type Member = {
   id: string;
@@ -53,13 +54,15 @@ function AboutPage() {
   const [founders, setFounders] = useState<Member[]>([]);
 
   useEffect(() => {
-    supabase
+    const loadFounders = () => supabase
       .from("team_members")
       .select("id, name, role, photo_url, bio, is_founder")
       .eq("is_founder", true)
       .order("sort_order", { ascending: true })
       .limit(3)
       .then(({ data }) => setFounders((data ?? []) as Member[]));
+    loadFounders();
+    return subscribeToTable("team_members", loadFounders, "public-about-founders-changes");
   }, []);
 
   return (
