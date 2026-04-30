@@ -6,19 +6,6 @@ const json = (body: unknown, status = 200) =>
     headers: { "Content-Type": "application/json" },
   });
 
-async function withDirectDb<T>(run: (sql: any) => Promise<T>) {
-  const databaseUrl = process.env.SUPABASE_DB_URL;
-  if (!databaseUrl) throw new Error("Database connection is not configured");
-
-  const { default: postgres } = await import("postgres");
-  const sql = postgres(databaseUrl, { max: 1, idle_timeout: 1, connect_timeout: 10, prepare: false });
-  try {
-    return await run(sql);
-  } finally {
-    await sql.end({ timeout: 5 });
-  }
-}
-
 export const Route = createFileRoute("/api/admin-check")({
   server: {
     handlers: {
