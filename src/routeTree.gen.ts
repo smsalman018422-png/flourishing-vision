@@ -23,6 +23,7 @@ import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as PortfolioSlugRouteImport } from './routes/portfolio.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ApiSitemapDotxmlRouteImport } from './routes/api/sitemap[.]xml'
+import { Route as ApiAdminDataRouteImport } from './routes/api/admin-data'
 import { Route as ApiAdminCheckRouteImport } from './routes/api/admin-check'
 import { Route as AdminTestimonialsRouteImport } from './routes/admin/testimonials'
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
@@ -103,6 +104,11 @@ const ApiSitemapDotxmlRoute = ApiSitemapDotxmlRouteImport.update({
   path: '/api/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminDataRoute = ApiAdminDataRouteImport.update({
+  id: '/api/admin-data',
+  path: '/api/admin-data',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminCheckRoute = ApiAdminCheckRouteImport.update({
   id: '/api/admin-check',
   path: '/api/admin-check',
@@ -168,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/admin/team': typeof AdminTeamRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/api/admin-check': typeof ApiAdminCheckRoute
+  '/api/admin-data': typeof ApiAdminDataRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
@@ -193,6 +200,7 @@ export interface FileRoutesByTo {
   '/admin/team': typeof AdminTeamRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/api/admin-check': typeof ApiAdminCheckRoute
+  '/api/admin-data': typeof ApiAdminDataRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
@@ -219,6 +227,7 @@ export interface FileRoutesById {
   '/admin/team': typeof AdminTeamRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
   '/api/admin-check': typeof ApiAdminCheckRoute
+  '/api/admin-data': typeof ApiAdminDataRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
     | '/admin/team'
     | '/admin/testimonials'
     | '/api/admin-check'
+    | '/api/admin-data'
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/portfolio/$slug'
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/admin/team'
     | '/admin/testimonials'
     | '/api/admin-check'
+    | '/api/admin-data'
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/portfolio/$slug'
@@ -296,6 +307,7 @@ export interface FileRouteTypes {
     | '/admin/team'
     | '/admin/testimonials'
     | '/api/admin-check'
+    | '/api/admin-data'
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/portfolio/$slug'
@@ -322,6 +334,7 @@ export interface RootRouteChildren {
   AdminTeamRoute: typeof AdminTeamRoute
   AdminTestimonialsRoute: typeof AdminTestimonialsRoute
   ApiAdminCheckRoute: typeof ApiAdminCheckRoute
+  ApiAdminDataRoute: typeof ApiAdminDataRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -424,6 +437,13 @@ declare module '@tanstack/react-router' {
       path: '/api/sitemap.xml'
       fullPath: '/api/sitemap.xml'
       preLoaderRoute: typeof ApiSitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin-data': {
+      id: '/api/admin-data'
+      path: '/api/admin-data'
+      fullPath: '/api/admin-data'
+      preLoaderRoute: typeof ApiAdminDataRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin-check': {
@@ -545,6 +565,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminTeamRoute: AdminTeamRoute,
   AdminTestimonialsRoute: AdminTestimonialsRoute,
   ApiAdminCheckRoute: ApiAdminCheckRoute,
+  ApiAdminDataRoute: ApiAdminDataRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   AdminIndexRoute: AdminIndexRoute,
 }

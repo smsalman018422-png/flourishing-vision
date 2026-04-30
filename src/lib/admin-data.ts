@@ -1,6 +1,18 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export type LoadResult<T> = { data: T[]; error: string | null };
+type AdminFilter = { op: "eq" | "in" | "gte"; column: string; value: unknown };
+type AdminOrder = { column: string; ascending?: boolean; nullsFirst?: boolean };
+
+export type AdminDataQuery = {
+  table: string;
+  select?: string;
+  count?: "exact" | "planned" | "estimated";
+  head?: boolean;
+  filters?: AdminFilter[];
+  orders?: AdminOrder[];
+  limit?: number;
+};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isTransient = (e: any) =>
@@ -34,4 +46,22 @@ export async function loadList<T>(
 
   console.error(`[admin] supabase error on ${table}:`, lastError);
   return { data: [], error: lastError?.message ?? "Failed to load data" };
+}
+
+export async function adminData<T>(query: AdminDataQuery): Promise<LoadResult<T> & { count: number | null }> {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData.session?.access_token;
+  if (!token) return { data: [], count: null, error: "Your session expired. Please sign in again." };
+
+  const res = await fetch("/api/admin-data", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(query),
+  });
+  const body = (await res.json().catch(() => null)) as { data?: T[]; count?: number | null; error?: string } | null;
+  if (!res.ok || body?.error) return { data: [], count: null, error: body?.error ?? "Failed to load data" };
+  return { data: body?.data ?? [], count: body?.count ?? null, error: null };
 }
