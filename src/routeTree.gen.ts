@@ -35,7 +35,7 @@ import { Route as AdminPortfolioRouteImport } from './routes/admin/portfolio'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
 import { Route as AdminBlogRouteImport } from './routes/admin/blog'
-import { Route as ApiPublicBlogRouteImport } from './routes/api/public.blog'
+import { Route as ApiPublicBlogRouteImport } from './routes/api/public/blog'
 
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
