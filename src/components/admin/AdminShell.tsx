@@ -1,6 +1,7 @@
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useAuth } from "@/components/AuthProvider";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   LayoutDashboard,
   Users,
@@ -13,16 +14,29 @@ import {
   LogOut,
   Loader2,
   ShieldAlert,
+  Menu,
+  X,
+  ChevronDown,
+  User as UserIcon,
+  Leaf,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const nav = [
   { to: "/admin", label: "Dashboard", Icon: LayoutDashboard },
   { to: "/admin/team", label: "Team", Icon: Users },
   { to: "/admin/portfolio", label: "Portfolio", Icon: Briefcase },
+  { to: "/admin/services", label: "Services", Icon: Sparkles },
   { to: "/admin/testimonials", label: "Testimonials", Icon: Quote },
   { to: "/admin/blog", label: "Blog", Icon: FileText },
   { to: "/admin/contacts", label: "Contacts", Icon: Mail },
-  { to: "/admin/services", label: "Services", Icon: Sparkles },
   { to: "/admin/settings", label: "Settings", Icon: Settings },
 ] as const;
 
@@ -30,6 +44,20 @@ export function AdminShell({ children }: { children?: ReactNode }) {
   const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Close drawer when route changes
+  useEffect(() => {
+    setDrawerOpen(false);
+  }, [pathname]);
+
+  // Lock body scroll when drawer open
+  useEffect(() => {
+    if (drawerOpen) {
+      document.body.style.overflow = "hidden";
+      return () => { document.body.style.overflow = ""; };
+    }
+  }, [drawerOpen]);
 
   useEffect(() => {
     if (loading) return;
@@ -51,9 +79,10 @@ export function AdminShell({ children }: { children?: ReactNode }) {
       <div className="min-h-screen grid place-items-center bg-background text-foreground p-6">
         <div className="max-w-md text-center glass rounded-2xl p-8">
           <ShieldAlert className="h-10 w-10 text-primary mx-auto" />
-          <h1 className="mt-4 text-xl font-display font-semibold">Admin access required</h1>
+          <h1 className="mt-4 text-xl font-display font-semibold">Not authorized</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Your account ({user.email}) doesn't have the admin role. Ask an existing admin to grant access in Settings → Admins.
+            Your account ({user.email}) doesn't have admin access. Ask an existing admin to grant
+            access in Settings → Admins.
           </p>
           <button
             onClick={async () => {
@@ -69,53 +98,150 @@ export function AdminShell({ children }: { children?: ReactNode }) {
     );
   }
 
+  const initials = (user.email ?? "A").slice(0, 1).toUpperCase();
+
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col lg:flex-row">
-      {/* Sidebar */}
-      <aside className="lg:w-64 lg:min-h-screen border-b lg:border-b-0 lg:border-r border-border/60 bg-[oklch(0.14_0.012_160)]/60 backdrop-blur">
-        <div className="p-5 flex items-center justify-between lg:justify-start gap-3">
-          <Link to="/" className="font-display font-semibold">
-            Letus<span className="text-gradient">Grow</span>
-            <span className="ml-2 text-xs text-muted-foreground">/ admin</span>
-          </Link>
-        </div>
-        <nav className="px-3 pb-3 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-1 gap-1">
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Desktop sidebar (fixed) */}
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[280px] flex-col border-r border-border/60 bg-[oklch(0.14_0.012_160)]/60 backdrop-blur z-30">
+        <SidebarBody pathname={pathname} email={user.email ?? ""} onSignOut={async () => { await signOut(); navigate({ to: "/admin/login" }); }} />
+      </aside>
+
+      {/* Mobile drawer */}
+      <AnimatePresence>
+        {drawerOpen && (
+          <>
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setDrawerOpen(false)}
+              className="lg:hidden fixed inset-0 z-40 bg-background/70 backdrop-blur-sm"
+            />
+            <motion.aside
+              key="drawer"
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "tween", duration: 0.25 }}
+              className="lg:hidden fixed inset-y-0 left-0 w-[85%] max-w-[320px] z-50 border-r border-border/60 bg-[oklch(0.12_0.012_160)] flex flex-col"
+            >
+              <button
+                onClick={() => setDrawerOpen(false)}
+                className="absolute top-3 right-3 h-10 w-10 grid place-items-center rounded-lg hover:bg-muted/40"
+                aria-label="Close menu"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <SidebarBody pathname={pathname} email={user.email ?? ""} onSignOut={async () => { await signOut(); navigate({ to: "/admin/login" }); }} />
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Main column */}
+      <div className="lg:pl-[280px] flex flex-col min-h-screen">
+        {/* Top bar */}
+        <header className="sticky top-0 z-20 h-14 border-b border-border/60 bg-background/80 backdrop-blur flex items-center justify-between px-4 sm:px-6">
+          <button
+            onClick={() => setDrawerOpen(true)}
+            className="lg:hidden h-10 w-10 grid place-items-center rounded-lg hover:bg-muted/40 -ml-2"
+            aria-label="Open menu"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <div className="lg:hidden font-display font-semibold text-sm">Admin</div>
+          <div className="hidden lg:block" />
+
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-2 rounded-full hover:bg-muted/40 p-1 pr-2 min-h-[44px]">
+              <span className="h-8 w-8 rounded-full bg-gradient-primary text-primary-foreground grid place-items-center text-xs font-semibold">
+                {initials}
+              </span>
+              <span className="hidden sm:inline text-sm text-muted-foreground max-w-[160px] truncate">
+                {user.email}
+              </span>
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel className="truncate text-xs">{user.email}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/admin/settings"><UserIcon className="h-4 w-4 mr-2" /> Profile & settings</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={async () => { await signOut(); navigate({ to: "/admin/login" }); }}
+                className="text-destructive focus:text-destructive"
+              >
+                <LogOut className="h-4 w-4 mr-2" /> Sign out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </header>
+
+        <main className="flex-1 p-4 sm:p-6 lg:p-10">
+          <div className="max-w-6xl mx-auto">{children ?? <Outlet />}</div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function SidebarBody({
+  pathname,
+  email,
+  onSignOut,
+}: {
+  pathname: string;
+  email: string;
+  onSignOut: () => void;
+}) {
+  return (
+    <>
+      <div className="p-5 flex items-center gap-2">
+        <span className="grid place-items-center h-9 w-9 rounded-xl bg-gradient-primary shadow-glow">
+          <Leaf className="h-4 w-4 text-primary-foreground" />
+        </span>
+        <Link to="/" className="font-display font-semibold">
+          Letus<span className="text-gradient">Grow</span>
+        </Link>
+        <span className="ml-1 text-[10px] uppercase tracking-wider rounded bg-primary/15 text-primary px-1.5 py-0.5">
+          admin
+        </span>
+      </div>
+      <nav className="px-3 py-2 flex-1 overflow-y-auto">
+        <ul className="space-y-1">
           {nav.map(({ to, label, Icon }) => {
             const active = pathname === to || (to !== "/admin" && pathname.startsWith(to));
             return (
-              <Link
-                key={to}
-                to={to}
-                className={`min-h-[44px] flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
-                  active
-                    ? "bg-primary/15 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                }`}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span className="truncate">{label}</span>
-              </Link>
+              <li key={to}>
+                <Link
+                  to={to}
+                  className={`min-h-[44px] flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+                    active
+                      ? "bg-primary/15 text-primary font-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                  }`}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{label}</span>
+                </Link>
+              </li>
             );
           })}
-        </nav>
-        <div className="hidden lg:block px-3 pb-5 mt-2 border-t border-border/60 pt-4">
-          <div className="px-3 text-xs text-muted-foreground truncate">{user.email}</div>
-          <button
-            onClick={async () => {
-              await signOut();
-              navigate({ to: "/admin/login" });
-            }}
-            className="mt-2 min-h-[44px] w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/40"
-          >
-            <LogOut className="h-4 w-4" /> Sign out
-          </button>
-        </div>
-      </aside>
-
-      {/* Main */}
-      <div className="flex-1 min-w-0">
-        <main className="p-4 sm:p-6 lg:p-10 max-w-6xl mx-auto">{children ?? <Outlet />}</main>
+        </ul>
+      </nav>
+      <div className="p-3 border-t border-border/60">
+        <div className="px-3 py-1 text-xs text-muted-foreground truncate">{email}</div>
+        <button
+          onClick={onSignOut}
+          className="mt-1 min-h-[44px] w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/40"
+        >
+          <LogOut className="h-4 w-4" /> Sign out
+        </button>
       </div>
-    </div>
+    </>
   );
 }
