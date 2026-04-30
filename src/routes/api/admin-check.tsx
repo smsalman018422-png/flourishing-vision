@@ -37,10 +37,19 @@ export const Route = createFileRoute("/api/admin-check")({
         }
 
         try {
-          const roleRows = await withDirectDb<unknown[]>((sql) =>
-            sql`select role from public.user_roles where user_id = ${userData.user.id} and role = 'admin'::public.app_role limit 1`,
-          );
-          if (!roleRows.length) return json({ ok: false, error: "You are not authorized as admin" }, 403);
+          const { data: roles, error: rolesError } = await supabaseAdmin
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", userData.user.id)
+            .eq("role", "admin")
+            .limit(1);
+
+          if (rolesError) {
+            return json({ ok: false, error: "Database error: " + rolesError.message }, 500);
+          }
+          if (!roles || roles.length === 0) {
+            return json({ ok: false, error: "You are not authorized as admin" }, 403);
+          }
         } catch (error) {
           const message = error instanceof Error ? error.message : "Database error";
           return json({ ok: false, error: "Database error: " + message }, 500);
