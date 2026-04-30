@@ -119,14 +119,17 @@ export type Database = {
           client_name: string
           cover_image_url: string | null
           created_at: string
+          gallery_images: string[]
           growth_pct: number | null
           id: string
           is_featured: boolean
+          is_visible: boolean
           project_title: string
           results: string | null
           revenue_label: string | null
           roi_pct: number | null
           service_type: string | null
+          slug: string | null
           solution: string | null
           sort_order: number
           testimonial_author: string | null
@@ -141,14 +144,17 @@ export type Database = {
           client_name: string
           cover_image_url?: string | null
           created_at?: string
+          gallery_images?: string[]
           growth_pct?: number | null
           id?: string
           is_featured?: boolean
+          is_visible?: boolean
           project_title: string
           results?: string | null
           revenue_label?: string | null
           roi_pct?: number | null
           service_type?: string | null
+          slug?: string | null
           solution?: string | null
           sort_order?: number
           testimonial_author?: string | null
@@ -163,14 +169,17 @@ export type Database = {
           client_name?: string
           cover_image_url?: string | null
           created_at?: string
+          gallery_images?: string[]
           growth_pct?: number | null
           id?: string
           is_featured?: boolean
+          is_visible?: boolean
           project_title?: string
           results?: string | null
           revenue_label?: string | null
           roi_pct?: number | null
           service_type?: string | null
+          slug?: string | null
           solution?: string | null
           sort_order?: number
           testimonial_author?: string | null
