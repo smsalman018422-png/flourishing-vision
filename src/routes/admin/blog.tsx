@@ -117,7 +117,7 @@ function BlogAdmin() {
       : await adminWrite({ table: "blog_posts", op: "update", values: payload, match: [{ column: "id", value: editing.id }] });
     setBusy(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       return;
     }
     toast.success(willPublish ? "Published" : "Saved as draft");
