@@ -14,7 +14,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { PageShell, PageHeader } from "@/components/layout/PageShell";
-import { supabase } from "@/integrations/supabase/client";
+import { getServiceBySlug, getRelatedPortfolio } from "@/server/services.functions";
 
 type ServiceRow = {
   id: string;
