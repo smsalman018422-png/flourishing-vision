@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Card, PageTitle } from "@/components/admin/ui";
-import { supabase } from "@/integrations/supabase/client";
+import { adminData } from "@/lib/admin-data";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { Mail, Users, Briefcase, BadgeCheck, Plus, ArrowRight, Inbox } from "lucide-react";
 
@@ -32,12 +32,12 @@ function Dashboard() {
   useEffect(() => {
     const since7 = new Date(Date.now() - 7 * 86400_000).toISOString();
     Promise.all([
-      supabase.from("team_members").select("id", { count: "exact", head: true }),
-      supabase.from("portfolio").select("id", { count: "exact", head: true }),
-      supabase.from("contact_submissions").select("id", { count: "exact", head: true }).gte("created_at", since7),
-      supabase.from("newsletter_subscribers").select("id", { count: "exact", head: true }),
-      supabase.from("contact_submissions").select("id, full_name, email, company, service, created_at").order("created_at", { ascending: false }).limit(5),
-      supabase.from("contact_submissions").select("created_at").gte("created_at", new Date(Date.now() - 30 * 86400_000).toISOString()),
+      adminData({ table: "team_members", select: "id", count: "exact", head: true }),
+      adminData({ table: "portfolio", select: "id", count: "exact", head: true }),
+      adminData({ table: "contact_submissions", select: "id", count: "exact", head: true, filters: [{ op: "gte", column: "created_at", value: since7 }] }),
+      adminData({ table: "newsletter_subscribers", select: "id", count: "exact", head: true }),
+      adminData<Contact>({ table: "contact_submissions", select: "id, full_name, email, company, service, created_at", orders: [{ column: "created_at", ascending: false }], limit: 5 }),
+      adminData<{ created_at: string }>({ table: "contact_submissions", select: "created_at", filters: [{ op: "gte", column: "created_at", value: new Date(Date.now() - 30 * 86400_000).toISOString() }] }),
     ]).then(([t, p, c7, sub, recentRows, chartRows]) => {
       setCounts({
         team: t.count ?? 0,
