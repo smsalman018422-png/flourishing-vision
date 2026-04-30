@@ -136,11 +136,11 @@ function TestimonialsAdmin() {
 
       <Card className="p-0 overflow-hidden">
         {loading ? (
-          <div className="p-12 grid place-items-center">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          </div>
+          <LoadingState />
+        ) : loadError ? (
+          <ErrorState message={loadError} onRetry={load} />
         ) : rows.length === 0 ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">No testimonials yet.</div>
+          <EmptyState title="No testimonials yet." actionLabel="Add your first testimonial" onAction={() => setEditing(empty())} />
         ) : (
           <SortableList
             items={rows}

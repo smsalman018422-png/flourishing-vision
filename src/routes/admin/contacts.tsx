@@ -175,9 +175,9 @@ function ContactsAdmin() {
 
       <Card className="p-0 overflow-hidden">
         {loading ? (
-          <div className="p-12 grid place-items-center">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          </div>
+          <LoadingState />
+        ) : loadError ? (
+          <ErrorState message={loadError} onRetry={load} />
         ) : filtered.length === 0 ? (
           <div className="p-12 text-center text-sm text-muted-foreground">
             {rows.length === 0 ? "No submissions yet." : "Nothing matches this filter."}

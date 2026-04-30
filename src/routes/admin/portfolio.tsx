@@ -204,11 +204,15 @@ function PortfolioAdmin() {
 
       <Card className="p-0 overflow-hidden">
         {loading ? (
-          <div className="p-12 grid place-items-center">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          </div>
+          <LoadingState />
+        ) : loadError ? (
+          <ErrorState message={loadError} onRetry={load} />
         ) : filtered.length === 0 ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">No case studies in this view.</div>
+          rows.length === 0 ? (
+            <EmptyState title="No case studies yet." actionLabel="Add your first case study" onAction={() => setEditing(empty())} />
+          ) : (
+            <div className="p-12 text-center text-sm text-muted-foreground">No case studies in this view.</div>
+          )
         ) : (
           <ul className="divide-y divide-border/60">
             {filtered.map((p) => (

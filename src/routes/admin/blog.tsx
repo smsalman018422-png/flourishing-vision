@@ -9,7 +9,7 @@ import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { supabase } from "@/integrations/supabase/client";
 import { loadList } from "@/lib/admin-data";
-import { Edit2, Eye, Plus, Trash2 } from "lucide-react";
+import { Edit2, Eye, Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Post = {
@@ -151,11 +151,11 @@ function BlogAdmin() {
 
       <Card className="p-0 overflow-hidden">
         {loading ? (
-          <div className="p-12 grid place-items-center">
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-          </div>
+          <LoadingState />
+        ) : loadError ? (
+          <ErrorState message={loadError} onRetry={load} />
         ) : rows.length === 0 ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">No posts yet.</div>
+          <EmptyState title="No posts yet." actionLabel="Write your first post" onAction={() => setEditing(empty())} />
         ) : (
           <ul className="divide-y divide-border/60">
             {rows.map((p) => (
