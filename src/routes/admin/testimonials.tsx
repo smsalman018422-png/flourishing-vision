@@ -204,7 +204,7 @@ function TestimonialsAdmin() {
               <ImageUpload
                 value={editing.photo_url}
                 onChange={(url) => setEditing({ ...editing, photo_url: url })}
-                bucket="testimonial-photos"
+                bucket="testimonial-images"
                 aspectClass="aspect-square max-w-[160px]"
                 label="Photo"
               />
