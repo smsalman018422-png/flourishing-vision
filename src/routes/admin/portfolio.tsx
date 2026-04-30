@@ -86,6 +86,7 @@ export const Route = createFileRoute("/admin/portfolio")({
 function PortfolioAdmin() {
   const [rows, setRows] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [editing, setEditing] = useState<Project | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Project | null>(null);
   const [busy, setBusy] = useState(false);
@@ -93,13 +94,16 @@ function PortfolioAdmin() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("portfolio")
-      .select("*")
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: false });
-    if (error) toast.error(error.message);
-    setRows(((data ?? []) as Project[]).map((r) => ({ ...r, gallery_images: r.gallery_images ?? [] })));
+    setLoadError(null);
+    const { data, error } = await loadList<Project>("portfolio", (q) =>
+      q.select("*").order("sort_order", { ascending: true }).order("created_at", { ascending: false }),
+    );
+    if (error) {
+      setLoadError(error);
+      setLoading(false);
+      return;
+    }
+    setRows(data.map((r) => ({ ...r, gallery_images: r.gallery_images ?? [] })));
     setLoading(false);
   };
   useEffect(() => {
