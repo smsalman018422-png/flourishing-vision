@@ -130,9 +130,9 @@ function BlogAdmin() {
     const id = confirmDelete.id;
     setRows((r) => r.filter((x) => x.id !== id));
     setConfirmDelete(null);
-    const { error } = await supabase.from("blog_posts").delete().eq("id", id);
+    const { error } = await adminWrite({ table: "blog_posts", op: "delete", match: [{ column: "id", value: id }] });
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       load();
     } else toast.success("Removed");
   };
