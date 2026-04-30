@@ -1,6 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const ALLOWED_BUCKETS = new Set(["team-photos", "portfolio-images", "blog-covers", "service-images", "testimonial-photos"]);
+const ALLOWED_BUCKETS = new Set([
+  "team-photos",
+  "portfolio-images",
+  "blog-covers",
+  "blog-images",
+  "service-images",
+  "testimonial-photos",
+  "testimonial-images",
+]);
 const SAFE_FOLDER = /^[a-zA-Z0-9/_-]{0,120}$/;
 
 const json = (body: unknown, status = 200) =>
