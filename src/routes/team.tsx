@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Linkedin, ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, ExternalLink } from "lucide-react";
 
 type Member = {
   id: string;
@@ -209,7 +209,7 @@ function FounderCard({ member, index, onOpen }: { member: Member; index: number;
             onClick={(e) => e.stopPropagation()}
             className="mt-5 inline-flex items-center gap-2 text-sm text-primary hover:underline min-h-[44px]"
           >
-            <Linkedin className="h-4 w-4" /> Connect
+            <ExternalLink className="h-4 w-4" /> Connect
           </a>
         )}
       </div>
@@ -284,7 +284,7 @@ function MemberDialog({ member, onClose }: { member: Member | null; onClose: () 
                 rel="noopener noreferrer"
                 className="mt-2 inline-flex items-center gap-2 text-sm text-primary hover:underline min-h-[44px]"
               >
-                <Linkedin className="h-4 w-4" /> View LinkedIn
+                <ExternalLink className="h-4 w-4" /> View LinkedIn
               </a>
             )}
           </>
