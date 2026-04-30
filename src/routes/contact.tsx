@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, PageHeader } from "@/components/layout/PageShell";
 import { supabase } from "@/integrations/supabase/client";
+import { getServiceTitles } from "@/server/services.functions";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -51,9 +52,9 @@ function ContactPage() {
   });
 
   useEffect(() => {
-    supabase.from("services").select("id, title").eq("is_visible", true).order("order_index").then(({ data }) => {
-      setServices(data ?? []);
-    });
+    getServiceTitles()
+      .then((data) => setServices(data ?? []))
+      .catch(() => setServices([]));
   }, []);
 
   const onSubmit = async (values: FormData) => {

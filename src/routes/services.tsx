@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import {
@@ -13,19 +12,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { PageShell, PageHeader } from "@/components/layout/PageShell";
-import { supabase } from "@/integrations/supabase/client";
-
-type ServiceRow = {
-  id: string;
-  slug: string;
-  title: string;
-  short_description: string;
-  icon_name: string;
-  features: string[];
-  starts_at_price: number | null;
-  order_index: number;
-  is_visible: boolean;
-};
+import { getPublicServices, type PublicService } from "@/server/services.functions";
 
 const ICONS: Record<string, LucideIcon> = {
   Hash,
@@ -37,6 +24,7 @@ const ICONS: Record<string, LucideIcon> = {
 };
 
 export const Route = createFileRoute("/services")({
+  loader: () => getPublicServices(),
   head: () => ({
     meta: [
       { title: "Services — LetUsGrow" },
@@ -56,29 +44,7 @@ export const Route = createFileRoute("/services")({
 });
 
 function ServicesPage() {
-  const [items, setItems] = useState<ServiceRow[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      const { data, error } = await (supabase as any)
-        .from("services")
-        .select(
-          "id, slug, title, short_description, icon_name, features, starts_at_price, order_index, is_visible",
-        )
-        .eq("is_visible", true)
-        .order("order_index", { ascending: true })
-        .limit(50);
-      if (!alive) return;
-      if (error) console.error(error);
-      setItems((data ?? []) as ServiceRow[]);
-      setLoading(false);
-    })();
-    return () => {
-      alive = false;
-    };
-  }, []);
+  const items = Route.useLoaderData() as PublicService[];
 
   return (
     <PageShell>
@@ -89,13 +55,7 @@ function ServicesPage() {
       />
 
       <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-16 sm:pb-24">
-        {loading ? (
-          <div className="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="glass rounded-2xl p-7 animate-pulse h-80" />
-            ))}
-          </div>
-        ) : items.length === 0 ? (
+        {items.length === 0 ? (
           <div className="glass-strong rounded-3xl p-12 text-center">
             <h3 className="text-2xl font-display font-semibold">Services coming soon</h3>
             <p className="mt-3 text-muted-foreground">
@@ -170,6 +130,7 @@ function ServicesPage() {
             })}
           </div>
         )}
+
 
         {/* Bottom CTA */}
         <div className="mt-20">

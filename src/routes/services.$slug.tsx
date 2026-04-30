@@ -14,7 +14,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { PageShell, PageHeader } from "@/components/layout/PageShell";
-import { supabase } from "@/integrations/supabase/client";
+import { getServiceBySlug, getRelatedPortfolio } from "@/server/services.functions";
 
 type ServiceRow = {
   id: string;
@@ -57,14 +57,7 @@ function slugify(s: string) {
 
 export const Route = createFileRoute("/services/$slug")({
   loader: async ({ params }) => {
-    const { data, error } = await (supabase as any)
-      .from("services")
-      .select("*")
-      .eq("slug", params.slug)
-      .eq("is_visible", true)
-      .maybeSingle();
-
-    if (error) throw error;
+    const data = await getServiceBySlug({ data: { slug: params.slug } });
     if (!data) throw notFound();
     return data as ServiceRow;
   },
@@ -118,15 +111,11 @@ function ServiceDetail() {
   useEffect(() => {
     if (!data.service_type) return;
     let alive = true;
-    (async () => {
-      const { data: rows } = await supabase
-        .from("portfolio")
-        .select("id, client_name, project_title, category, cover_image_url, roi_pct")
-        .eq("service_type", data.service_type as string)
-        .order("sort_order", { ascending: true })
-        .limit(3);
-      if (alive) setRelated((rows ?? []) as PortfolioRow[]);
-    })();
+    getRelatedPortfolio({ data: { serviceType: data.service_type as string } })
+      .then((rows) => {
+        if (alive) setRelated((rows ?? []) as PortfolioRow[]);
+      })
+      .catch(() => {});
     return () => {
       alive = false;
     };
