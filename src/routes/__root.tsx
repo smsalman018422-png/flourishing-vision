@@ -51,18 +51,9 @@ export const Route = createRootRoute({
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "preconnect", href: "https://yqrtqeklcinuxgogfilv.supabase.co", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://yqrtqeklcinuxgogfilv.supabase.co" },
-      // Load fonts non-render-blocking with swap fallback
-      {
-        rel: "preload",
-        as: "style",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap",
-      },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap",
-        media: "print",
-        // @ts-expect-error - onLoad on link is valid HTML
-        onLoad: "this.media='all'",
       },
     ],
   }),
