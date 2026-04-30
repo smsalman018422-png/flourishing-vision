@@ -16,40 +16,55 @@ export type Database = {
     Tables: {
       blog_posts: {
         Row: {
+          author_avatar_url: string | null
           author_name: string | null
+          author_role: string | null
+          category: string | null
           content: string | null
           cover_image_url: string | null
           created_at: string
           excerpt: string | null
           id: string
+          is_featured: boolean
           published: boolean
           published_at: string | null
+          read_time_minutes: number | null
           slug: string
           title: string
           updated_at: string
         }
         Insert: {
+          author_avatar_url?: string | null
           author_name?: string | null
+          author_role?: string | null
+          category?: string | null
           content?: string | null
           cover_image_url?: string | null
           created_at?: string
           excerpt?: string | null
           id?: string
+          is_featured?: boolean
           published?: boolean
           published_at?: string | null
+          read_time_minutes?: number | null
           slug: string
           title: string
           updated_at?: string
         }
         Update: {
+          author_avatar_url?: string | null
           author_name?: string | null
+          author_role?: string | null
+          category?: string | null
           content?: string | null
           cover_image_url?: string | null
           created_at?: string
           excerpt?: string | null
           id?: string
+          is_featured?: boolean
           published?: boolean
           published_at?: string | null
+          read_time_minutes?: number | null
           slug?: string
           title?: string
           updated_at?: string
