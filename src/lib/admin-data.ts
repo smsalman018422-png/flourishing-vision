@@ -65,3 +65,28 @@ export async function adminData<T>(query: AdminDataQuery): Promise<LoadResult<T>
   if (!res.ok || body?.error) return { data: [], count: null, error: body?.error ?? "Failed to load data" };
   return { data: body?.data ?? [], count: body?.count ?? null, error: null };
 }
+
+export type AdminWriteRequest = {
+  table: string;
+  op: "insert" | "update" | "delete" | "upsert";
+  values?: Record<string, unknown> | Record<string, unknown>[];
+  match?: { column: string; value: unknown }[];
+  onConflict?: string;
+};
+
+export async function adminWrite<T = unknown>(
+  req: AdminWriteRequest,
+): Promise<{ data: T[]; error: string | null }> {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const token = sessionData.session?.access_token;
+  if (!token) return { data: [], error: "Your session expired. Please sign in again." };
+
+  const res = await fetch("/api/admin-write", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify(req),
+  });
+  const body = (await res.json().catch(() => null)) as { data?: T[]; error?: string } | null;
+  if (!res.ok || body?.error) return { data: [], error: body?.error ?? "Failed to save" };
+  return { data: body?.data ?? [], error: null };
+}

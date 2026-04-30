@@ -8,7 +8,7 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { supabase } from "@/integrations/supabase/client";
-import { adminData } from "@/lib/admin-data";
+import { adminData, adminWrite } from "@/lib/admin-data";
 import { Edit2, Eye, Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -113,11 +113,11 @@ function BlogAdmin() {
     };
     const isNew = !editing.id;
     const { error } = isNew
-      ? await supabase.from("blog_posts").insert(payload)
-      : await supabase.from("blog_posts").update(payload).eq("id", editing.id);
+      ? await adminWrite({ table: "blog_posts", op: "insert", values: payload })
+      : await adminWrite({ table: "blog_posts", op: "update", values: payload, match: [{ column: "id", value: editing.id }] });
     setBusy(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       return;
     }
     toast.success(willPublish ? "Published" : "Saved as draft");
@@ -130,9 +130,9 @@ function BlogAdmin() {
     const id = confirmDelete.id;
     setRows((r) => r.filter((x) => x.id !== id));
     setConfirmDelete(null);
-    const { error } = await supabase.from("blog_posts").delete().eq("id", id);
+    const { error } = await adminWrite({ table: "blog_posts", op: "delete", match: [{ column: "id", value: id }] });
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       load();
     } else toast.success("Removed");
   };
