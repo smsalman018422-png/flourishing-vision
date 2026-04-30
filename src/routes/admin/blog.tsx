@@ -8,6 +8,7 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { adminData, adminWrite } from "@/lib/admin-data";
+import { subscribeToTable } from "@/lib/realtime";
 import { Edit2, Eye, Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -103,6 +104,7 @@ function BlogAdmin() {
   };
   useEffect(() => {
     load();
+    return subscribeToTable("blog_posts", load, "admin-blog-posts-changes");
   }, []);
 
   const persist = async (asPublished?: boolean) => {
@@ -276,7 +278,8 @@ function BlogAdmin() {
               <ImageUpload
                 value={editing.cover_image_url}
                 onChange={(url) => setEditing({ ...editing, cover_image_url: url })}
-                bucket="blog-covers"
+                bucket="blog-images"
+                folder="covers"
                 aspectClass="aspect-video"
                 label="Cover"
               />
@@ -360,7 +363,7 @@ function BlogAdmin() {
               <ImageUpload
                 value={editing.author_avatar_url}
                 onChange={(url) => setEditing({ ...editing, author_avatar_url: url })}
-                bucket="blog-covers"
+                bucket="blog-images"
                 folder="authors"
                 aspectClass="aspect-square max-w-[120px]"
                 label="Avatar"

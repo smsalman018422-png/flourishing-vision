@@ -6,8 +6,8 @@ import { Drawer } from "@/components/admin/Drawer";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { SortableList } from "@/components/admin/SortableList";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
-import { supabase } from "@/integrations/supabase/client";
-import { adminData } from "@/lib/admin-data";
+import { adminData, adminWrite } from "@/lib/admin-data";
+import { subscribeToTable } from "@/lib/realtime";
 import { Edit2, Eye, EyeOff, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -95,6 +95,7 @@ function ServicesAdmin() {
   };
   useEffect(() => {
     load();
+    return subscribeToTable("services", load, "admin-services-changes");
   }, []);
 
   const save = async () => {
@@ -117,11 +118,11 @@ function ServicesAdmin() {
     };
     const isNew = !editing.id;
     const { error } = isNew
-      ? await supabase.from("services").insert({ ...payload, order_index: rows.length })
-      : await supabase.from("services").update(payload).eq("id", editing.id);
+      ? await adminWrite({ table: "services", op: "insert", values: { ...payload, order_index: rows.length } })
+      : await adminWrite({ table: "services", op: "update", values: payload, match: [{ column: "id", value: editing.id }] });
     setBusy(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       return;
     }
     toast.success(isNew ? "Service added" : "Saved");
@@ -132,9 +133,9 @@ function ServicesAdmin() {
   const toggleVisibility = async (s: Service) => {
     const next = !s.is_visible;
     setRows((r) => r.map((x) => (x.id === s.id ? { ...x, is_visible: next } : x)));
-    const { error } = await supabase.from("services").update({ is_visible: next }).eq("id", s.id);
+    const { error } = await adminWrite({ table: "services", op: "update", values: { is_visible: next }, match: [{ column: "id", value: s.id }] });
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       load();
     }
   };
@@ -144,16 +145,16 @@ function ServicesAdmin() {
     const id = confirmDelete.id;
     setRows((r) => r.filter((x) => x.id !== id));
     setConfirmDelete(null);
-    const { error } = await supabase.from("services").delete().eq("id", id);
+    const { error } = await adminWrite({ table: "services", op: "delete", match: [{ column: "id", value: id }] });
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       load();
     } else toast.success("Removed");
   };
 
   const onReorder = async (next: Service[]) => {
     setRows(next);
-    const updates = next.map((s, i) => supabase.from("services").update({ order_index: i }).eq("id", s.id));
+    const updates = next.map((s, i) => adminWrite({ table: "services", op: "update", values: { order_index: i }, match: [{ column: "id", value: s.id }] }));
     const results = await Promise.all(updates);
     if (results.some((r) => r.error)) toast.error("Some rows failed to reorder");
   };

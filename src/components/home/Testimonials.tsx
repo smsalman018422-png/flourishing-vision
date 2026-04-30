@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Star, Play, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { subscribeToTable } from "@/lib/realtime";
 
 type Testimonial = {
   id: string;
@@ -27,16 +28,19 @@ export function Testimonials() {
   // Fetch
   useEffect(() => {
     let alive = true;
-    (async () => {
+    const loadItems = async () => {
       const { data } = await supabase
         .from("testimonials")
         .select("*")
         .order("sort_order", { ascending: true })
         .limit(50);
       if (alive) setItems((data ?? []) as Testimonial[]);
-    })();
+    };
+    loadItems();
+    const unsubscribe = subscribeToTable("testimonials", loadItems, "home-testimonials-changes");
     return () => {
       alive = false;
+      unsubscribe();
     };
   }, []);
 

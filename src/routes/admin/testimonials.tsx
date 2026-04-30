@@ -7,8 +7,8 @@ import { ImageUpload } from "@/components/admin/ImageUpload";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { SortableList } from "@/components/admin/SortableList";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
-import { supabase } from "@/integrations/supabase/client";
-import { adminData } from "@/lib/admin-data";
+import { adminData, adminWrite } from "@/lib/admin-data";
+import { subscribeToTable } from "@/lib/realtime";
 import { Edit2, Plus, Star, Trash2, Video } from "lucide-react";
 import { toast } from "sonner";
 
@@ -73,6 +73,7 @@ function TestimonialsAdmin() {
   };
   useEffect(() => {
     load();
+    return subscribeToTable("testimonials", load, "admin-testimonials-changes");
   }, []);
 
   const save = async () => {
@@ -94,11 +95,11 @@ function TestimonialsAdmin() {
     };
     const isNew = !editing.id;
     const { error } = isNew
-      ? await supabase.from("testimonials").insert({ ...payload, sort_order: rows.length })
-      : await supabase.from("testimonials").update(payload).eq("id", editing.id);
+      ? await adminWrite({ table: "testimonials", op: "insert", values: { ...payload, sort_order: rows.length } })
+      : await adminWrite({ table: "testimonials", op: "update", values: payload, match: [{ column: "id", value: editing.id }] });
     setBusy(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       return;
     }
     toast.success(isNew ? "Testimonial added" : "Saved");
@@ -111,16 +112,16 @@ function TestimonialsAdmin() {
     const id = confirmDelete.id;
     setRows((r) => r.filter((x) => x.id !== id));
     setConfirmDelete(null);
-    const { error } = await supabase.from("testimonials").delete().eq("id", id);
+    const { error } = await adminWrite({ table: "testimonials", op: "delete", match: [{ column: "id", value: id }] });
     if (error) {
-      toast.error(error.message);
+      toast.error(error);
       load();
     } else toast.success("Removed");
   };
 
   const onReorder = async (next: Testimonial[]) => {
     setRows(next);
-    const updates = next.map((t, i) => supabase.from("testimonials").update({ sort_order: i }).eq("id", t.id));
+    const updates = next.map((t, i) => adminWrite({ table: "testimonials", op: "update", values: { sort_order: i }, match: [{ column: "id", value: t.id }] }));
     const results = await Promise.all(updates);
     if (results.some((r) => r.error)) toast.error("Some rows failed to reorder");
   };
@@ -203,7 +204,7 @@ function TestimonialsAdmin() {
               <ImageUpload
                 value={editing.photo_url}
                 onChange={(url) => setEditing({ ...editing, photo_url: url })}
-                bucket="testimonial-photos"
+                bucket="testimonial-images"
                 aspectClass="aspect-square max-w-[160px]"
                 label="Photo"
               />

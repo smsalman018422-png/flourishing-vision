@@ -13,37 +13,45 @@ const ALLOWED_TABLES = new Set([
 ]);
 
 const TABLE_COLUMNS: Record<string, readonly string[]> = {
-  team_members: ["name", "role", "bio", "photo_url", "linkedin_url", "twitter_url", "sort_order", "is_visible"],
+  team_members: ["name", "role", "category", "bio", "photo_url", "linkedin_url", "skills", "is_founder", "is_visible", "sort_order"],
   portfolio: [
-    "title",
-    "slug",
+    "project_title",
     "client_name",
     "category",
-    "description",
+    "service_type",
+    "slug",
+    "cover_image_url",
+    "before_image_url",
+    "after_image_url",
+    "gallery_images",
     "challenge",
     "solution",
     "results",
-    "cover_image_url",
-    "gallery_urls",
-    "metrics",
-    "year",
+    "roi_pct",
+    "growth_pct",
+    "revenue_label",
+    "testimonial_quote",
+    "testimonial_author",
+    "testimonial_role",
+    "is_visible",
     "is_featured",
-    "is_published",
     "sort_order",
   ],
   services: [
     "title",
     "slug",
     "short_description",
-    "description",
+    "long_description",
     "icon_name",
-    "image_url",
     "features",
-    "price_from",
+    "packages",
+    "process",
+    "starts_at_price",
+    "service_type",
     "order_index",
     "is_visible",
   ],
-  testimonials: ["client_name", "client_role", "client_company", "quote", "photo_url", "rating", "sort_order", "is_visible"],
+  testimonials: ["author_name", "author_role", "company", "quote", "rating", "photo_url", "video_url", "video_thumbnail_url", "sort_order"],
   blog_posts: [
     "slug",
     "title",
@@ -65,8 +73,8 @@ const TABLE_COLUMNS: Record<string, readonly string[]> = {
   user_roles: ["user_id", "role"],
 };
 
-const ARRAY_COLUMNS = new Set(["gallery_urls", "features"]);
-const JSON_COLUMNS = new Set(["metrics", "value"]);
+const ARRAY_COLUMNS = new Set(["gallery_images", "features", "skills"]);
+const JSON_COLUMNS = new Set(["packages", "process", "value"]);
 
 type AdminWriteRequest = {
   table?: string;

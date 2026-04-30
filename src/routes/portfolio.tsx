@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowUpRight, TrendingUp } from "lucide-react";
+import { subscribeToTable } from "@/lib/realtime";
 
 type Project = {
   id: string;
@@ -50,7 +51,7 @@ function PortfolioPage() {
 
   useEffect(() => {
     let cancelled = false;
-    supabase
+    const loadProjects = () => supabase
       .from("portfolio")
       .select("id, slug, client_name, project_title, category, service_type, cover_image_url, roi_pct, growth_pct, revenue_label, is_visible, sort_order")
       .eq("is_visible", true)
@@ -60,7 +61,12 @@ function PortfolioPage() {
         setProjects((data ?? []) as Project[]);
         setLoading(false);
       });
-    return () => { cancelled = true; };
+    loadProjects();
+    const unsubscribe = subscribeToTable("portfolio", loadProjects, "public-portfolio-changes");
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
   }, []);
 
   const filtered = useMemo(() => {

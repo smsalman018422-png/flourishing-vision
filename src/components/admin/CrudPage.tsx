@@ -1,14 +1,6 @@
 import { useEffect, useState } from "react";
-import { supabase as supabaseClient } from "@/integrations/supabase/client";
-// Loose-typed alias for dynamic table names in this generic CRUD helper.
-const supabase = supabaseClient as unknown as {
-  from: (t: string) => {
-    select: (s: string) => { order: (c: string, o: { ascending: boolean }) => { limit: (n: number) => Promise<{ data: Record<string, unknown>[] | null; error: { message: string } | null }> } };
-    insert: (d: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
-    update: (d: Record<string, unknown>) => { eq: (c: string, v: string) => Promise<{ error: { message: string } | null }> };
-    delete: () => { eq: (c: string, v: string) => Promise<{ error: { message: string } | null }> };
-  };
-};
+import { adminData, adminWrite } from "@/lib/admin-data";
+import { subscribeToTable } from "@/lib/realtime";
 import { Button, Card, Field, PageTitle, Select, TextArea, TextInput } from "./ui";
 import { Edit2, Loader2, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -47,39 +39,38 @@ export function CrudPage({
 
   const load = () => {
     setLoading(true);
-    supabase
-      .from(table)
-      .select("*")
-      .order(orderBy, { ascending })
-      .limit(200)
+    adminData<Row>({ table, select: "*", orders: [{ column: orderBy, ascending }], limit: 200 })
       .then(({ data, error }) => {
-        if (error) toast.error(error.message);
+        if (error) toast.error(error);
         setRows((data ?? []) as Row[]);
         setLoading(false);
       });
   };
-  useEffect(load, [table, orderBy, ascending]);
+  useEffect(() => {
+    load();
+    return subscribeToTable(table, load, `admin-crud-${table}-changes`);
+  }, [table, orderBy, ascending]);
 
   const remove = async (id: string) => {
     if (!confirm("Delete this item? This cannot be undone.")) return;
-    const { error } = await supabase.from(table).delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    const { error } = await adminWrite({ table, op: "delete", match: [{ column: "id", value: id }] });
+    if (error) return toast.error(error);
     toast.success("Deleted");
     load();
   };
 
   const save = async (data: Record<string, unknown>): Promise<void> => {
     if (editing) {
-      const { error } = await supabase.from(table).update(data).eq("id", editing.id);
+      const { error } = await adminWrite({ table, op: "update", values: data, match: [{ column: "id", value: editing.id }] });
       if (error) {
-        toast.error(error.message);
+        toast.error(error);
         return;
       }
       toast.success("Saved");
     } else {
-      const { error } = await supabase.from(table).insert(data);
+      const { error } = await adminWrite({ table, op: "insert", values: data });
       if (error) {
-        toast.error(error.message);
+        toast.error(error);
         return;
       }
       toast.success("Created");
