@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { useAuth } from "@/components/AuthProvider";
+import { AuthProvider, useAuth } from "@/components/AuthProvider";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   LayoutDashboard,
@@ -41,6 +41,14 @@ const nav = [
 ] as const;
 
 export function AdminShell({ children }: { children?: ReactNode }) {
+  return (
+    <AuthProvider>
+      <AdminShellContent>{children}</AdminShellContent>
+    </AuthProvider>
+  );
+}
+
+function AdminShellContent({ children }: { children?: ReactNode }) {
   const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();

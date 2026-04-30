@@ -35,32 +35,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    let seq = 0;
 
-    // Listener FIRST — does not block render
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s);
-      if (s?.user) {
-        // Defer admin check; never blocks UI
-        setTimeout(() => {
-          checkAdmin(s.access_token).then((admin) => {
-            if (!cancelled) setIsAdmin(admin);
-          });
-        }, 0);
-      } else {
+    const applySession = async (nextSession: Session | null) => {
+      const ticket = ++seq;
+      setSession(nextSession);
+      if (!nextSession?.user) {
         setIsAdmin(false);
+        setLoading(false);
+        return;
       }
+
+      const admin = await checkAdmin(nextSession.access_token);
+      if (!cancelled && ticket === seq) {
+        setIsAdmin(admin);
+        setLoading(false);
+      }
+    };
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+      setLoading(true);
+      void applySession(s);
     });
 
-    // Resolve loading state immediately so public pages render without waiting
     supabase.auth.getSession().then(({ data }) => {
       if (cancelled) return;
-      setSession(data.session);
+      void applySession(data.session);
+    }).catch(() => {
+      if (cancelled) return;
+      setSession(null);
+      setIsAdmin(false);
       setLoading(false);
-      if (data.session?.user) {
-        checkAdmin(data.session.access_token).then((admin) => {
-          if (!cancelled) setIsAdmin(admin);
-        });
-      }
     });
 
     return () => {

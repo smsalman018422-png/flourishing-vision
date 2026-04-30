@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useAuth } from "@/components/AuthProvider";
+import { AuthProvider, useAuth } from "@/components/AuthProvider";
 import { Button, Field, TextInput } from "@/components/admin/ui";
 import { Leaf, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -9,7 +9,11 @@ export const Route = createFileRoute("/admin/login")({
   head: () => ({
     meta: [{ title: "Admin login — LetUsGrow" }, { name: "robots", content: "noindex" }],
   }),
-  component: AdminLogin,
+  component: () => (
+    <AuthProvider>
+      <AdminLogin />
+    </AuthProvider>
+  ),
 });
 
 function AdminLogin() {
