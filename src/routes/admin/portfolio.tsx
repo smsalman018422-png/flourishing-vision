@@ -151,8 +151,10 @@ function PortfolioAdmin() {
   };
 
   const toggle = async (p: Project, key: "is_visible" | "is_featured") => {
-    setRows((r) => r.map((x) => (x.id === p.id ? { ...x, [key]: !x[key] } : x)));
-    const { error } = await supabase.from("portfolio").update({ [key]: !p[key] }).eq("id", p.id);
+    const next = !p[key];
+    setRows((r) => r.map((x) => (x.id === p.id ? { ...x, [key]: next } : x)));
+    const patch = key === "is_visible" ? { is_visible: next } : { is_featured: next };
+    const { error } = await supabase.from("portfolio").update(patch).eq("id", p.id);
     if (error) {
       toast.error(error.message);
       load();
