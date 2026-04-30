@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, LayoutGroup } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Clock, BookOpen } from "lucide-react";
+import { subscribeToTable } from "@/lib/realtime";
 
 type Post = {
   id: string;
@@ -33,7 +34,7 @@ function BlogPage() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/public/blog")
+    const loadPosts = () => fetch("/api/public/blog")
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Failed to load posts"))))
       .then((body: { data?: Post[] }) => {
         if (!cancelled) setPosts(body.data ?? []);
@@ -44,8 +45,11 @@ function BlogPage() {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+    loadPosts();
+    const unsubscribe = subscribeToTable("blog_posts", loadPosts, "public-blog-posts-changes");
     return () => {
       cancelled = true;
+      unsubscribe();
     };
   }, []);
 
