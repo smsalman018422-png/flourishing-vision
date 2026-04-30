@@ -35,12 +35,13 @@ import { Route as AdminPortfolioRouteImport } from './routes/admin/portfolio'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
 import { Route as AdminBlogRouteImport } from './routes/admin/blog'
+import { Route as ApiPublicBlogRouteImport } from './routes/api/public.blog'
 
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
   path: '/team',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/team.lazy').then((d) => d.Route))
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
@@ -55,7 +56,7 @@ const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/pricing.lazy').then((d) => d.Route))
 const PortfolioRoute = PortfolioRouteImport.update({
   id: '/portfolio',
   path: '/portfolio',
@@ -70,17 +71,17 @@ const BlogRoute = BlogRouteImport.update({
   id: '/blog',
   path: '/blog',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/blog.lazy').then((d) => d.Route))
 const AboutRoute = AboutRouteImport.update({
   id: '/about',
   path: '/about',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/about.lazy').then((d) => d.Route))
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -166,6 +167,11 @@ const AdminBlogRoute = AdminBlogRouteImport.update({
   path: '/admin/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicBlogRoute = ApiPublicBlogRouteImport.update({
+  id: '/api/public/blog',
+  path: '/api/public/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -194,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/portfolio/$slug': typeof PortfolioSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/blog': typeof ApiPublicBlogRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -222,6 +229,7 @@ export interface FileRoutesByTo {
   '/portfolio/$slug': typeof PortfolioSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin': typeof AdminIndexRoute
+  '/api/public/blog': typeof ApiPublicBlogRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -251,6 +259,7 @@ export interface FileRoutesById {
   '/portfolio/$slug': typeof PortfolioSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/api/public/blog': typeof ApiPublicBlogRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -281,6 +290,7 @@ export interface FileRouteTypes {
     | '/portfolio/$slug'
     | '/services/$slug'
     | '/admin/'
+    | '/api/public/blog'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -309,6 +319,7 @@ export interface FileRouteTypes {
     | '/portfolio/$slug'
     | '/services/$slug'
     | '/admin'
+    | '/api/public/blog'
   id:
     | '__root__'
     | '/'
@@ -337,6 +348,7 @@ export interface FileRouteTypes {
     | '/portfolio/$slug'
     | '/services/$slug'
     | '/admin/'
+    | '/api/public/blog'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -363,6 +375,7 @@ export interface RootRouteChildren {
   ApiAdminWriteRoute: typeof ApiAdminWriteRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  ApiPublicBlogRoute: typeof ApiPublicBlogRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -549,6 +562,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBlogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/blog': {
+      id: '/api/public/blog'
+      path: '/api/public/blog'
+      fullPath: '/api/public/blog'
+      preLoaderRoute: typeof ApiPublicBlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -610,6 +630,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminWriteRoute: ApiAdminWriteRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   AdminIndexRoute: AdminIndexRoute,
+  ApiPublicBlogRoute: ApiPublicBlogRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
