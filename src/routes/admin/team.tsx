@@ -7,8 +7,8 @@ import { ImageUpload } from "@/components/admin/ImageUpload";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { SortableList } from "@/components/admin/SortableList";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
-import { supabase } from "@/integrations/supabase/client";
-import { adminData } from "@/lib/admin-data";
+import { adminData, adminWrite } from "@/lib/admin-data";
+import { subscribeToTable } from "@/lib/realtime";
 import { Edit2, Eye, EyeOff, Plus, Star, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -76,6 +76,7 @@ function TeamAdmin() {
   };
   useEffect(() => {
     load();
+    return subscribeToTable("team_members", load, "admin-team-members-changes");
   }, []);
 
   const save = async () => {
@@ -104,8 +105,8 @@ function TeamAdmin() {
       setRows((r) => r.map((m) => (m.id === editing.id ? { ...m, ...payload } : m)));
     }
     const { error } = isNew
-      ? await supabase.from("team_members").insert({ ...payload, sort_order: rows.length })
-      : await supabase.from("team_members").update(payload).eq("id", editing.id);
+      ? await adminWrite({ table: "team_members", op: "insert", values: { ...payload, sort_order: rows.length } })
+      : await adminWrite({ table: "team_members", op: "update", values: payload, match: [{ column: "id", value: editing.id }] });
     setBusy(false);
     if (error) {
       toast.error(error.message);
@@ -119,7 +120,7 @@ function TeamAdmin() {
 
   const toggleVisibility = async (m: Member) => {
     setRows((r) => r.map((x) => (x.id === m.id ? { ...x, is_visible: !x.is_visible } : x)));
-    const { error } = await supabase.from("team_members").update({ is_visible: !m.is_visible }).eq("id", m.id);
+    const { error } = await adminWrite({ table: "team_members", op: "update", values: { is_visible: !m.is_visible }, match: [{ column: "id", value: m.id }] });
     if (error) {
       toast.error(error.message);
       setRows((r) => r.map((x) => (x.id === m.id ? { ...x, is_visible: m.is_visible } : x)));
@@ -131,7 +132,7 @@ function TeamAdmin() {
     const id = confirmDelete.id;
     setRows((r) => r.filter((x) => x.id !== id));
     setConfirmDelete(null);
-    const { error } = await supabase.from("team_members").delete().eq("id", id);
+    const { error } = await adminWrite({ table: "team_members", op: "delete", match: [{ column: "id", value: id }] });
     if (error) {
       toast.error(error.message);
       load();
@@ -141,7 +142,7 @@ function TeamAdmin() {
   const onReorder = async (next: Member[]) => {
     setRows(next);
     const updates = next.map((m, i) =>
-      supabase.from("team_members").update({ sort_order: i }).eq("id", m.id),
+      adminWrite({ table: "team_members", op: "update", values: { sort_order: i }, match: [{ column: "id", value: m.id }] }),
     );
     const results = await Promise.all(updates);
     if (results.some((r) => r.error)) toast.error("Some rows failed to reorder");
