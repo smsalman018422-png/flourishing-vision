@@ -23,6 +23,7 @@ import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as PortfolioSlugRouteImport } from './routes/portfolio.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ApiSitemapDotxmlRouteImport } from './routes/api/sitemap[.]xml'
+import { Route as ApiAdminWriteRouteImport } from './routes/api/admin-write'
 import { Route as ApiAdminUploadRouteImport } from './routes/api/admin-upload'
 import { Route as ApiAdminDataRouteImport } from './routes/api/admin-data'
 import { Route as ApiAdminCheckRouteImport } from './routes/api/admin-check'
@@ -105,6 +106,11 @@ const ApiSitemapDotxmlRoute = ApiSitemapDotxmlRouteImport.update({
   path: '/api/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAdminWriteRoute = ApiAdminWriteRouteImport.update({
+  id: '/api/admin-write',
+  path: '/api/admin-write',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminUploadRoute = ApiAdminUploadRouteImport.update({
   id: '/api/admin-upload',
   path: '/api/admin-upload',
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/api/admin-check': typeof ApiAdminCheckRoute
   '/api/admin-data': typeof ApiAdminDataRoute
   '/api/admin-upload': typeof ApiAdminUploadRoute
+  '/api/admin-write': typeof ApiAdminWriteRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/api/admin-check': typeof ApiAdminCheckRoute
   '/api/admin-data': typeof ApiAdminDataRoute
   '/api/admin-upload': typeof ApiAdminUploadRoute
+  '/api/admin-write': typeof ApiAdminWriteRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
@@ -237,6 +245,7 @@ export interface FileRoutesById {
   '/api/admin-check': typeof ApiAdminCheckRoute
   '/api/admin-data': typeof ApiAdminDataRoute
   '/api/admin-upload': typeof ApiAdminUploadRoute
+  '/api/admin-write': typeof ApiAdminWriteRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
@@ -266,6 +275,7 @@ export interface FileRouteTypes {
     | '/api/admin-check'
     | '/api/admin-data'
     | '/api/admin-upload'
+    | '/api/admin-write'
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/portfolio/$slug'
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/api/admin-check'
     | '/api/admin-data'
     | '/api/admin-upload'
+    | '/api/admin-write'
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/portfolio/$slug'
@@ -320,6 +331,7 @@ export interface FileRouteTypes {
     | '/api/admin-check'
     | '/api/admin-data'
     | '/api/admin-upload'
+    | '/api/admin-write'
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/portfolio/$slug'
@@ -348,6 +360,7 @@ export interface RootRouteChildren {
   ApiAdminCheckRoute: typeof ApiAdminCheckRoute
   ApiAdminDataRoute: typeof ApiAdminDataRoute
   ApiAdminUploadRoute: typeof ApiAdminUploadRoute
+  ApiAdminWriteRoute: typeof ApiAdminWriteRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -450,6 +463,13 @@ declare module '@tanstack/react-router' {
       path: '/api/sitemap.xml'
       fullPath: '/api/sitemap.xml'
       preLoaderRoute: typeof ApiSitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin-write': {
+      id: '/api/admin-write'
+      path: '/api/admin-write'
+      fullPath: '/api/admin-write'
+      preLoaderRoute: typeof ApiAdminWriteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin-upload': {
@@ -587,6 +607,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminCheckRoute: ApiAdminCheckRoute,
   ApiAdminDataRoute: ApiAdminDataRoute,
   ApiAdminUploadRoute: ApiAdminUploadRoute,
+  ApiAdminWriteRoute: ApiAdminWriteRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
