@@ -63,8 +63,10 @@ function PortfolioPage() {
       });
     loadProjects();
     const unsubscribe = subscribeToTable("portfolio", loadProjects, "public-portfolio-changes");
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
       unsubscribe();
+    };
   }, []);
 
   const filtered = useMemo(() => {
