@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ArrowLeft, Calendar, Clock, Twitter, Linkedin as LinkedinSvg, Facebook, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Link as LinkIcon } from "lucide-react";
+import { TwitterIcon, LinkedInIcon, FacebookIcon } from "@/components/icons/Brands";
 
 type Post = {
   id: string;

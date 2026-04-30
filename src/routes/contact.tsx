@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mail, MessageCircle, MapPin, Clock, CheckCircle2, Twitter, Instagram, Linkedin as LinkedinSvg } from "lucide-react";
+import { Mail, MessageCircle, MapPin, Clock, CheckCircle2 } from "lucide-react";
+import { TwitterIcon, LinkedInIcon, InstagramIcon } from "@/components/icons/Brands";
 
 const schema = z.object({
   full_name: z.string().trim().min(1, "Name is required").max(100),
