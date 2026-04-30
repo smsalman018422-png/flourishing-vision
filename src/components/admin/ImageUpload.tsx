@@ -24,6 +24,21 @@ export function ImageUpload({
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
+  const uploadViaAdmin = async (file: File) => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) throw new Error("Your session expired. Please sign in again.");
+
+    const form = new FormData();
+    form.append("file", file);
+    form.append("bucket", bucket);
+    form.append("folder", folder);
+    const res = await fetch("/api/admin-upload", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
+    const body = (await res.json().catch(() => null)) as { url?: string; error?: string } | null;
+    if (!res.ok || body?.error || !body?.url) throw new Error(body?.error ?? "Upload failed");
+    return body.url;
+  };
+
   const upload = async (file: File) => {
     if (!file.type.startsWith("image/")) {
       toast.error("Only image files are supported");
@@ -34,23 +49,15 @@ export function ImageUpload({
       return;
     }
     setUploading(true);
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `${folder ? folder + "/" : ""}${Date.now()}-${Math.random()
-      .toString(36)
-      .slice(2, 8)}.${ext}`;
-    const { error } = await supabase.storage.from(bucket).upload(path, file, {
-      cacheControl: "31536000",
-      upsert: false,
-    });
-    if (error) {
-      toast.error(error.message);
+    try {
+      const publicUrl = await uploadViaAdmin(file);
+      onChange(publicUrl);
       setUploading(false);
-      return;
+      toast.success(`${label} uploaded`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload failed");
+      setUploading(false);
     }
-    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-    onChange(data.publicUrl);
-    setUploading(false);
-    toast.success(`${label} uploaded`);
   };
 
   return (
@@ -111,6 +118,21 @@ export function MultiImageUpload({ values, onChange, bucket, folder = "" }: Mult
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
+  const uploadViaAdmin = async (file: File) => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData.session?.access_token;
+    if (!token) throw new Error("Your session expired. Please sign in again.");
+
+    const form = new FormData();
+    form.append("file", file);
+    form.append("bucket", bucket);
+    form.append("folder", folder);
+    const res = await fetch("/api/admin-upload", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
+    const body = (await res.json().catch(() => null)) as { url?: string; error?: string } | null;
+    if (!res.ok || body?.error || !body?.url) throw new Error(body?.error ?? "Upload failed");
+    return body.url;
+  };
+
   const upload = async (files: FileList) => {
     setUploading(true);
     const next: string[] = [];
@@ -120,15 +142,12 @@ export function MultiImageUpload({ values, onChange, bucket, folder = "" }: Mult
         toast.error(`${file.name} is over 8 MB`);
         continue;
       }
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${folder ? folder + "/" : ""}${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error } = await supabase.storage.from(bucket).upload(path, file, { cacheControl: "31536000" });
-      if (error) {
-        toast.error(error.message);
+      try {
+        next.push(await uploadViaAdmin(file));
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : `Couldn't upload ${file.name}`);
         continue;
       }
-      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
-      next.push(data.publicUrl);
     }
     onChange([...values, ...next]);
     setUploading(false);
