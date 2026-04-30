@@ -8,7 +8,6 @@ import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { RichTextEditor } from "@/components/admin/RichTextEditor";
 import { EmptyState, ErrorState, LoadingState } from "@/components/admin/States";
 import { adminData, adminWrite } from "@/lib/admin-data";
-import { subscribeToTable } from "@/lib/realtime";
 import { Edit2, Eye, Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -104,7 +103,6 @@ function BlogAdmin() {
   };
   useEffect(() => {
     load();
-    return subscribeToTable("blog_posts", load, "admin-blog-posts-changes");
   }, []);
 
   const persist = async (asPublished?: boolean) => {
