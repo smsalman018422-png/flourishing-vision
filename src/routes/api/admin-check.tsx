@@ -37,7 +37,7 @@ export const Route = createFileRoute("/api/admin-check")({
         }
 
         try {
-          const roleRows = await withDirectDb((sql) =>
+          const roleRows = await withDirectDb<unknown[]>((sql) =>
             sql`select role from public.user_roles where user_id = ${userData.user.id} and role = 'admin'::public.app_role limit 1`,
           );
           if (!roleRows.length) return json({ ok: false, error: "You are not authorized as admin" }, 403);
