@@ -90,7 +90,7 @@ export function Navbar() {
             </button>
 
             <a
-              href="/#contact"
+              href="/contact"
               className="hidden sm:inline-flex items-center h-9 px-4 rounded-xl text-sm font-medium bg-gradient-primary text-primary-foreground shadow-glow hover:shadow-elegant hover:-translate-y-0.5 active:translate-y-0 transition-all"
             >
               Start growing
@@ -126,7 +126,7 @@ export function Navbar() {
                   </a>
                 ))}
                 <a
-                  href="/#contact"
+                  href="/contact"
                   onClick={() => setOpen(false)}
                   className="mt-2 text-center px-3 py-2.5 rounded-lg text-sm font-medium bg-gradient-primary text-primary-foreground"
                 >
