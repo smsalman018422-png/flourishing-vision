@@ -52,9 +52,9 @@ function ContactPage() {
   });
 
   useEffect(() => {
-    supabase.from("services").select("id, title").eq("is_visible", true).order("order_index").then(({ data }) => {
-      setServices(data ?? []);
-    });
+    getServiceTitles()
+      .then((data) => setServices(data ?? []))
+      .catch(() => setServices([]));
   }, []);
 
   const onSubmit = async (values: FormData) => {
