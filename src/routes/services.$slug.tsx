@@ -111,15 +111,11 @@ function ServiceDetail() {
   useEffect(() => {
     if (!data.service_type) return;
     let alive = true;
-    (async () => {
-      const { data: rows } = await supabase
-        .from("portfolio")
-        .select("id, client_name, project_title, category, cover_image_url, roi_pct")
-        .eq("service_type", data.service_type as string)
-        .order("sort_order", { ascending: true })
-        .limit(3);
-      if (alive) setRelated((rows ?? []) as PortfolioRow[]);
-    })();
+    getRelatedPortfolio({ data: { serviceType: data.service_type as string } })
+      .then((rows) => {
+        if (alive) setRelated((rows ?? []) as PortfolioRow[]);
+      })
+      .catch(() => {});
     return () => {
       alive = false;
     };
