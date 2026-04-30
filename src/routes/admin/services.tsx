@@ -79,7 +79,20 @@ function ServicesAdmin() {
       .from("services")
       .select("*")
       .order("order_index", { ascending: true });
-    if (error) toast.error(error.message);
+    if (error) {
+      // Transient schema-cache hiccups return PGRST002. Retry quietly once.
+      const isTransient = (error as { code?: string }).code === "PGRST002";
+      if (isTransient) {
+        await new Promise((r) => setTimeout(r, 1500));
+        const retry = await supabase.from("services").select("*").order("order_index", { ascending: true });
+        if (!retry.error) {
+          setRows(((retry.data ?? []) as Service[]).map((s) => ({ ...s, features: s.features ?? [] })));
+          setLoading(false);
+          return;
+        }
+      }
+      toast.error(error.message);
+    }
     setRows(((data ?? []) as Service[]).map((s) => ({ ...s, features: s.features ?? [] })));
     setLoading(false);
   };
