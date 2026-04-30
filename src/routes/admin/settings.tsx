@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Button, Card, Field, PageTitle, TextArea, TextInput } from "@/components/admin/ui";
 import { supabase } from "@/integrations/supabase/client";
+import { adminData } from "@/lib/admin-data";
 import { Loader2, Save, Trash2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
@@ -94,24 +95,22 @@ function SettingsSection({
 
   useEffect(() => {
     setLoading(true);
-    supabase
-      .from("site_settings")
-      .select("*")
-      .in(
-        "key",
-        fields.map((f) => f.key),
-      )
-      .then(({ data }) => {
-        const map: Record<string, string> = {};
-        fields.forEach((f) => (map[f.key] = ""));
-        (data ?? []).forEach((r) => {
-          const v = r.value as { v?: string } | null;
-          map[r.key] = v?.v ?? "";
-        });
-        setValues(map);
-        setInitial(map);
-        setLoading(false);
+    adminData<{ key: string; value: { v?: string } | null }>({
+      table: "site_settings",
+      select: "*",
+      filters: [{ op: "in", column: "key", value: fields.map((f) => f.key) }],
+    }).then(({ data, error }) => {
+      const map: Record<string, string> = {};
+      fields.forEach((f) => (map[f.key] = ""));
+      if (error) console.error("Admin data error (site_settings):", error);
+      (data ?? []).forEach((r) => {
+        const v = r.value;
+        map[r.key] = v?.v ?? "";
       });
+      setValues(map);
+      setInitial(map);
+      setLoading(false);
+    });
   }, [fields]);
 
   const dirty = JSON.stringify(values) !== JSON.stringify(initial);
@@ -182,14 +181,15 @@ function AdminsSection() {
 
   const load = () => {
     setLoading(true);
-    supabase
-      .from("user_roles")
-      .select("*")
-      .eq("role", "admin")
-      .then(({ data }) => {
-        setAdmins((data ?? []) as RoleRow[]);
-        setLoading(false);
-      });
+    adminData<RoleRow>({
+      table: "user_roles",
+      select: "*",
+      filters: [{ op: "eq", column: "role", value: "admin" }],
+    }).then(({ data, error }) => {
+      if (error) console.error("Admin data error (user_roles):", error);
+      setAdmins((data ?? []) as RoleRow[]);
+      setLoading(false);
+    });
   };
   useEffect(load, []);
 
