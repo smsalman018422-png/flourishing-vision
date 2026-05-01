@@ -7,6 +7,7 @@ import { z } from "zod";
 import { Button, Field, TextInput } from "@/components/admin/ui";
 
 type Tab = "login" | "signup";
+const sb = supabase as any;
 
 export const Route = createFileRoute("/client/login")({
   validateSearch: (s: Record<string, unknown>): { tab?: Tab } => ({
@@ -39,8 +40,8 @@ function ClientAuthPage() {
       const uid = data.session?.user.id;
       if (!uid || cancelled) return;
       const [{ data: roles }, { data: profile }] = await Promise.all([
-        supabase.from("user_roles").select("role").eq("user_id", uid),
-        supabase.from("client_profiles").select("id").eq("id", uid).maybeSingle(),
+        sb.from("user_roles").select("role").eq("user_id", uid),
+        sb.from("client_profiles").select("id").eq("id", uid).maybeSingle(),
       ]);
       if (cancelled) return;
       const isAdmin = (roles ?? []).some((r) => r.role === "admin");
