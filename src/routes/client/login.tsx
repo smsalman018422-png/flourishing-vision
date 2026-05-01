@@ -45,8 +45,8 @@ function ClientAuthPage() {
       ]);
       if (cancelled) return;
       const isAdmin = (roles ?? []).some((r: { role: string }) => r.role === "admin");
-      if (isAdmin) navigate({ to: "/admin" });
-      else if (profile) navigate({ to: "/client/dashboard" });
+      if (isAdmin) navigate({ to: "/admin", replace: true });
+      else if (profile) navigate({ to: "/client/dashboard", replace: true });
     };
     void route();
     return () => {
