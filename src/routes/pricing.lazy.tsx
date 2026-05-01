@@ -1,9 +1,22 @@
 import { createLazyFileRoute, Link } from "@tanstack/react-router";
 import { PageShell, PageHeader } from "@/components/layout/PageShell";
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, X, ArrowRight, Sparkles } from "lucide-react";
+import {
+  Check,
+  X,
+  ArrowRight,
+  Sparkles,
+  Sprout,
+  Rocket,
+  Shield,
+  Crown,
+  ChevronDown,
+  TrendingUp,
+  Clock,
+  BadgeCheck,
+} from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -11,84 +24,244 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-const PLANS = [
+type Plan = {
+  id: string;
+  name: string;
+  icon: typeof Sprout;
+  monthly: number;
+  yearly: number;
+  tagline: string;
+  bestFor: string;
+  cta: string;
+  popular?: boolean;
+  premium?: boolean;
+  features: string[];
+  bonuses?: { label: string; items: string[] };
+  includesNote?: string;
+};
+
+const PLANS: Plan[] = [
   {
-    name: "Starter",
-    monthly: 499,
-    tagline: "For founders testing the waters",
-    features: ["1 channel managed", "Weekly reporting", "Up to 8 creatives/mo", "Email support"],
+    id: "starter",
+    name: "Starter Growth",
+    icon: Sprout,
+    monthly: 297,
+    yearly: 237,
+    tagline: "Perfect for local businesses and startups wanting a professional presence",
+    bestFor: "Restaurants, Local Shops, Startups, Personal Brands",
     cta: "Get Started",
-    popular: false,
+    features: [
+      "15 Custom-Made Premium Image Posts",
+      "1 Social Media Platform Management",
+      "Professional Branded Post Design",
+      "Caption Writing Included",
+      "Basic Hashtag Research",
+      "Content Calendar Planning",
+      "HD Quality Creative Designs",
+      "Monthly Strategy Discussion",
+      "Basic Audience Engagement",
+      "Page Optimization Suggestions",
+      "Story Post Support (Up to 4 Stories)",
+      "Organic Reach Optimization",
+      "Competitor Monitoring",
+      "Basic Brand Consistency Setup",
+      "Basic CTA Optimization",
+      "Mobile-Friendly Visual Design",
+      "Monthly Performance Report",
+      "3 Business Days Delivery Time",
+      "Email Support",
+    ],
   },
   {
-    name: "Growth",
-    monthly: 999,
-    tagline: "Most popular for scaling brands",
-    features: [
-      "3 channels managed",
-      "Twice-weekly reporting",
-      "Up to 24 creatives/mo",
-      "Slack support",
-      "Quarterly strategy",
-    ],
-    cta: "Get Started",
+    id: "business",
+    name: "Business Growth",
+    icon: Rocket,
+    monthly: 597,
+    yearly: 477,
+    tagline: "For businesses serious about consistent growth and stronger engagement",
+    bestFor: "Ecommerce, Gyms, Fashion Brands, Service Businesses",
+    cta: "Most Popular — Get Started",
     popular: true,
+    features: [
+      "Facebook + Instagram Management",
+      "30 Custom-Made Image Posts",
+      "10 High-Engaging Text Posts",
+      "Professional Copywriting",
+      "High CTR Caption Writing",
+      "Content Strategy Planning",
+      "Viral Style Content Research",
+      "Story Designs Included",
+      "Basic Reel Content Ideas",
+      "Fast Support Response",
+      "Monthly Competitor Analysis",
+      "CTA Optimization",
+      "Engagement Optimization",
+      "Page Branding Improvements",
+      "Organic Growth Strategy",
+      "Scheduled Posting",
+      "Audience Behavior Analysis",
+      "Custom Branded Templates",
+      "Priority Support",
+      "Monthly Growth Report",
+      "Basic Ad Strategy Suggestions",
+      "Basic Funnel Suggestions",
+      "Profile Optimization",
+      "Comment Monitoring",
+    ],
+    bonuses: {
+      label: "Bonus",
+      items: ["Free Audit Every Month", "Trending Content Suggestions"],
+    },
   },
   {
-    name: "Enterprise",
-    monthly: null,
-    tagline: "Custom growth pods",
+    id: "full",
+    name: "Full Management",
+    icon: Shield,
+    monthly: 857,
+    yearly: 685,
+    tagline: "Aggressive growth, premium management, and ad scaling support",
+    bestFor: "Established Brands, Agencies, Online Stores, Coaches",
+    cta: "Get Started",
     features: [
-      "Unlimited channels",
-      "Realtime dashboards",
-      "Unlimited creatives",
-      "Dedicated team",
-      "On-call strategy",
+      "Multiple Platform Management",
+      "30 Custom-Made Image Posts",
+      "30 High-Engaging Text Posts",
+      "One Dedicated Account Manager",
+      "Run Up To 3 Meta Ads Campaigns",
+      "Manage Up To $2500 Ad Spend",
+      "Slack Support",
+      "Priority Fast Response",
+      "Advanced Audience Targeting",
+      "Conversion Focused Strategy",
+      "Advanced Content Planning",
+      "Viral Hook Optimization",
+      "Story + Feed Strategy",
+      "Brand Voice Development",
+      "Weekly Content Planning",
+      "Advanced Competitor Research",
+      "Monthly Creative Refresh",
+      "High-Engagement CTA Strategy",
+      "Community Management",
+      "Organic Growth Optimization",
+      "Retargeting Strategy Suggestions",
+      "Lead Generation Suggestions",
+      "Monthly Analytics Breakdown",
+      "Ad Performance Optimization",
+      "Creative Split Testing Suggestions",
+      "Landing Page Suggestions",
+      "Monthly Strategy Call",
+      "Trend Monitoring",
+      "AI Assisted Content Research",
+      "Premium Design Quality",
     ],
-    cta: "Book a Call",
-    popular: false,
+    bonuses: {
+      label: "Bonus",
+      items: [
+        "Emergency Post Support",
+        "Priority Queue Handling",
+        "Premium Business Consultation",
+      ],
+    },
+  },
+  {
+    id: "fullpage",
+    name: "Full Page Management",
+    icon: Crown,
+    monthly: 1297,
+    yearly: 1037,
+    tagline: "Premium done-for-you solution with a full social media team experience",
+    bestFor: "High-Growth Brands, Ecommerce, Real Estate, Law Firms, Med Spas",
+    cta: "Book a Strategy Call",
+    premium: true,
+    includesNote: "Includes everything in Full Management",
+    features: [
+      "Instagram + Facebook Full Management",
+      "Inbox & Message Replies",
+      "Comment Replies & Moderation",
+      "Customer Interaction Handling",
+      "Up To 5 Meta Ads Campaigns",
+      "Manage Up To $3500 Monthly Ad Spend",
+      "Weekly Performance Reports",
+      "Advanced Retargeting Strategy",
+      "Lead Funnel Optimization",
+      "One Dedicated Manager",
+      "Slack + Priority Support",
+      "Reputation Management",
+      "Advanced Audience Research",
+      "Daily Engagement Monitoring",
+      "Story Management",
+      "Content Publishing & Scheduling",
+      "Advanced Conversion Optimization",
+      "High-Performance Ad Strategy",
+      "Monthly Growth Planning",
+      "Custom Campaign Creation",
+      "Business Growth Consultation",
+      "Organic + Paid Growth Combination",
+      "Advanced Analytics Reporting",
+      "Crisis Response Support",
+      "Competitor Ad Monitoring",
+      "Advanced Brand Positioning",
+      "Conversion Focused Copywriting",
+      "Engagement Team Support",
+      "Trend Based Content Strategy",
+      "CTA Funnel Strategy",
+      "Lead Quality Optimization",
+      "High Priority Support Queue",
+      "Business Scaling Suggestions",
+    ],
+    bonuses: {
+      label: "Premium Bonuses",
+      items: [
+        "Weekly Strategy Meetings",
+        "Dedicated Priority Team",
+        "Emergency Campaign Support",
+        "Monthly Competitor Growth Analysis",
+        "Premium Brand Growth Blueprint",
+      ],
+    },
   },
 ];
 
-const COMPARISON = [
-  { feature: "Channels managed", starter: "1", growth: "3", enterprise: "Unlimited" },
-  { feature: "Creatives per month", starter: "8", growth: "24", enterprise: "Unlimited" },
-  {
-    feature: "Reporting cadence",
-    starter: "Weekly",
-    growth: "Twice weekly",
-    enterprise: "Realtime",
-  },
-  { feature: "Strategy reviews", starter: "—", growth: "Quarterly", enterprise: "Monthly" },
-  { feature: "Dedicated team", starter: false, growth: false, enterprise: true },
-  { feature: "Slack channel", starter: false, growth: true, enterprise: true },
-  { feature: "On-call support", starter: false, growth: false, enterprise: true },
+const COMPARISON: Array<{
+  feature: string;
+  values: [string | boolean, string | boolean, string | boolean, string | boolean];
+}> = [
+  { feature: "Platforms", values: ["1", "2", "Multiple", "IG + FB Full"] },
+  { feature: "Image Posts / month", values: ["15", "30", "30", "30+"] },
+  { feature: "Text Posts / month", values: ["—", "10", "30", "30+"] },
+  { feature: "Meta Ad Campaigns", values: [false, false, "Up to 3", "Up to 5"] },
+  { feature: "Ad Spend Managed", values: ["—", "—", "$2,500", "$3,500"] },
+  { feature: "Dedicated Manager", values: [false, false, true, true] },
+  { feature: "Support", values: ["Email", "Priority", "Slack", "Slack + Priority"] },
+  { feature: "Strategy Calls", values: ["Monthly", "Monthly", "Monthly", "Weekly"] },
+  { feature: "Reports", values: ["Monthly", "Monthly", "Monthly", "Weekly"] },
+  { feature: "Inbox & Comment Replies", values: [false, false, false, true] },
 ];
 
 const FAQS = [
   {
-    q: "Are there long-term contracts?",
-    a: "No. All plans are month-to-month after a 90-day initial engagement.",
+    q: "Can I upgrade my plan anytime?",
+    a: "Absolutely. You can upgrade at any point — we'll prorate the difference and roll your account onto the new plan immediately.",
   },
   {
-    q: "Can I switch plans later?",
-    a: "Anytime. Upgrades are prorated; downgrades take effect on your next cycle.",
+    q: "What platforms do you manage?",
+    a: "We manage Facebook, Instagram, TikTok, LinkedIn, X (Twitter), YouTube and Pinterest. The number of platforms included depends on your plan.",
   },
   {
-    q: "Do you work with agencies?",
-    a: "Yes — we partner with agencies as a white-label growth team.",
+    q: "How long until I see results?",
+    a: "Most clients see meaningful engagement growth within 30–45 days. Paid ads typically show measurable ROI within the first 60 days as we optimise campaigns.",
   },
   {
-    q: "What's included in onboarding?",
-    a: "Audit, strategy session, channel setup, creative kickoff, and a 30-day roadmap.",
+    q: "Can I cancel anytime?",
+    a: "Yes. There are no long-term contracts on any monthly plan. Cancel any time before your next billing cycle.",
   },
   {
-    q: "Do you guarantee results?",
-    a: "We guarantee process, transparency and effort. Outcomes depend on many factors we forecast together.",
+    q: "Do you offer custom packages?",
+    a: "Yes — we build hybrid packages all the time. Talk to our team and we'll tailor a plan to your goals, channels and budget.",
   },
   {
-    q: "Which industries do you serve?",
-    a: "Mostly DTC, SaaS, and services brands doing $500k–$50M in revenue.",
+    q: "What payment methods do you accept?",
+    a: "We accept all major credit cards, debit cards, bank transfers, PayPal and Wise for international clients.",
   },
 ];
 
@@ -101,148 +274,131 @@ function PricingPage() {
 
   return (
     <PageShell>
+      {/* HERO */}
       <PageHeader
-        eyebrow="Pricing"
-        title="Simple, transparent pricing"
-        subtitle="Pick the plan that matches your stage. Upgrade, downgrade or pause anytime."
+        eyebrow={
+          <span className="inline-flex items-center gap-2">
+            <TrendingUp className="h-3.5 w-3.5" /> Social Media Management
+          </span>
+        }
+        title={
+          <>
+            Packages Built to <span className="text-primary">Scale Your Brand</span>
+          </>
+        }
+        subtitle="From startups to enterprise — choose the plan that matches your growth goals."
       />
 
       {/* Billing toggle */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 flex justify-center">
-        <div className="glass rounded-full p-1 flex items-center gap-1 text-sm">
-          <button
-            onClick={() => setYearly(false)}
-            className={`px-4 py-2 rounded-full min-h-[40px] font-medium transition-colors ${!yearly ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
-          >
-            Monthly
-          </button>
-          <button
-            onClick={() => setYearly(true)}
-            className={`px-4 py-2 rounded-full min-h-[40px] font-medium transition-colors flex items-center gap-2 ${yearly ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
-          >
-            Yearly{" "}
-            <span className="text-[10px] uppercase tracking-wider rounded bg-primary/20 text-primary px-1.5 py-0.5">
-              Save 20%
-            </span>
-          </button>
-        </div>
+        <LayoutGroup>
+          <div className="relative inline-flex items-center rounded-full border border-border/60 bg-card/60 backdrop-blur-xl p-1">
+            <button
+              onClick={() => setYearly(false)}
+              className={`relative z-10 px-5 py-2 text-sm font-medium rounded-full min-h-[40px] transition ${
+                !yearly ? "text-primary-foreground" : "text-muted-foreground"
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setYearly(true)}
+              className={`relative z-10 px-5 py-2 text-sm font-medium rounded-full min-h-[40px] transition flex items-center gap-2 ${
+                yearly ? "text-primary-foreground" : "text-muted-foreground"
+              }`}
+            >
+              Yearly
+              <span
+                className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                  yearly
+                    ? "bg-primary-foreground/20 text-primary-foreground"
+                    : "bg-primary/20 text-primary"
+                }`}
+              >
+                SAVE 20%
+              </span>
+            </button>
+            <motion.div
+              layout
+              transition={{ type: "spring", stiffness: 400, damping: 32 }}
+              className="absolute inset-y-1 rounded-full bg-primary"
+              style={{
+                left: yearly ? "50%" : "0.25rem",
+                right: yearly ? "0.25rem" : "50%",
+              }}
+            />
+          </div>
+        </LayoutGroup>
       </div>
 
-      {/* Plans */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {PLANS.slice() // Popular card first on mobile
-            .sort((a, b) => (a.popular === b.popular ? 0 : a.popular ? -1 : 1))
-            .map((p) => {
-              const popular = p.popular;
-              const price =
-                p.monthly == null ? null : yearly ? Math.round(p.monthly * 0.8) : p.monthly;
-              return (
-                <motion.div
-                  key={p.name}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4 }}
-                  className={`relative rounded-3xl p-6 sm:p-8 ${
-                    popular
-                      ? "lg:order-2 bg-gradient-to-b from-primary/10 to-transparent ring-2 ring-primary shadow-glow"
-                      : "lg:order-1 glass"
-                  } ${p.name === "Enterprise" ? "lg:order-3" : ""}`}
-                >
-                  {popular && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground inline-flex items-center gap-1">
-                      <Sparkles className="h-3 w-3" /> Most Popular
-                    </span>
-                  )}
-                  <h3 className="text-xl font-display font-semibold">{p.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{p.tagline}</p>
-                  <div className="mt-6 flex items-baseline gap-2">
-                    {price == null ? (
-                      <span className="text-4xl font-display font-semibold">Custom</span>
-                    ) : (
-                      <>
-                        <span className="text-4xl sm:text-5xl font-display font-semibold">
-                          ${price.toLocaleString()}
-                        </span>
-                        <span className="text-muted-foreground">/mo</span>
-                      </>
-                    )}
-                  </div>
-                  {yearly && price != null && (
-                    <p className="mt-1 text-xs text-primary">Billed annually — save 20%</p>
-                  )}
-                  <ul className="mt-6 space-y-3">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-sm">
-                        <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" /> {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Button
-                    asChild
-                    size="lg"
-                    className="mt-8 w-full"
-                    variant={popular ? "default" : "outline"}
-                  >
-                    <Link to="/contact">
-                      {p.cta} <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </motion.div>
-              );
-            })}
+      {/* PLAN CARDS */}
+      <section className="relative mx-auto max-w-[100rem] px-4 sm:px-6 py-12 lg:py-16">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[1100px] rounded-full bg-primary/10 blur-[160px]" />
+        </div>
+
+        {/* Mobile horizontal scroll, tablet 2-col, desktop 4-col */}
+        <div className="relative grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-5 xl:items-stretch">
+          {PLANS.map((plan, i) => (
+            <PlanCard key={plan.id} plan={plan} yearly={yearly} index={i} />
+          ))}
         </div>
       </section>
 
-      {/* Comparison */}
+      {/* COMPARISON */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16">
-        <h2 className="text-2xl sm:text-3xl font-display font-semibold mb-6">Compare features</h2>
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <p className="text-xs font-medium text-primary uppercase tracking-[0.3em]">Compare</p>
+          <h2 className="mt-3 text-3xl sm:text-4xl font-display font-semibold">
+            Find your perfect fit
+          </h2>
+        </div>
+
         {/* Desktop table */}
-        <div className="hidden md:block overflow-hidden rounded-2xl glass">
+        <div className="hidden md:block overflow-hidden rounded-3xl border border-border/60 bg-card/60 backdrop-blur-xl">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left">
-                <th className="p-4 font-medium text-muted-foreground">Feature</th>
-                <th className="p-4 font-medium">Starter</th>
-                <th className="p-4 font-medium text-primary">Growth</th>
-                <th className="p-4 font-medium">Enterprise</th>
+              <tr className="text-left bg-card/40">
+                <th className="p-5 font-medium text-muted-foreground">Feature</th>
+                <th className="p-5 font-medium">Starter</th>
+                <th className="p-5 font-medium text-primary">Business</th>
+                <th className="p-5 font-medium">Full Mgmt</th>
+                <th className="p-5 font-medium text-amber-400">Full Page</th>
               </tr>
             </thead>
             <tbody>
               {COMPARISON.map((row) => (
-                <tr key={row.feature} className="border-t border-border">
-                  <td className="p-4 text-muted-foreground">{row.feature}</td>
-                  <td className="p-4">{renderCell(row.starter)}</td>
-                  <td className="p-4">{renderCell(row.growth)}</td>
-                  <td className="p-4">{renderCell(row.enterprise)}</td>
+                <tr key={row.feature} className="border-t border-border/60">
+                  <td className="p-5 text-muted-foreground">{row.feature}</td>
+                  {row.values.map((v, idx) => (
+                    <td key={idx} className="p-5">
+                      {renderCell(v)}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
         {/* Mobile collapsible */}
         <div className="md:hidden">
           <Accordion type="single" collapsible className="space-y-2">
-            {(["Starter", "Growth", "Enterprise"] as const).map((plan) => (
-              <AccordionItem key={plan} value={plan} className="glass rounded-2xl border-0 px-4">
-                <AccordionTrigger className="min-h-[44px]">{plan} features</AccordionTrigger>
+            {PLANS.map((plan, planIdx) => (
+              <AccordionItem
+                key={plan.id}
+                value={plan.id}
+                className="rounded-2xl border border-border/60 bg-card/60 px-4"
+              >
+                <AccordionTrigger className="min-h-[48px]">{plan.name}</AccordionTrigger>
                 <AccordionContent>
-                  <ul className="space-y-3 pb-2">
-                    {COMPARISON.map((row) => {
-                      const v =
-                        plan === "Starter"
-                          ? row.starter
-                          : plan === "Growth"
-                            ? row.growth
-                            : row.enterprise;
-                      return (
-                        <li key={row.feature} className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">{row.feature}</span>
-                          <span>{renderCell(v)}</span>
-                        </li>
-                      );
-                    })}
+                  <ul className="space-y-3 pb-3">
+                    {COMPARISON.map((row) => (
+                      <li key={row.feature} className="flex justify-between text-sm gap-4">
+                        <span className="text-muted-foreground">{row.feature}</span>
+                        <span className="text-right">{renderCell(row.values[planIdx])}</span>
+                      </li>
+                    ))}
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -251,29 +407,102 @@ function PricingPage() {
         </div>
       </section>
 
+      {/* CUSTOM */}
+      <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-16">
+        <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-card/60 backdrop-blur-xl p-10 sm:p-14 text-center">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
+          <div className="relative">
+            <Sparkles className="h-8 w-8 text-primary mx-auto" />
+            <h2 className="mt-4 text-3xl sm:text-4xl font-display font-semibold">
+              Need a Custom Package?
+            </h2>
+            <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
+              We create tailored solutions for unique business needs. Mix and match services across
+              all our offerings.
+            </p>
+            <Button asChild size="lg" className="mt-6">
+              <Link to="/contact">
+                Talk to Our Team <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ */}
-      <section className="mx-auto max-w-3xl px-4 sm:px-6 py-16">
-        <h2 className="text-2xl sm:text-3xl font-display font-semibold mb-6">Frequently asked</h2>
+      <section className="mx-auto max-w-3xl px-4 sm:px-6 py-12">
+        <div className="text-center mb-10">
+          <p className="text-xs font-medium text-primary uppercase tracking-[0.3em]">FAQ</p>
+          <h2 className="mt-3 text-3xl sm:text-4xl font-display font-semibold">
+            Frequently asked
+          </h2>
+        </div>
         <Accordion type="single" collapsible className="space-y-2">
           {FAQS.map((f, i) => (
-            <AccordionItem key={i} value={`faq-${i}`} className="glass rounded-2xl border-0 px-4">
-              <AccordionTrigger className="text-left min-h-[44px]">{f.q}</AccordionTrigger>
+            <AccordionItem
+              key={i}
+              value={`faq-${i}`}
+              className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl px-5"
+            >
+              <AccordionTrigger className="text-left min-h-[48px] font-medium">
+                {f.q}
+              </AccordionTrigger>
               <AccordionContent className="text-muted-foreground">{f.a}</AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
       </section>
 
-      {/* CTA */}
+      {/* GUARANTEE */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {[
+            {
+              icon: Shield,
+              title: "30-Day Satisfaction Guarantee",
+              text: "Not happy? We'll make it right or refund your first month.",
+            },
+            {
+              icon: Clock,
+              title: "14-Day Free Trial on Starter",
+              text: "Try the Starter Growth plan risk-free for two weeks.",
+            },
+            {
+              icon: BadgeCheck,
+              title: "Cancel Anytime",
+              text: "No long-term contracts. Pause or cancel any time.",
+            },
+          ].map((g, i) => (
+            <motion.div
+              key={g.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.4, delay: i * 0.08 }}
+              className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-xl p-6 text-center"
+            >
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/15 text-primary">
+                <g.icon className="h-6 w-6" />
+              </div>
+              <h3 className="mt-4 font-semibold text-lg">{g.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{g.text}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Final CTA */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-20">
-        <div className="rounded-3xl glass p-10 sm:p-16 text-center">
-          <h2 className="text-2xl sm:text-3xl font-display font-semibold">Still have questions?</h2>
+        <div className="rounded-3xl border border-border/60 bg-gradient-to-br from-primary/15 via-card/60 to-accent/10 backdrop-blur-xl p-10 sm:p-16 text-center">
+          <h2 className="text-3xl sm:text-4xl font-display font-semibold">
+            Ready to scale your brand?
+          </h2>
           <p className="mt-3 text-muted-foreground">
-            Talk to us — we'll match you with the right plan.
+            Join hundreds of brands already growing with us.
           </p>
           <Button asChild size="lg" className="mt-6">
             <Link to="/contact">
-              Talk to us <ArrowRight className="ml-2 h-4 w-4" />
+              Get Started Today <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </div>
@@ -282,8 +511,232 @@ function PricingPage() {
   );
 }
 
+function PlanCard({ plan, yearly, index }: { plan: Plan; yearly: boolean; index: number }) {
+  const [expanded, setExpanded] = useState(false);
+  const Icon = plan.icon;
+  const price = yearly ? plan.yearly : plan.monthly;
+  const originalPrice = yearly ? plan.monthly : null;
+  const visibleCount = 7;
+  const visibleFeatures = expanded ? plan.features : plan.features.slice(0, visibleCount);
+  const hasMore = plan.features.length > visibleCount;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.5, delay: index * 0.08 }}
+      className={`group relative ${plan.popular ? "xl:-my-3 xl:scale-[1.03]" : ""}`}
+    >
+      {/* Glow border for popular */}
+      {plan.popular && (
+        <>
+          <div className="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-primary via-accent to-primary opacity-90 blur-md" />
+          <div className="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-primary to-accent" />
+        </>
+      )}
+      {/* Gold border for premium */}
+      {plan.premium && (
+        <div className="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-amber-400/60 via-amber-200/30 to-amber-500/60" />
+      )}
+
+      <div
+        className={`relative h-full flex flex-col rounded-3xl border bg-card/70 backdrop-blur-xl p-6 lg:p-7 transition-all duration-300 group-hover:-translate-y-1 ${
+          plan.popular
+            ? "border-transparent shadow-[0_0_60px_-15px_oklch(0.62_0.16_150/0.7)]"
+            : plan.premium
+              ? "border-transparent shadow-[0_0_50px_-20px_rgba(251,191,36,0.5)]"
+              : "border-border/60 group-hover:border-primary/40 group-hover:shadow-[0_0_40px_-15px_oklch(0.62_0.16_150/0.5)]"
+        }`}
+      >
+        {/* Popular badge */}
+        {plan.popular && (
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold tracking-wider uppercase shadow-lg shadow-primary/40">
+              <Sparkles className="h-3 w-3" /> Most Popular
+            </span>
+          </div>
+        )}
+        {plan.premium && (
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 text-black text-[10px] font-bold tracking-wider uppercase shadow-lg shadow-amber-500/30">
+              <Crown className="h-3 w-3" /> Premium
+            </span>
+          </div>
+        )}
+
+        {/* Icon */}
+        <div
+          className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl ${
+            plan.premium
+              ? "bg-amber-400/15 text-amber-400"
+              : plan.popular
+                ? "bg-primary/20 text-primary"
+                : "bg-primary/10 text-primary"
+          }`}
+        >
+          <Icon className="h-6 w-6" />
+        </div>
+
+        {/* Name + tagline */}
+        <h3 className="mt-4 text-2xl font-bold font-display">{plan.name}</h3>
+        <p className="mt-1.5 text-sm text-muted-foreground min-h-[40px]">{plan.tagline}</p>
+
+        {/* Price */}
+        <div className="mt-5 min-h-[68px]">
+          <AnimatePresence mode="popLayout">
+            <motion.div
+              key={yearly ? "y" : "m"}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25 }}
+              className="flex items-end gap-2 flex-wrap"
+            >
+              <span
+                className={`text-4xl lg:text-5xl font-black tracking-tight ${
+                  plan.premium ? "text-amber-400" : ""
+                }`}
+              >
+                ${price.toLocaleString()}
+              </span>
+              <span className="text-muted-foreground mb-1.5 text-sm">/month</span>
+              {originalPrice && (
+                <span className="text-muted-foreground line-through text-sm mb-1.5">
+                  ${originalPrice}
+                </span>
+              )}
+            </motion.div>
+          </AnimatePresence>
+          {yearly && (
+            <p className="text-xs text-primary font-medium mt-1">
+              Billed yearly · ${(plan.yearly * 12).toLocaleString()}/yr · Save 20%
+            </p>
+          )}
+        </div>
+
+        {/* CTA */}
+        <Link
+          to="/contact"
+          className={`mt-5 inline-flex items-center justify-center w-full rounded-full px-6 py-3 font-semibold transition text-sm min-h-[44px] ${
+            plan.popular
+              ? "bg-primary text-primary-foreground hover:opacity-90 shadow-lg shadow-primary/30"
+              : plan.premium
+                ? "border-2 border-amber-400/60 text-amber-400 hover:bg-amber-400/10"
+                : "border border-primary/40 text-primary hover:bg-primary/10"
+          }`}
+        >
+          {plan.cta}
+        </Link>
+
+        {/* Includes note */}
+        {plan.includesNote && (
+          <div className="mt-4 rounded-xl border border-amber-400/30 bg-amber-400/5 px-3 py-2 text-xs font-medium text-amber-400 flex items-center gap-2">
+            <BadgeCheck className="h-3.5 w-3.5" /> {plan.includesNote}
+          </div>
+        )}
+
+        {/* Features */}
+        <ul className="mt-6 space-y-2.5 flex-1">
+          {visibleFeatures.map((f) => (
+            <li key={f} className="flex items-start gap-2.5 text-sm">
+              <span
+                className={`mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
+                  plan.popular ? "bg-primary" : "bg-primary/15"
+                }`}
+              >
+                <Check
+                  className={`h-2.5 w-2.5 ${
+                    plan.popular ? "text-primary-foreground" : "text-primary"
+                  }`}
+                  strokeWidth={4}
+                />
+              </span>
+              <span className="text-foreground/90">{f}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* Expand */}
+        {hasMore && (
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            className="mt-4 inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-primary hover:underline"
+          >
+            {expanded ? "Show less" : `View all ${plan.features.length} features`}
+            <ChevronDown
+              className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`}
+            />
+          </button>
+        )}
+
+        {/* Bonuses */}
+        {plan.bonuses && (
+          <AnimatePresence initial={false}>
+            {expanded && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden"
+              >
+                <div
+                  className={`mt-4 rounded-2xl p-4 border ${
+                    plan.premium
+                      ? "border-amber-400/30 bg-gradient-to-br from-amber-400/10 to-transparent"
+                      : "border-primary/30 bg-gradient-to-br from-primary/10 to-transparent"
+                  }`}
+                >
+                  <p
+                    className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                      plan.premium ? "text-amber-400" : "text-primary"
+                    }`}
+                  >
+                    <Sparkles className="h-3 w-3" /> {plan.bonuses.label}
+                  </p>
+                  <ul className="mt-3 space-y-2">
+                    {plan.bonuses.items.map((b) => (
+                      <li key={b} className="flex items-start gap-2 text-sm">
+                        <Sparkles
+                          className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${
+                            plan.premium ? "text-amber-400" : "text-primary"
+                          }`}
+                        />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
+
+        {/* Best for */}
+        <div className="mt-6 pt-5 border-t border-border/60">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+            Best For
+          </p>
+          <p className="mt-1.5 text-xs text-foreground/80">{plan.bestFor}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 function renderCell(v: string | boolean) {
-  if (v === true) return <Check className="h-4 w-4 text-primary" />;
-  if (v === false) return <X className="h-4 w-4 text-muted-foreground/50" />;
-  return <span>{v}</span>;
+  if (v === true)
+    return (
+      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-primary">
+        <Check className="h-3.5 w-3.5" strokeWidth={3} />
+      </span>
+    );
+  if (v === false)
+    return (
+      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-muted text-muted-foreground/50">
+        <X className="h-3.5 w-3.5" />
+      </span>
+    );
+  return <span className="font-medium">{v}</span>;
 }
