@@ -11,7 +11,7 @@ export type PublicPackage = {
   tagline: string | null;
   description: string | null;
   icon_name: string;
-  features: unknown;
+  features: any;
   best_for: string | null;
   is_popular: boolean;
   is_premium: boolean;
