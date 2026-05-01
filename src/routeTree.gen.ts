@@ -27,6 +27,7 @@ import { Route as ClientDashboardRouteImport } from './routes/client/dashboard'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ApiSitemapDotxmlRouteImport } from './routes/api/sitemap[.]xml'
 import { Route as ApiPurchaseCheckoutRouteImport } from './routes/api/purchase-checkout'
+import { Route as ApiPurchaseApproveRouteImport } from './routes/api/purchase-approve'
 import { Route as ApiAdminWriteRouteImport } from './routes/api/admin-write'
 import { Route as ApiAdminUploadRouteImport } from './routes/api/admin-upload'
 import { Route as ApiAdminDataRouteImport } from './routes/api/admin-data'
@@ -142,6 +143,11 @@ const ApiSitemapDotxmlRoute = ApiSitemapDotxmlRouteImport.update({
 const ApiPurchaseCheckoutRoute = ApiPurchaseCheckoutRouteImport.update({
   id: '/api/purchase-checkout',
   path: '/api/purchase-checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPurchaseApproveRoute = ApiPurchaseApproveRouteImport.update({
+  id: '/api/purchase-approve',
+  path: '/api/purchase-approve',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAdminWriteRoute = ApiAdminWriteRouteImport.update({
@@ -304,6 +310,7 @@ export interface FileRoutesByFullPath {
   '/api/admin-data': typeof ApiAdminDataRoute
   '/api/admin-upload': typeof ApiAdminUploadRoute
   '/api/admin-write': typeof ApiAdminWriteRoute
+  '/api/purchase-approve': typeof ApiPurchaseApproveRoute
   '/api/purchase-checkout': typeof ApiPurchaseCheckoutRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -350,6 +357,7 @@ export interface FileRoutesByTo {
   '/api/admin-data': typeof ApiAdminDataRoute
   '/api/admin-upload': typeof ApiAdminUploadRoute
   '/api/admin-write': typeof ApiAdminWriteRoute
+  '/api/purchase-approve': typeof ApiPurchaseApproveRoute
   '/api/purchase-checkout': typeof ApiPurchaseCheckoutRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -396,6 +404,7 @@ export interface FileRoutesById {
   '/api/admin-data': typeof ApiAdminDataRoute
   '/api/admin-upload': typeof ApiAdminUploadRoute
   '/api/admin-write': typeof ApiAdminWriteRoute
+  '/api/purchase-approve': typeof ApiPurchaseApproveRoute
   '/api/purchase-checkout': typeof ApiPurchaseCheckoutRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -444,6 +453,7 @@ export interface FileRouteTypes {
     | '/api/admin-data'
     | '/api/admin-upload'
     | '/api/admin-write'
+    | '/api/purchase-approve'
     | '/api/purchase-checkout'
     | '/api/sitemap.xml'
     | '/blog/$slug'
@@ -490,6 +500,7 @@ export interface FileRouteTypes {
     | '/api/admin-data'
     | '/api/admin-upload'
     | '/api/admin-write'
+    | '/api/purchase-approve'
     | '/api/purchase-checkout'
     | '/api/sitemap.xml'
     | '/blog/$slug'
@@ -535,6 +546,7 @@ export interface FileRouteTypes {
     | '/api/admin-data'
     | '/api/admin-upload'
     | '/api/admin-write'
+    | '/api/purchase-approve'
     | '/api/purchase-checkout'
     | '/api/sitemap.xml'
     | '/blog/$slug'
@@ -582,6 +594,7 @@ export interface RootRouteChildren {
   ApiAdminDataRoute: typeof ApiAdminDataRoute
   ApiAdminUploadRoute: typeof ApiAdminUploadRoute
   ApiAdminWriteRoute: typeof ApiAdminWriteRoute
+  ApiPurchaseApproveRoute: typeof ApiPurchaseApproveRoute
   ApiPurchaseCheckoutRoute: typeof ApiPurchaseCheckoutRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   ClientDashboardRoute: typeof ClientDashboardRouteWithChildren
@@ -717,6 +730,13 @@ declare module '@tanstack/react-router' {
       path: '/api/purchase-checkout'
       fullPath: '/api/purchase-checkout'
       preLoaderRoute: typeof ApiPurchaseCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/purchase-approve': {
+      id: '/api/purchase-approve'
+      path: '/api/purchase-approve'
+      fullPath: '/api/purchase-approve'
+      preLoaderRoute: typeof ApiPurchaseApproveRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin-write': {
@@ -991,6 +1011,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminDataRoute: ApiAdminDataRoute,
   ApiAdminUploadRoute: ApiAdminUploadRoute,
   ApiAdminWriteRoute: ApiAdminWriteRoute,
+  ApiPurchaseApproveRoute: ApiPurchaseApproveRoute,
   ApiPurchaseCheckoutRoute: ApiPurchaseCheckoutRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   ClientDashboardRoute: ClientDashboardRouteWithChildren,
