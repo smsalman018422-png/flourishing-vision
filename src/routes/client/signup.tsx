@@ -137,9 +137,12 @@ function ClientSignupPage() {
                 We've sent a confirmation link to <span className="text-foreground font-medium">{email}</span>.
                 After confirming, you can sign in to your dashboard.
               </p>
-              <Button asChild className="w-full">
-                <Link to="/client/login">Go to Login →</Link>
-              </Button>
+              <Link
+                to="/client/login"
+                className="inline-flex items-center justify-center w-full h-10 px-4 rounded-lg bg-gradient-primary text-primary-foreground font-medium shadow-glow"
+              >
+                Go to Login →
+              </Link>
             </div>
           ) : (
             <>

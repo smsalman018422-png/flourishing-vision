@@ -21,6 +21,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as PortfolioSlugRouteImport } from './routes/portfolio.$slug'
+import { Route as ClientSignupRouteImport } from './routes/client/signup'
 import { Route as ClientLoginRouteImport } from './routes/client/login'
 import { Route as ClientDashboardRouteImport } from './routes/client/dashboard'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
@@ -110,6 +111,11 @@ const PortfolioSlugRoute = PortfolioSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => PortfolioRoute,
+} as any)
+const ClientSignupRoute = ClientSignupRouteImport.update({
+  id: '/client/signup',
+  path: '/client/signup',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ClientLoginRoute = ClientLoginRouteImport.update({
   id: '/client/login',
@@ -289,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/client/dashboard': typeof ClientDashboardRouteWithChildren
   '/client/login': typeof ClientLoginRoute
+  '/client/signup': typeof ClientSignupRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -331,6 +338,7 @@ export interface FileRoutesByTo {
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/client/login': typeof ClientLoginRoute
+  '/client/signup': typeof ClientSignupRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin': typeof AdminIndexRoute
@@ -375,6 +383,7 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/client/dashboard': typeof ClientDashboardRouteWithChildren
   '/client/login': typeof ClientLoginRoute
+  '/client/signup': typeof ClientSignupRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -420,6 +429,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/client/dashboard'
     | '/client/login'
+    | '/client/signup'
     | '/portfolio/$slug'
     | '/services/$slug'
     | '/admin/'
@@ -462,6 +472,7 @@ export interface FileRouteTypes {
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/client/login'
+    | '/client/signup'
     | '/portfolio/$slug'
     | '/services/$slug'
     | '/admin'
@@ -505,6 +516,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/client/dashboard'
     | '/client/login'
+    | '/client/signup'
     | '/portfolio/$slug'
     | '/services/$slug'
     | '/admin/'
@@ -548,6 +560,7 @@ export interface RootRouteChildren {
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   ClientDashboardRoute: typeof ClientDashboardRouteWithChildren
   ClientLoginRoute: typeof ClientLoginRoute
+  ClientSignupRoute: typeof ClientSignupRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ApiPublicBlogRoute: typeof ApiPublicBlogRoute
 }
@@ -637,6 +650,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/portfolio/$slug'
       preLoaderRoute: typeof PortfolioSlugRouteImport
       parentRoute: typeof PortfolioRoute
+    }
+    '/client/signup': {
+      id: '/client/signup'
+      path: '/client/signup'
+      fullPath: '/client/signup'
+      preLoaderRoute: typeof ClientSignupRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/client/login': {
       id: '/client/login'
@@ -933,6 +953,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   ClientDashboardRoute: ClientDashboardRouteWithChildren,
   ClientLoginRoute: ClientLoginRoute,
+  ClientSignupRoute: ClientSignupRoute,
   AdminIndexRoute: AdminIndexRoute,
   ApiPublicBlogRoute: ApiPublicBlogRoute,
 }
