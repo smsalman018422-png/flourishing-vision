@@ -65,7 +65,7 @@ type TypeKey = (typeof TYPE_FILTERS)[number]["key"];
 export const Route = createFileRoute("/client/dashboard/reports")({
   head: () => ({
     meta: [
-      { title: "My Reports — LetUsGrow" },
+      { title: "My Reports — Let Us Grow" },
       { name: "robots", content: "noindex" },
     ],
   }),

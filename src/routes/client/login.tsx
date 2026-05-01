@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Leaf, Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
+import logoSrc from "@/assets/logo.png";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button, Field, TextInput } from "@/components/admin/ui";
@@ -15,7 +16,7 @@ export const Route = createFileRoute("/client/login")({
   }),
   head: () => ({
     meta: [
-      { title: "Client Portal — LetUsGrow" },
+      { title: "Client Portal — Let Us Grow" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -63,12 +64,7 @@ function ClientAuthPage() {
     <div className="min-h-screen grid place-items-center bg-background px-4 py-12">
       <div className="w-full max-w-lg">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <span className="grid place-items-center h-9 w-9 rounded-xl bg-gradient-primary shadow-glow">
-            <Leaf className="h-4 w-4 text-primary-foreground" strokeWidth={2.5} />
-          </span>
-          <span className="font-display font-semibold text-lg">
-            LetUs<span className="text-gradient">Grow</span>
-          </span>
+          <img src={logoSrc} alt="Let Us Grow" className="h-10 w-auto object-contain" />
         </Link>
 
         <div className="glass rounded-2xl p-6 sm:p-8">
@@ -310,7 +306,7 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
         );
         await sb.from("client_notifications").insert({
           client_id: uid,
-          title: "Welcome to LetUsGrow! 🎉",
+          title: "Welcome to Let Us Grow! 🎉",
           body: "Your account is ready. Explore your dashboard to get started.",
           type: "success",
         });
@@ -383,7 +379,7 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
         Create your account
       </h1>
       <p className="mt-2 text-sm text-muted-foreground text-center">
-        Join hundreds of brands scaling globally with LetUsGrow.
+        Join hundreds of brands scaling globally with Let Us Grow.
       </p>
 
       <form onSubmit={handleSignup} className="mt-6 space-y-4">

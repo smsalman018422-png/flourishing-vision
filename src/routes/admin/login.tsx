@@ -2,12 +2,13 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "@/components/AuthProvider";
 import { Button, Field, TextInput } from "@/components/admin/ui";
-import { Leaf, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import logoSrc from "@/assets/logo.png";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/login")({
   head: () => ({
-    meta: [{ title: "Admin login — LetUsGrow" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Admin login — Let Us Grow" }, { name: "robots", content: "noindex" }],
   }),
   component: () => (
     <AuthProvider>
@@ -79,12 +80,7 @@ function AdminLogin() {
     <div className="min-h-screen grid place-items-center bg-background px-4 py-12">
       <div className="w-full max-w-md">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <span className="grid place-items-center h-9 w-9 rounded-xl bg-gradient-primary shadow-glow">
-            <Leaf className="h-4 w-4 text-primary-foreground" strokeWidth={2.5} />
-          </span>
-          <span className="font-display font-semibold text-lg">
-            LetUs<span className="text-gradient">Grow</span>
-          </span>
+          <img src={logoSrc} alt="Let Us Grow" className="h-10 w-auto object-contain" />
         </Link>
         <div className="glass rounded-2xl p-6 sm:p-8">
           <h1 className="text-xl sm:text-2xl font-display font-semibold text-center">

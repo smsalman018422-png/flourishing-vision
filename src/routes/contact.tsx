@@ -33,9 +33,9 @@ const BUDGETS = ["< $2k/mo", "$2k–$5k/mo", "$5k–$10k/mo", "$10k–$25k/mo", 
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact — LetUsGrow" },
+      { title: "Contact — Let Us Grow" },
       { name: "description", content: "Let's grow together. Get in touch or book a call directly." },
-      { property: "og:title", content: "Contact — LetUsGrow" },
+      { property: "og:title", content: "Contact — Let Us Grow" },
       { property: "og:description", content: "Let's grow together. Get in touch or book a call directly." },
     ],
   }),

@@ -28,10 +28,10 @@ type Post = {
 export const Route = createFileRoute("/blog/$slug")({
   head: ({ params }) => ({
     meta: [
-      { title: `${params.slug} — LetUsGrow Blog` },
+      { title: `${params.slug} — Let Us Grow Blog` },
       {
         name: "description",
-        content: "Insights on growth, marketing and brand from the LetUsGrow team.",
+        content: "Insights on growth, marketing and brand from the Let Us Grow team.",
       },
       { property: "og:title", content: params.slug },
       { property: "og:description", content: "Insights on growth, marketing and brand." },

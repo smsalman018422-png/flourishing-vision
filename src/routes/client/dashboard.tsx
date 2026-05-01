@@ -15,10 +15,10 @@ import {
   Loader2,
   Menu,
   X,
-  Leaf,
   ChevronDown,
   User as UserIcon,
 } from "lucide-react";
+import logoSrc from "@/assets/logo.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +33,7 @@ const sb = supabase as any;
 
 export const Route = createFileRoute("/client/dashboard")({
   head: () => ({
-    meta: [{ title: "Client Dashboard — LetUsGrow" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Client Dashboard — Let Us Grow" }, { name: "robots", content: "noindex" }],
   }),
   component: ClientDashboardLayout,
 });
@@ -428,11 +428,8 @@ function SidebarBody({
   return (
     <>
       <div className="p-5 flex items-center gap-2">
-        <span className="grid place-items-center h-9 w-9 rounded-xl bg-gradient-primary shadow-glow">
-          <Leaf className="h-4 w-4 text-primary-foreground" />
-        </span>
-        <Link to="/" className="font-display font-semibold">
-          Letus<span className="text-gradient">Grow</span>
+        <Link to="/" className="flex items-center gap-2">
+          <img src={logoSrc} alt="Let Us Grow" className="h-8 w-auto object-contain" />
         </Link>
         <span className="ml-1 text-[10px] uppercase tracking-wider rounded bg-primary/15 text-primary px-1.5 py-0.5">
           client
