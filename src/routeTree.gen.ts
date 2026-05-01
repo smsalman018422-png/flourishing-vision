@@ -34,6 +34,7 @@ import { Route as AdminTeamRouteImport } from './routes/admin/team'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminPortfolioRouteImport } from './routes/admin/portfolio'
+import { Route as AdminMembershipsRouteImport } from './routes/admin/memberships'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
 import { Route as AdminClientsRouteImport } from './routes/admin/clients'
@@ -173,6 +174,11 @@ const AdminPortfolioRoute = AdminPortfolioRouteImport.update({
   path: '/admin/portfolio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminMembershipsRoute = AdminMembershipsRouteImport.update({
+  id: '/admin/memberships',
+  path: '/admin/memberships',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
@@ -255,6 +261,7 @@ export interface FileRoutesByFullPath {
   '/admin/clients': typeof AdminClientsRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -295,6 +302,7 @@ export interface FileRoutesByTo {
   '/admin/clients': typeof AdminClientsRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -335,6 +343,7 @@ export interface FileRoutesById {
   '/admin/clients': typeof AdminClientsRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -377,6 +386,7 @@ export interface FileRouteTypes {
     | '/admin/clients'
     | '/admin/contacts'
     | '/admin/login'
+    | '/admin/memberships'
     | '/admin/portfolio'
     | '/admin/services'
     | '/admin/settings'
@@ -417,6 +427,7 @@ export interface FileRouteTypes {
     | '/admin/clients'
     | '/admin/contacts'
     | '/admin/login'
+    | '/admin/memberships'
     | '/admin/portfolio'
     | '/admin/services'
     | '/admin/settings'
@@ -456,6 +467,7 @@ export interface FileRouteTypes {
     | '/admin/clients'
     | '/admin/contacts'
     | '/admin/login'
+    | '/admin/memberships'
     | '/admin/portfolio'
     | '/admin/services'
     | '/admin/settings'
@@ -497,6 +509,7 @@ export interface RootRouteChildren {
   AdminClientsRoute: typeof AdminClientsRoute
   AdminContactsRoute: typeof AdminContactsRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminMembershipsRoute: typeof AdminMembershipsRoute
   AdminPortfolioRoute: typeof AdminPortfolioRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -690,6 +703,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPortfolioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/memberships': {
+      id: '/admin/memberships'
+      path: '/admin/memberships'
+      fullPath: '/admin/memberships'
+      preLoaderRoute: typeof AdminMembershipsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
@@ -858,6 +878,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminClientsRoute: AdminClientsRoute,
   AdminContactsRoute: AdminContactsRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminMembershipsRoute: AdminMembershipsRoute,
   AdminPortfolioRoute: AdminPortfolioRoute,
   AdminServicesRoute: AdminServicesRoute,
   AdminSettingsRoute: AdminSettingsRoute,
