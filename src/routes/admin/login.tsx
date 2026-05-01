@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "@/components/AuthProvider";
 import { Button, Field, TextInput } from "@/components/admin/ui";
 import { Loader2 } from "lucide-react";
-import logoSrc from "@/assets/logo.png";
+
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/login")({
