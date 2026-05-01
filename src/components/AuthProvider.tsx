@@ -46,30 +46,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     let seq = 0;
 
-    const applySession = async (nextSession: Session | null) => {
+    let lastUserId: string | null = null;
+
+    const applySession = async (nextSession: Session | null, showLoading: boolean) => {
       const ticket = ++seq;
       setSession(nextSession);
       if (!nextSession?.user) {
+        lastUserId = null;
         setIsAdmin(false);
         setLoading(false);
         return;
       }
 
+      // Same user as before — keep existing admin state, no loading flash
+      if (lastUserId === nextSession.user.id) {
+        setLoading(false);
+        return;
+      }
+
+      if (showLoading) setLoading(true);
       const admin = await checkAdmin(nextSession.access_token);
       if (!cancelled && ticket === seq) {
+        lastUserId = nextSession.user.id;
         setIsAdmin(admin);
         setLoading(false);
       }
     };
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setLoading(true);
-      void applySession(s);
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      // Ignore token refresh / re-emitted SIGNED_IN events for the same user
+      // (these fire when the tab regains focus and would otherwise blank the UI)
+      const sameUser = s?.user?.id && s.user.id === lastUserId;
+      if (event === "TOKEN_REFRESHED" || (event === "SIGNED_IN" && sameUser)) {
+        setSession(s);
+        return;
+      }
+      void applySession(s, !sameUser);
     });
 
     supabase.auth.getSession().then(({ data }) => {
       if (cancelled) return;
-      void applySession(data.session);
+      void applySession(data.session, true);
     }).catch(() => {
       if (cancelled) return;
       setSession(null);
