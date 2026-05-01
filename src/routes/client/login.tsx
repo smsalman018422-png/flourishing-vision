@@ -285,15 +285,18 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
     setBusy(true);
     const createProfile = async (uid: string) => {
       try {
-        await sb.from("client_profiles").insert({
-          id: uid,
-          email: parsed.data.email,
-          full_name: parsed.data.fullName || "",
-          phone: phone?.trim() || null,
-          whatsapp_number: phone?.trim() || null,
-          company_name: companyName?.trim() || null,
-          is_active: true,
-        });
+        await sb.from("client_profiles").upsert(
+          {
+            id: uid,
+            email: parsed.data.email,
+            full_name: parsed.data.fullName || "",
+            phone: phone?.trim() || null,
+            whatsapp_number: phone?.trim() || null,
+            company_name: companyName?.trim() || null,
+            is_active: true,
+          },
+          { onConflict: "id" },
+        );
         await sb.from("client_notifications").insert({
           client_id: uid,
           title: "Welcome to LetUsGrow! 🎉",
@@ -306,15 +309,10 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
     };
 
     try {
-      console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
-      console.log("Signing up:", parsed.data.email);
-
-      // SIMPLE signUp — no emailRedirectTo (which can force email confirmation)
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: parsed.data.email,
         password: parsed.data.password,
       });
-      console.log("Signup response:", { authData, authError });
 
       if (authError) {
         const msg = authError.message || "";
@@ -326,10 +324,12 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
         } else {
           setError(msg);
         }
+        setBusy(false);
         return;
       }
       if (!authData?.user) {
         setError("Failed to create account. Please try again.");
+        setBusy(false);
         return;
       }
 
@@ -337,12 +337,12 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
       if (authData.session) {
         await createProfile(authData.user.id);
         toast.success("Account created! Welcome!");
-        navigate({ to: "/client/dashboard" });
+        await navigate({ to: "/client/dashboard", replace: true });
         return;
       }
 
       // No session — try immediate sign-in (auto-confirm should be on)
-      await new Promise((r) => setTimeout(r, 1500));
+      await new Promise((r) => setTimeout(r, 800));
       const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
         email: parsed.data.email,
         password: parsed.data.password,
@@ -351,17 +351,17 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
       if (!loginError && loginData?.session) {
         await createProfile(loginData.user.id);
         toast.success("Account created! Welcome!");
-        navigate({ to: "/client/dashboard" });
+        await navigate({ to: "/client/dashboard", replace: true });
         return;
       }
 
       console.error("Auto-login after signup failed:", loginError);
       toast.success("Account created! Please check your email to confirm, then sign in.");
       onSwitchToLogin();
+      setBusy(false);
     } catch (err) {
       console.error("Signup catch:", err);
       setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
       setBusy(false);
     }
   };
