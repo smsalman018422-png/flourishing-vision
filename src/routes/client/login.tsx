@@ -45,8 +45,8 @@ function ClientAuthPage() {
       ]);
       if (cancelled) return;
       const isAdmin = (roles ?? []).some((r: { role: string }) => r.role === "admin");
-      if (isAdmin) navigate({ to: "/admin" });
-      else if (profile) navigate({ to: "/client/dashboard" });
+      if (isAdmin) navigate({ to: "/admin", replace: true });
+      else if (profile) navigate({ to: "/client/dashboard", replace: true });
     };
     void route();
     return () => {
@@ -122,6 +122,7 @@ function LoginForm() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (busy) return;
     setBusy(true);
     setError("");
     try {
@@ -130,7 +131,7 @@ function LoginForm() {
         email: normalizedEmail,
         password,
       });
-      if (authError || !authData.user) {
+      if (authError || !authData.user || !authData.session) {
         const message = authError?.message ?? "Sign-in failed";
         if (message.includes("Invalid login credentials")) {
           setError("Wrong email or password. Please check and try again.");
@@ -139,43 +140,26 @@ function LoginForm() {
         } else {
           setError(message);
         }
-        return;
-      }
-      const { data: profile } = await sb
-        .from("client_profiles")
-        .select("id,full_name,is_active")
-        .eq("id", authData.user.id)
-        .maybeSingle();
-      if (!profile) {
-        // Auto-create a profile for users created elsewhere (e.g. admins)
-        await sb.from("client_profiles").insert({
-          id: authData.user.id,
-          email: authData.user.email?.trim().toLowerCase() || normalizedEmail,
-          full_name:
-            (authData.user.user_metadata?.full_name as string | undefined) ||
-            authData.user.email?.split("@")[0] ||
-            "Client",
-          phone: (authData.user.user_metadata?.phone as string | undefined) || null,
-          whatsapp_number: (authData.user.user_metadata?.phone as string | undefined) || null,
-          company_name: (authData.user.user_metadata?.company_name as string | undefined) || null,
-          is_active: true,
-        });
-      } else if (profile.is_active === false) {
-        setError("Your account has been deactivated. Contact support.");
-        await supabase.auth.signOut();
+        setBusy(false);
         return;
       }
 
-      const { data: roles } = await sb.from("user_roles").select("role").eq("user_id", authData.user.id);
-      if ((roles ?? []).some((r: { role: string }) => r.role === "admin")) {
-        navigate({ to: "/admin" });
-        return;
-      }
+      // Fast path: check admin in parallel, but don't block navigation on profile fetch.
+      // Dashboard layout will create/verify the profile if missing.
+      const { data: roles } = await sb
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", authData.user.id);
+      const isAdmin = (roles ?? []).some((r: { role: string }) => r.role === "admin");
+
       toast.success("Welcome back");
-      navigate({ to: "/client/dashboard" });
+      if (isAdmin) {
+        await navigate({ to: "/admin", replace: true });
+      } else {
+        await navigate({ to: "/client/dashboard", replace: true });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
       setBusy(false);
     }
   };
@@ -301,15 +285,18 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
     setBusy(true);
     const createProfile = async (uid: string) => {
       try {
-        await sb.from("client_profiles").insert({
-          id: uid,
-          email: parsed.data.email,
-          full_name: parsed.data.fullName || "",
-          phone: phone?.trim() || null,
-          whatsapp_number: phone?.trim() || null,
-          company_name: companyName?.trim() || null,
-          is_active: true,
-        });
+        await sb.from("client_profiles").upsert(
+          {
+            id: uid,
+            email: parsed.data.email,
+            full_name: parsed.data.fullName || "",
+            phone: phone?.trim() || null,
+            whatsapp_number: phone?.trim() || null,
+            company_name: companyName?.trim() || null,
+            is_active: true,
+          },
+          { onConflict: "id" },
+        );
         await sb.from("client_notifications").insert({
           client_id: uid,
           title: "Welcome to LetUsGrow! 🎉",
@@ -322,15 +309,10 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
     };
 
     try {
-      console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
-      console.log("Signing up:", parsed.data.email);
-
-      // SIMPLE signUp — no emailRedirectTo (which can force email confirmation)
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: parsed.data.email,
         password: parsed.data.password,
       });
-      console.log("Signup response:", { authData, authError });
 
       if (authError) {
         const msg = authError.message || "";
@@ -342,10 +324,12 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
         } else {
           setError(msg);
         }
+        setBusy(false);
         return;
       }
       if (!authData?.user) {
         setError("Failed to create account. Please try again.");
+        setBusy(false);
         return;
       }
 
@@ -353,12 +337,12 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
       if (authData.session) {
         await createProfile(authData.user.id);
         toast.success("Account created! Welcome!");
-        navigate({ to: "/client/dashboard" });
+        await navigate({ to: "/client/dashboard", replace: true });
         return;
       }
 
       // No session — try immediate sign-in (auto-confirm should be on)
-      await new Promise((r) => setTimeout(r, 1500));
+      await new Promise((r) => setTimeout(r, 800));
       const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
         email: parsed.data.email,
         password: parsed.data.password,
@@ -367,17 +351,17 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
       if (!loginError && loginData?.session) {
         await createProfile(loginData.user.id);
         toast.success("Account created! Welcome!");
-        navigate({ to: "/client/dashboard" });
+        await navigate({ to: "/client/dashboard", replace: true });
         return;
       }
 
       console.error("Auto-login after signup failed:", loginError);
       toast.success("Account created! Please check your email to confirm, then sign in.");
       onSwitchToLogin();
+      setBusy(false);
     } catch (err) {
       console.error("Signup catch:", err);
       setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
       setBusy(false);
     }
   };
