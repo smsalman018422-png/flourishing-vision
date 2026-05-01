@@ -849,3 +849,278 @@ function normalizeFeatures(raw: unknown): FeatureItem[] {
     })
     .filter((f): f is FeatureItem => !!f && !!f.text);
 }
+
+type ClientOption = { id: string; full_name: string; email: string | null };
+
+function AssignPackageDialog({
+  open,
+  onOpenChange,
+  packages,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  packages: Pkg[];
+}) {
+  const [clients, setClients] = useState<ClientOption[]>([]);
+  const [clientSearch, setClientSearch] = useState("");
+  const [clientId, setClientId] = useState("");
+  const [mode, setMode] = useState<"existing" | "custom">("existing");
+  const [packageId, setPackageId] = useState("");
+  const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
+  const [amount, setAmount] = useState<string>("");
+  const [durationDays, setDurationDays] = useState<string>("");
+  const [customName, setCustomName] = useState("");
+  const [customFeaturesText, setCustomFeaturesText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = (supabaseLazy() as any);
+    sb.then((client: { from: (t: string) => { select: (s: string) => { order: (c: string, o: { ascending: boolean }) => Promise<{ data: ClientOption[] | null }> } } }) =>
+      client
+        .from("client_profiles")
+        .select("id,full_name,email")
+        .order("created_at", { ascending: false }),
+    ).then((res: { data: ClientOption[] | null }) => setClients(res.data ?? []));
+  }, [open]);
+
+  useEffect(() => {
+    if (mode !== "existing" || !packageId) return;
+    const pkg = packages.find((p) => p.id === packageId);
+    if (!pkg) return;
+    setAmount(String(billing === "yearly" ? pkg.price_yearly : pkg.price_monthly));
+  }, [packageId, billing, mode, packages]);
+
+  const reset = () => {
+    setClientId("");
+    setClientSearch("");
+    setMode("existing");
+    setPackageId("");
+    setBilling("monthly");
+    setAmount("");
+    setDurationDays("");
+    setCustomName("");
+    setCustomFeaturesText("");
+  };
+
+  const filteredClients = useMemo(() => {
+    const q = clientSearch.trim().toLowerCase();
+    if (!q) return clients.slice(0, 50);
+    return clients
+      .filter(
+        (c) =>
+          c.full_name?.toLowerCase().includes(q) ||
+          c.email?.toLowerCase().includes(q),
+      )
+      .slice(0, 50);
+  }, [clients, clientSearch]);
+
+  const submit = async () => {
+    if (!clientId) return toast.error("Please select a client");
+    if (mode === "existing" && !packageId) return toast.error("Please select a package");
+    if (mode === "custom" && !customName.trim())
+      return toast.error("Please enter a custom package name");
+
+    setSubmitting(true);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const sb = (await import("@/integrations/supabase/client")).supabase as any;
+      const { data: sess } = await sb.auth.getSession();
+      const token = sess.session?.access_token;
+      if (!token) {
+        toast.error("Your admin session expired. Please sign in again.");
+        return;
+      }
+
+      const customFeatures = customFeaturesText
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean);
+
+      const body: Record<string, unknown> = {
+        client_id: clientId,
+        billing_cycle: billing,
+        amount: amount ? Number(amount) : undefined,
+        duration_days: durationDays ? Number(durationDays) : undefined,
+      };
+      if (mode === "existing") {
+        body.package_id = packageId;
+      } else {
+        body.custom_name = customName.trim();
+        body.custom_features = customFeatures;
+      }
+
+      const res = await fetch("/api/assign-package", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+      const j = await res.json().catch(() => null);
+      if (!res.ok || !j?.ok) {
+        toast.error(j?.error || "Failed to assign package");
+        return;
+      }
+      toast.success("Package assigned to client");
+      reset();
+      onOpenChange(false);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Gift className="h-5 w-5 text-primary" /> Assign Package to Client
+          </DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4">
+          <div>
+            <Label>Client *</Label>
+            <Input
+              placeholder="Search by name or email…"
+              value={clientSearch}
+              onChange={(e) => setClientSearch(e.target.value)}
+              className="mb-2"
+            />
+            <div className="max-h-40 overflow-y-auto rounded-md border border-border/60">
+              {filteredClients.length === 0 ? (
+                <p className="text-xs text-muted-foreground p-3">No clients found.</p>
+              ) : (
+                filteredClients.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setClientId(c.id)}
+                    className={`w-full text-left px-3 py-2 text-sm border-b border-border/40 last:border-0 hover:bg-muted ${
+                      clientId === c.id ? "bg-primary/10" : ""
+                    }`}
+                  >
+                    <div className="font-medium">{c.full_name}</div>
+                    <div className="text-xs text-muted-foreground">{c.email ?? "—"}</div>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div>
+            <Label>Package Type *</Label>
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              <ShadButton
+                type="button"
+                variant={mode === "existing" ? "default" : "outline"}
+                onClick={() => setMode("existing")}
+                className="gap-2"
+              >
+                <UserPlus className="h-4 w-4" /> Existing Package
+              </ShadButton>
+              <ShadButton
+                type="button"
+                variant={mode === "custom" ? "default" : "outline"}
+                onClick={() => setMode("custom")}
+                className="gap-2"
+              >
+                <Gift className="h-4 w-4" /> Custom Package
+              </ShadButton>
+            </div>
+          </div>
+
+          {mode === "existing" ? (
+            <div>
+              <Label>Package *</Label>
+              <ShadSelect value={packageId} onValueChange={setPackageId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a package" />
+                </SelectTrigger>
+                <SelectContent>
+                  {packages.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name} — ${p.price_monthly}/mo · ${p.price_yearly}/yr
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </ShadSelect>
+            </div>
+          ) : (
+            <>
+              <div>
+                <Label>Custom Package Name *</Label>
+                <Input
+                  value={customName}
+                  onChange={(e) => setCustomName(e.target.value)}
+                  placeholder="e.g. VIP Quarterly Plan"
+                />
+              </div>
+              <div>
+                <Label>Features (one per line)</Label>
+                <textarea
+                  value={customFeaturesText}
+                  onChange={(e) => setCustomFeaturesText(e.target.value)}
+                  rows={5}
+                  className="w-full rounded-md border border-border/60 bg-background p-2 text-sm"
+                  placeholder={"Dedicated account manager\nWeekly strategy calls\nPriority support"}
+                />
+              </div>
+            </>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>Billing Cycle</Label>
+              <ShadSelect value={billing} onValueChange={(v) => setBilling(v as "monthly" | "yearly")}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="yearly">Yearly</SelectItem>
+                </SelectContent>
+              </ShadSelect>
+            </div>
+            <div>
+              <Label>Amount ($)</Label>
+              <Input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="0"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label>Duration (days, optional)</Label>
+            <Input
+              type="number"
+              value={durationDays}
+              onChange={(e) => setDurationDays(e.target.value)}
+              placeholder={billing === "yearly" ? "365 (default)" : "30 (default)"}
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Leave empty to use {billing === "yearly" ? "1 year" : "1 month"} from today.
+            </p>
+          </div>
+        </div>
+        <DialogFooter>
+          <ShadButton variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            Cancel
+          </ShadButton>
+          <ShadButton onClick={submit} disabled={submitting}>
+            {submitting ? "Assigning…" : "Assign Package"}
+          </ShadButton>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+async function supabaseLazy() {
+  return (await import("@/integrations/supabase/client")).supabase;
+}
