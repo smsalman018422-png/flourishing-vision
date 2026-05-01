@@ -102,11 +102,11 @@ export function Footer() {
         <div className="grid gap-12 text-center md:text-left md:grid-cols-2 lg:grid-cols-4">
           {/* COL 1 — Brand */}
           <div>
-            <div className="flex items-center justify-center md:justify-start gap-2">
+            <div className="flex items-center justify-center md:justify-start">
               <img
                 src={logoSrc}
                 alt="Let Us Grow"
-                className="h-10 w-auto object-contain"
+                className="h-12 sm:h-14 w-auto object-contain max-w-[220px]"
                 loading="lazy"
                 decoding="async"
               />
