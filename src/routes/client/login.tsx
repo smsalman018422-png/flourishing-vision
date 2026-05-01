@@ -125,32 +125,56 @@ function LoginForm() {
     setBusy(true);
     setError("");
     try {
+      const normalizedEmail = email.trim().toLowerCase();
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email,
+        email: normalizedEmail,
         password,
       });
       if (authError || !authData.user) {
-        setError(authError?.message ?? "Sign-in failed");
+        const message = authError?.message ?? "Sign-in failed";
+        if (message.includes("Invalid login credentials")) {
+          setError("Wrong email or password. Please check and try again.");
+        } else if (message.includes("Email not confirmed")) {
+          setError("Please verify your email first. Check your inbox.");
+        } else {
+          setError(message);
+        }
         return;
       }
-      const { data: profile } = await supabase
+      const { data: profile } = await sb
         .from("client_profiles")
-        .select("id")
+        .select("id,full_name,is_active")
         .eq("id", authData.user.id)
         .maybeSingle();
       if (!profile) {
         // Auto-create a profile for users created elsewhere (e.g. admins)
-        await supabase.from("client_profiles").insert({
+        await sb.from("client_profiles").insert({
           id: authData.user.id,
-          email: authData.user.email,
+          email: authData.user.email?.trim().toLowerCase() || normalizedEmail,
           full_name:
             (authData.user.user_metadata?.full_name as string | undefined) ||
             authData.user.email?.split("@")[0] ||
             "Client",
+          phone: (authData.user.user_metadata?.phone as string | undefined) || null,
+          whatsapp_number: (authData.user.user_metadata?.phone as string | undefined) || null,
+          company_name: (authData.user.user_metadata?.company_name as string | undefined) || null,
+          is_active: true,
         });
+      } else if (profile.is_active === false) {
+        setError("Your account has been deactivated. Contact support.");
+        await supabase.auth.signOut();
+        return;
+      }
+
+      const { data: roles } = await sb.from("user_roles").select("role").eq("user_id", authData.user.id);
+      if ((roles ?? []).some((r: { role: string }) => r.role === "admin")) {
+        navigate({ to: "/admin" });
+        return;
       }
       toast.success("Welcome back");
       navigate({ to: "/client/dashboard" });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setBusy(false);
     }
