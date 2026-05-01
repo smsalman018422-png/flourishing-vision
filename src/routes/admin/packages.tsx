@@ -381,6 +381,8 @@ function PackagesAdmin() {
         }
       />
 
+      <PendingApprovals />
+
       {/* Category filter tabs */}
       <div className="flex flex-wrap gap-2 mb-5">
         <CategoryChip label="All" active={filterCategory === "all"} onClick={() => setFilterCategory("all")} />
