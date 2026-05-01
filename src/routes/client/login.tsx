@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Leaf, Loader2, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { Leaf, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button, Field, TextInput } from "@/components/admin/ui";
@@ -277,7 +277,7 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -381,25 +381,6 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
       setBusy(false);
     }
   };
-
-  if (success) {
-    return (
-      <div className="text-center space-y-4 py-4">
-        <div className="mx-auto h-14 w-14 rounded-full bg-emerald-500/15 grid place-items-center">
-          <CheckCircle2 className="h-7 w-7 text-emerald-500" />
-        </div>
-        <h1 className="text-xl sm:text-2xl font-display font-semibold">Check your email!</h1>
-        <p className="text-sm text-muted-foreground">
-          We've sent a confirmation link to{" "}
-          <span className="text-foreground font-medium">{email}</span>. After confirming, you can
-          sign in to your dashboard.
-        </p>
-        <Button type="button" onClick={onSwitchToLogin} className="w-full">
-          Go to Sign In →
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <>
