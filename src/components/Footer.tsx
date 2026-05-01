@@ -106,7 +106,7 @@ export function Footer() {
               <img
                 src={logoSrc}
                 alt="Let Us Grow"
-                className="h-12 sm:h-14 w-auto object-contain max-w-[220px]"
+                className="h-9 w-auto object-contain"
                 loading="lazy"
                 decoding="async"
               />

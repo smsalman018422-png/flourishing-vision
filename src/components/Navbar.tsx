@@ -111,7 +111,7 @@ export function Navbar() {
               <img
                 src={logoSrc}
                 alt="Let Us Grow"
-                className="h-10 sm:h-12 lg:h-14 w-auto object-contain max-w-[160px] sm:max-w-[200px] lg:max-w-[240px]"
+                className="h-9 w-auto object-contain"
                 loading="eager"
                 decoding="async"
               />

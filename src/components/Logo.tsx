@@ -11,7 +11,7 @@ type LogoProps = {
 
 export function Logo({
   className = "flex items-center gap-2",
-  imgClassName = "h-10 sm:h-12 w-auto object-contain max-w-[200px]",
+  imgClassName = "h-9 w-auto object-contain",
   to,
   showText = false,
   textClassName = "font-display font-semibold text-lg",
