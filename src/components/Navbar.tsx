@@ -107,11 +107,11 @@ export function Navbar() {
               scrolled ? "glass-strong shadow-elegant" : "bg-transparent"
             }`}
           >
-            <Link to="/" className="flex items-center gap-2 group min-h-11" aria-label="Let Us Grow — Home">
+            <Link to="/" className="flex items-center group min-h-11" aria-label="Let Us Grow — Home">
               <img
                 src={logoSrc}
                 alt="Let Us Grow"
-                className="h-9 w-auto object-contain"
+                className="h-10 sm:h-12 lg:h-14 w-auto object-contain max-w-[160px] sm:max-w-[200px] lg:max-w-[240px]"
                 loading="eager"
                 decoding="async"
               />

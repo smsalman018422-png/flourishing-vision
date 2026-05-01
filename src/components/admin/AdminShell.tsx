@@ -218,8 +218,8 @@ function SidebarBody({
   return (
     <>
       <div className="p-5 flex items-center gap-2">
-        <Link to="/" className="flex items-center gap-2">
-          <img src={logoSrc} alt="Let Us Grow" className="h-8 w-auto object-contain" />
+        <Link to="/" className="flex items-center">
+          <img src={logoSrc} alt="Let Us Grow" className="h-11 w-auto object-contain max-w-[180px]" />
         </Link>
         <span className="ml-1 text-[10px] uppercase tracking-wider rounded bg-primary/15 text-primary px-1.5 py-0.5">
           admin
