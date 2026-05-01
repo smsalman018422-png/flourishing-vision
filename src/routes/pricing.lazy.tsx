@@ -132,11 +132,19 @@ function normalizeFeatures(raw: unknown): FeatureItem[] {
     .filter((f): f is FeatureItem => !!f && !!f.text);
 }
 
+const ALL_CATEGORIES = ["social_media", "web_development", "creator"];
+
+const COMING_SOON_LABELS: Record<string, string> = {
+  web_development: "Web Development packages launching soon — talk to our team for a custom build.",
+  creator: "Creator packages launching soon — get on the early-access list.",
+};
+
 function PricingPage() {
   const [yearly, setYearly] = useState(false);
   const [packages, setPackages] = useState<Pkg[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>("social_media");
+  const [purchaseTarget, setPurchaseTarget] = useState<Pkg | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -172,27 +180,19 @@ function PricingPage() {
     };
   }, []);
 
-  // Available categories from data
+  // Always show all known categories so "coming soon" tabs are visible.
   const categories = useMemo(() => {
     const set = new Set(packages.map((p) => p.category));
-    const known = ["social_media", "web_development", "creator", "custom"].filter((c) =>
-      set.has(c),
-    );
-    const extra = Array.from(set).filter((c) => !known.includes(c));
-    return [...known, ...extra];
+    const extras = Array.from(set).filter((c) => !ALL_CATEGORIES.includes(c));
+    return [...ALL_CATEGORIES, ...extras];
   }, [packages]);
-
-  // Default category to first available
-  useEffect(() => {
-    if (categories.length && !categories.includes(activeCategory)) {
-      setActiveCategory(categories[0]);
-    }
-  }, [categories, activeCategory]);
 
   const visiblePackages = useMemo(
     () => packages.filter((p) => p.category === activeCategory),
     [packages, activeCategory],
   );
+
+  const isComingSoon = visiblePackages.length === 0 && !loading && activeCategory in COMING_SOON_LABELS;
 
   return (
     <PageShell>
