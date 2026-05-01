@@ -34,9 +34,9 @@ const PAGE_SIZE = 9;
 export const Route = createFileRoute("/portfolio")({
   head: () => ({
     meta: [
-      { title: "Our Work — LetUsGrow" },
+      { title: "Our Work — Let Us Grow" },
       { name: "description", content: "Selected case studies for ambitious brands. Real campaigns, real revenue." },
-      { property: "og:title", content: "Our Work — LetUsGrow" },
+      { property: "og:title", content: "Our Work — Let Us Grow" },
       { property: "og:description", content: "Real campaigns, real revenue. See the work." },
     ],
   }),

@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 
 const PHONE = "15550000000"; // replace with real number
-const MESSAGE = "Hi LetuGrow team, I'd like to discuss...";
+const MESSAGE = "Hi Let Us Grow team, I'd like to discuss...";
 
 export function WhatsAppButton() {
   const href = `https://wa.me/${PHONE}?text=${encodeURIComponent(MESSAGE)}`;

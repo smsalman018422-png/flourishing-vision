@@ -31,8 +31,8 @@ type Project = {
 export const Route = createFileRoute("/portfolio/$slug")({
   head: ({ params }) => ({
     meta: [
-      { title: `Case study — ${params.slug} — LetUsGrow` },
-      { name: "description", content: "A LetUsGrow case study: challenge, solution, and measurable results." },
+      { title: `Case study — ${params.slug} — Let Us Grow` },
+      { name: "description", content: "A Let Us Grow case study: challenge, solution, and measurable results." },
       { property: "og:title", content: `Case study — ${params.slug}` },
       { property: "og:description", content: "Challenge, solution, results." },
     ],

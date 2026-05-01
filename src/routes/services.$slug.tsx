@@ -64,12 +64,12 @@ export const Route = createFileRoute("/services/$slug")({
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.title} — LetUsGrow` },
+          { title: `${loaderData.title} — Let Us Grow` },
           { name: "description", content: loaderData.short_description },
-          { property: "og:title", content: `${loaderData.title} — LetUsGrow` },
+          { property: "og:title", content: `${loaderData.title} — Let Us Grow` },
           { property: "og:description", content: loaderData.short_description },
         ]
-      : [{ title: "Service — LetUsGrow" }],
+      : [{ title: "Service — Let Us Grow" }],
   }),
   component: ServiceDetail,
   errorComponent: ({ error }) => (

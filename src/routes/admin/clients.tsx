@@ -329,7 +329,7 @@ function AddClientDialog({
 
       await sb.from("client_notifications").insert({
         client_id: userId,
-        title: "Welcome to LetUsGrow!",
+        title: "Welcome to Let Us Grow!",
         body: `Your ${plan?.name ?? "plan"} is now active. Explore your dashboard to get started.`,
         type: "success",
         link: "/client/dashboard",

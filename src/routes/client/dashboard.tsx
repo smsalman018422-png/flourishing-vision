@@ -33,7 +33,7 @@ const sb = supabase as any;
 
 export const Route = createFileRoute("/client/dashboard")({
   head: () => ({
-    meta: [{ title: "Client Dashboard — LetUsGrow" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "Client Dashboard — Let Us Grow" }, { name: "robots", content: "noindex" }],
   }),
   component: ClientDashboardLayout,
 });

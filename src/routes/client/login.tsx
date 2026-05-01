@@ -15,7 +15,7 @@ export const Route = createFileRoute("/client/login")({
   }),
   head: () => ({
     meta: [
-      { title: "Client Portal — LetUsGrow" },
+      { title: "Client Portal — Let Us Grow" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -310,7 +310,7 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
         );
         await sb.from("client_notifications").insert({
           client_id: uid,
-          title: "Welcome to LetUsGrow! 🎉",
+          title: "Welcome to Let Us Grow! 🎉",
           body: "Your account is ready. Explore your dashboard to get started.",
           type: "success",
         });
@@ -383,7 +383,7 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
         Create your account
       </h1>
       <p className="mt-2 text-sm text-muted-foreground text-center">
-        Join hundreds of brands scaling globally with LetUsGrow.
+        Join hundreds of brands scaling globally with Let Us Grow.
       </p>
 
       <form onSubmit={handleSignup} className="mt-6 space-y-4">

@@ -54,7 +54,7 @@ type StatusKey = (typeof STATUS_FILTERS)[number]["key"];
 
 export const Route = createFileRoute("/client/dashboard/projects")({
   head: () => ({
-    meta: [{ title: "My Projects — LetUsGrow" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "My Projects — Let Us Grow" }, { name: "robots", content: "noindex" }],
   }),
   component: ProjectsPage,
 });
