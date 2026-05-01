@@ -51,6 +51,7 @@ import { Route as ClientDashboardTicketsRouteImport } from './routes/client/dash
 import { Route as ClientDashboardSettingsRouteImport } from './routes/client/dashboard.settings'
 import { Route as ClientDashboardReportsRouteImport } from './routes/client/dashboard.reports'
 import { Route as ClientDashboardProjectsRouteImport } from './routes/client/dashboard.projects'
+import { Route as ClientDashboardPackagesRouteImport } from './routes/client/dashboard.packages'
 import { Route as ClientDashboardNotificationsRouteImport } from './routes/client/dashboard.notifications'
 import { Route as ClientDashboardMembershipRouteImport } from './routes/client/dashboard.membership'
 import { Route as ClientDashboardBillingRouteImport } from './routes/client/dashboard.billing'
@@ -266,6 +267,11 @@ const ClientDashboardProjectsRoute = ClientDashboardProjectsRouteImport.update({
   path: '/projects',
   getParentRoute: () => ClientDashboardRoute,
 } as any)
+const ClientDashboardPackagesRoute = ClientDashboardPackagesRouteImport.update({
+  id: '/packages',
+  path: '/packages',
+  getParentRoute: () => ClientDashboardRoute,
+} as any)
 const ClientDashboardNotificationsRoute =
   ClientDashboardNotificationsRouteImport.update({
     id: '/notifications',
@@ -331,6 +337,7 @@ export interface FileRoutesByFullPath {
   '/client/dashboard/billing': typeof ClientDashboardBillingRoute
   '/client/dashboard/membership': typeof ClientDashboardMembershipRoute
   '/client/dashboard/notifications': typeof ClientDashboardNotificationsRoute
+  '/client/dashboard/packages': typeof ClientDashboardPackagesRoute
   '/client/dashboard/projects': typeof ClientDashboardProjectsRoute
   '/client/dashboard/reports': typeof ClientDashboardReportsRoute
   '/client/dashboard/settings': typeof ClientDashboardSettingsRoute
@@ -378,6 +385,7 @@ export interface FileRoutesByTo {
   '/client/dashboard/billing': typeof ClientDashboardBillingRoute
   '/client/dashboard/membership': typeof ClientDashboardMembershipRoute
   '/client/dashboard/notifications': typeof ClientDashboardNotificationsRoute
+  '/client/dashboard/packages': typeof ClientDashboardPackagesRoute
   '/client/dashboard/projects': typeof ClientDashboardProjectsRoute
   '/client/dashboard/reports': typeof ClientDashboardReportsRoute
   '/client/dashboard/settings': typeof ClientDashboardSettingsRoute
@@ -427,6 +435,7 @@ export interface FileRoutesById {
   '/client/dashboard/billing': typeof ClientDashboardBillingRoute
   '/client/dashboard/membership': typeof ClientDashboardMembershipRoute
   '/client/dashboard/notifications': typeof ClientDashboardNotificationsRoute
+  '/client/dashboard/packages': typeof ClientDashboardPackagesRoute
   '/client/dashboard/projects': typeof ClientDashboardProjectsRoute
   '/client/dashboard/reports': typeof ClientDashboardReportsRoute
   '/client/dashboard/settings': typeof ClientDashboardSettingsRoute
@@ -477,6 +486,7 @@ export interface FileRouteTypes {
     | '/client/dashboard/billing'
     | '/client/dashboard/membership'
     | '/client/dashboard/notifications'
+    | '/client/dashboard/packages'
     | '/client/dashboard/projects'
     | '/client/dashboard/reports'
     | '/client/dashboard/settings'
@@ -524,6 +534,7 @@ export interface FileRouteTypes {
     | '/client/dashboard/billing'
     | '/client/dashboard/membership'
     | '/client/dashboard/notifications'
+    | '/client/dashboard/packages'
     | '/client/dashboard/projects'
     | '/client/dashboard/reports'
     | '/client/dashboard/settings'
@@ -572,6 +583,7 @@ export interface FileRouteTypes {
     | '/client/dashboard/billing'
     | '/client/dashboard/membership'
     | '/client/dashboard/notifications'
+    | '/client/dashboard/packages'
     | '/client/dashboard/projects'
     | '/client/dashboard/reports'
     | '/client/dashboard/settings'
@@ -913,6 +925,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientDashboardProjectsRouteImport
       parentRoute: typeof ClientDashboardRoute
     }
+    '/client/dashboard/packages': {
+      id: '/client/dashboard/packages'
+      path: '/packages'
+      fullPath: '/client/dashboard/packages'
+      preLoaderRoute: typeof ClientDashboardPackagesRouteImport
+      parentRoute: typeof ClientDashboardRoute
+    }
     '/client/dashboard/notifications': {
       id: '/client/dashboard/notifications'
       path: '/notifications'
@@ -982,6 +1001,7 @@ interface ClientDashboardRouteChildren {
   ClientDashboardBillingRoute: typeof ClientDashboardBillingRoute
   ClientDashboardMembershipRoute: typeof ClientDashboardMembershipRoute
   ClientDashboardNotificationsRoute: typeof ClientDashboardNotificationsRoute
+  ClientDashboardPackagesRoute: typeof ClientDashboardPackagesRoute
   ClientDashboardProjectsRoute: typeof ClientDashboardProjectsRoute
   ClientDashboardReportsRoute: typeof ClientDashboardReportsRoute
   ClientDashboardSettingsRoute: typeof ClientDashboardSettingsRoute
@@ -993,6 +1013,7 @@ const ClientDashboardRouteChildren: ClientDashboardRouteChildren = {
   ClientDashboardBillingRoute: ClientDashboardBillingRoute,
   ClientDashboardMembershipRoute: ClientDashboardMembershipRoute,
   ClientDashboardNotificationsRoute: ClientDashboardNotificationsRoute,
+  ClientDashboardPackagesRoute: ClientDashboardPackagesRoute,
   ClientDashboardProjectsRoute: ClientDashboardProjectsRoute,
   ClientDashboardReportsRoute: ClientDashboardReportsRoute,
   ClientDashboardSettingsRoute: ClientDashboardSettingsRoute,
