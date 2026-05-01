@@ -26,6 +26,9 @@ import { Route as ClientLoginRouteImport } from './routes/client/login'
 import { Route as ClientDashboardRouteImport } from './routes/client/dashboard'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ApiSitemapDotxmlRouteImport } from './routes/api/sitemap[.]xml'
+import { Route as ApiPurchaseCheckoutRouteImport } from './routes/api/purchase-checkout'
+import { Route as ApiPurchaseApproveRouteImport } from './routes/api/purchase-approve'
+import { Route as ApiAssignPackageRouteImport } from './routes/api/assign-package'
 import { Route as ApiAdminWriteRouteImport } from './routes/api/admin-write'
 import { Route as ApiAdminUploadRouteImport } from './routes/api/admin-upload'
 import { Route as ApiAdminDataRouteImport } from './routes/api/admin-data'
@@ -136,6 +139,21 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
 const ApiSitemapDotxmlRoute = ApiSitemapDotxmlRouteImport.update({
   id: '/api/sitemap.xml',
   path: '/api/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPurchaseCheckoutRoute = ApiPurchaseCheckoutRouteImport.update({
+  id: '/api/purchase-checkout',
+  path: '/api/purchase-checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPurchaseApproveRoute = ApiPurchaseApproveRouteImport.update({
+  id: '/api/purchase-approve',
+  path: '/api/purchase-approve',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAssignPackageRoute = ApiAssignPackageRouteImport.update({
+  id: '/api/assign-package',
+  path: '/api/assign-package',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAdminWriteRoute = ApiAdminWriteRouteImport.update({
@@ -298,6 +316,9 @@ export interface FileRoutesByFullPath {
   '/api/admin-data': typeof ApiAdminDataRoute
   '/api/admin-upload': typeof ApiAdminUploadRoute
   '/api/admin-write': typeof ApiAdminWriteRoute
+  '/api/assign-package': typeof ApiAssignPackageRoute
+  '/api/purchase-approve': typeof ApiPurchaseApproveRoute
+  '/api/purchase-checkout': typeof ApiPurchaseCheckoutRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/client/dashboard': typeof ClientDashboardRouteWithChildren
@@ -343,6 +364,9 @@ export interface FileRoutesByTo {
   '/api/admin-data': typeof ApiAdminDataRoute
   '/api/admin-upload': typeof ApiAdminUploadRoute
   '/api/admin-write': typeof ApiAdminWriteRoute
+  '/api/assign-package': typeof ApiAssignPackageRoute
+  '/api/purchase-approve': typeof ApiPurchaseApproveRoute
+  '/api/purchase-checkout': typeof ApiPurchaseCheckoutRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/client/login': typeof ClientLoginRoute
@@ -388,6 +412,9 @@ export interface FileRoutesById {
   '/api/admin-data': typeof ApiAdminDataRoute
   '/api/admin-upload': typeof ApiAdminUploadRoute
   '/api/admin-write': typeof ApiAdminWriteRoute
+  '/api/assign-package': typeof ApiAssignPackageRoute
+  '/api/purchase-approve': typeof ApiPurchaseApproveRoute
+  '/api/purchase-checkout': typeof ApiPurchaseCheckoutRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/client/dashboard': typeof ClientDashboardRouteWithChildren
@@ -435,6 +462,9 @@ export interface FileRouteTypes {
     | '/api/admin-data'
     | '/api/admin-upload'
     | '/api/admin-write'
+    | '/api/assign-package'
+    | '/api/purchase-approve'
+    | '/api/purchase-checkout'
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/client/dashboard'
@@ -480,6 +510,9 @@ export interface FileRouteTypes {
     | '/api/admin-data'
     | '/api/admin-upload'
     | '/api/admin-write'
+    | '/api/assign-package'
+    | '/api/purchase-approve'
+    | '/api/purchase-checkout'
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/client/login'
@@ -524,6 +557,9 @@ export interface FileRouteTypes {
     | '/api/admin-data'
     | '/api/admin-upload'
     | '/api/admin-write'
+    | '/api/assign-package'
+    | '/api/purchase-approve'
+    | '/api/purchase-checkout'
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/client/dashboard'
@@ -570,6 +606,9 @@ export interface RootRouteChildren {
   ApiAdminDataRoute: typeof ApiAdminDataRoute
   ApiAdminUploadRoute: typeof ApiAdminUploadRoute
   ApiAdminWriteRoute: typeof ApiAdminWriteRoute
+  ApiAssignPackageRoute: typeof ApiAssignPackageRoute
+  ApiPurchaseApproveRoute: typeof ApiPurchaseApproveRoute
+  ApiPurchaseCheckoutRoute: typeof ApiPurchaseCheckoutRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   ClientDashboardRoute: typeof ClientDashboardRouteWithChildren
   ClientLoginRoute: typeof ClientLoginRoute
@@ -697,6 +736,27 @@ declare module '@tanstack/react-router' {
       path: '/api/sitemap.xml'
       fullPath: '/api/sitemap.xml'
       preLoaderRoute: typeof ApiSitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/purchase-checkout': {
+      id: '/api/purchase-checkout'
+      path: '/api/purchase-checkout'
+      fullPath: '/api/purchase-checkout'
+      preLoaderRoute: typeof ApiPurchaseCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/purchase-approve': {
+      id: '/api/purchase-approve'
+      path: '/api/purchase-approve'
+      fullPath: '/api/purchase-approve'
+      preLoaderRoute: typeof ApiPurchaseApproveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/assign-package': {
+      id: '/api/assign-package'
+      path: '/api/assign-package'
+      fullPath: '/api/assign-package'
+      preLoaderRoute: typeof ApiAssignPackageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin-write': {
@@ -971,6 +1031,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminDataRoute: ApiAdminDataRoute,
   ApiAdminUploadRoute: ApiAdminUploadRoute,
   ApiAdminWriteRoute: ApiAdminWriteRoute,
+  ApiAssignPackageRoute: ApiAssignPackageRoute,
+  ApiPurchaseApproveRoute: ApiPurchaseApproveRoute,
+  ApiPurchaseCheckoutRoute: ApiPurchaseCheckoutRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   ClientDashboardRoute: ClientDashboardRouteWithChildren,
   ClientLoginRoute: ClientLoginRoute,

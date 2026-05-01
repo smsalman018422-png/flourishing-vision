@@ -133,11 +133,16 @@ export type Database = {
           cancelled_at: string | null
           client_id: string
           created_at: string
+          custom_features: Json
+          custom_name: string | null
           end_date: string
           id: string
-          plan_id: string
+          is_custom: boolean
+          package_id: string | null
+          plan_id: string | null
           start_date: string
           status: string
+          updated_at: string
         }
         Insert: {
           amount?: number
@@ -146,11 +151,16 @@ export type Database = {
           cancelled_at?: string | null
           client_id: string
           created_at?: string
+          custom_features?: Json
+          custom_name?: string | null
           end_date: string
           id?: string
-          plan_id: string
+          is_custom?: boolean
+          package_id?: string | null
+          plan_id?: string | null
           start_date?: string
           status?: string
+          updated_at?: string
         }
         Update: {
           amount?: number
@@ -159,13 +169,25 @@ export type Database = {
           cancelled_at?: string | null
           client_id?: string
           created_at?: string
+          custom_features?: Json
+          custom_name?: string | null
           end_date?: string
           id?: string
-          plan_id?: string
+          is_custom?: boolean
+          package_id?: string | null
+          plan_id?: string | null
           start_date?: string
           status?: string
+          updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "client_memberships_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "client_memberships_plan_id_fkey"
             columns: ["plan_id"]
@@ -612,6 +634,65 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      package_purchase_requests: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_membership_id: string | null
+          billing_cycle: string
+          client_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          package_id: string
+          payment_status: string
+          rejected_at: string | null
+          status: string
+          stripe_session_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          approved_at?: string | null
+          approved_membership_id?: string | null
+          billing_cycle?: string
+          client_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          package_id: string
+          payment_status?: string
+          rejected_at?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_membership_id?: string | null
+          billing_cycle?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          package_id?: string
+          payment_status?: string
+          rejected_at?: string | null
+          status?: string
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_purchase_requests_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       packages: {
         Row: {
