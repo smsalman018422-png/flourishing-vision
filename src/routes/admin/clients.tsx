@@ -170,7 +170,7 @@ function ClientsPage() {
               </thead>
               <tbody>
                 {filtered.map((c) => (
-                  <tr key={c.id} className="border-b border-border/40 hover:bg-muted/20">
+                  <tr key={c.id} onClick={() => setSelectedClient(c)} className="border-b border-border/40 hover:bg-muted/20 cursor-pointer">
                     <td className="p-3">
                       <div className="flex items-center gap-3">
                         <Avatar name={c.full_name} url={c.avatar_url} />
