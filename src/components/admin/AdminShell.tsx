@@ -23,7 +23,7 @@ import {
   MessageCircle,
   Package,
 } from "lucide-react";
-import logoSrc from "@/assets/logo.png";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
