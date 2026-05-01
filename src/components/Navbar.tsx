@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { Leaf, Moon, Sun, Menu, X } from "lucide-react";
+import { Leaf, Moon, Sun, Menu, X, LogIn, LayoutDashboard } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
+import { supabase } from "@/integrations/supabase/client";
 
 const links = [
   { label: "Home", href: "/" },
@@ -19,6 +20,49 @@ export function Navbar() {
   const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [authState, setAuthState] = useState<{
+    kind: "anon" | "client" | "admin";
+    name: string;
+  }>({ kind: "anon", name: "" });
+
+  useEffect(() => {
+    let mounted = true;
+    const detect = async () => {
+      const { data } = await supabase.auth.getSession();
+      const user = data.session?.user;
+      if (!user) {
+        if (mounted) setAuthState({ kind: "anon", name: "" });
+        return;
+      }
+      const [{ data: profile }, { data: roles }] = await Promise.all([
+        supabase.from("client_profiles").select("full_name").eq("id", user.id).maybeSingle(),
+        supabase.from("user_roles").select("role").eq("user_id", user.id),
+      ]);
+      if (!mounted) return;
+      const isAdmin = (roles ?? []).some((r) => r.role === "admin");
+      if (isAdmin) {
+        setAuthState({ kind: "admin", name: user.email ?? "Admin" });
+      } else if (profile) {
+        setAuthState({ kind: "client", name: profile.full_name || user.email || "" });
+      } else {
+        setAuthState({ kind: "anon", name: "" });
+      }
+    };
+    void detect();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => void detect());
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  const initials = authState.name
+    .split(" ")
+    .map((s) => s[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase() || "U";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -116,6 +160,26 @@ export function Navbar() {
                 </AnimatePresence>
               </button>
 
+              {authState.kind === "anon" ? (
+                <Link
+                  to="/client/login"
+                  className="hidden lg:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <LogIn className="h-3.5 w-3.5" />
+                  Client Login
+                </Link>
+              ) : (
+                <Link
+                  to={authState.kind === "admin" ? "/admin" : "/client/dashboard"}
+                  className="hidden lg:inline-flex items-center gap-2 h-9 pl-2 pr-3 rounded-xl text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <span className="h-7 w-7 rounded-full bg-gradient-primary text-primary-foreground grid place-items-center text-[11px] font-semibold">
+                    {initials}
+                  </span>
+                  {authState.kind === "admin" ? "Admin" : "Dashboard"}
+                </Link>
+              )}
+
               <Link
                 to="/contact"
                 className="hidden lg:inline-flex items-center h-9 px-4 rounded-xl text-sm font-medium bg-gradient-primary text-primary-foreground shadow-glow hover:shadow-elegant hover:-translate-y-0.5 active:translate-y-0 transition-all"
@@ -193,6 +257,32 @@ export function Navbar() {
                     </motion.div>
                   );
                 })}
+
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.08 + links.length * 0.05, duration: 0.3, ease: "easeOut" }}
+                >
+                  {authState.kind === "anon" ? (
+                    <Link
+                      to="/client/login"
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-2 min-h-12 px-4 rounded-xl text-base text-foreground hover:bg-muted transition-colors"
+                    >
+                      <LogIn className="h-4 w-4" />
+                      Client Login
+                    </Link>
+                  ) : (
+                    <Link
+                      to={authState.kind === "admin" ? "/admin" : "/client/dashboard"}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-2 min-h-12 px-4 rounded-xl text-base text-foreground hover:bg-muted transition-colors"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      {authState.kind === "admin" ? "Admin" : "Dashboard"}
+                    </Link>
+                  )}
+                </motion.div>
               </nav>
 
               <motion.div

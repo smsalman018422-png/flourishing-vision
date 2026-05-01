@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Leaf, Loader2, Check } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -154,6 +155,16 @@ export function Footer() {
                   </a>
                 </li>
               ))}
+              <li>
+                <Link to="/client/login" className="text-sm text-foreground/80 hover:text-primary transition-colors">
+                  Client Login
+                </Link>
+              </li>
+              <li>
+                <Link to="/client/dashboard" className="text-sm text-foreground/80 hover:text-primary transition-colors">
+                  Client Dashboard
+                </Link>
+              </li>
             </ul>
           </div>
 
