@@ -131,9 +131,32 @@ function ClientDashboardOverview() {
   }, []);
 
   useEffect(() => {
+    let mounted = true;
+    const timeout = window.setTimeout(() => {
+      if (!mounted) return;
+      setError("Couldn't confirm your session. Please try again.");
+      setLoading(false);
+    }, 8000);
+
     supabase.auth.getSession().then(({ data }) => {
+      if (!mounted) return;
+      window.clearTimeout(timeout);
       setUserId(data.session?.user.id ?? null);
+      if (!data.session?.user.id) {
+        setError("Please sign in again to view your dashboard.");
+        setLoading(false);
+      }
+    }).catch(() => {
+      if (!mounted) return;
+      window.clearTimeout(timeout);
+      setError("Couldn't confirm your session. Please try again.");
+      setLoading(false);
     });
+
+    return () => {
+      mounted = false;
+      window.clearTimeout(timeout);
+    };
   }, []);
 
   const loadAll = useCallback(async (uid: string) => {
