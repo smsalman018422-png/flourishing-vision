@@ -10,6 +10,7 @@ const ALLOWED_TABLES = new Set([
   "newsletter_subscribers",
   "site_settings",
   "user_roles",
+  "packages",
 ]);
 
 const TABLE_COLUMNS: Record<string, readonly string[]> = {
