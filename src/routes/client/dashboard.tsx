@@ -46,6 +46,7 @@ type ClientProfile = {
   full_name: string;
   company_name: string | null;
   avatar_url: string | null;
+  is_active?: boolean;
 };
 
 const nav: Array<{ to: string; label: string; Icon: typeof LayoutDashboard; exact?: boolean }> = [
@@ -92,7 +93,7 @@ function ClientDashboardLayout() {
       }
       const { data: profile } = await sb
         .from("client_profiles")
-        .select("id,full_name,company_name,avatar_url")
+        .select("id,full_name,company_name,avatar_url,is_active")
         .eq("id", uid)
         .maybeSingle();
       if (!mounted) return;
@@ -115,7 +116,7 @@ function ClientDashboardLayout() {
             company_name: (sessionUser?.user_metadata?.company_name as string | undefined) || null,
             is_active: true,
           })
-          .select("id,full_name,company_name,avatar_url")
+          .select("id,full_name,company_name,avatar_url,is_active")
           .maybeSingle();
         if (createErr || !created) {
           await supabase.auth.signOut();
@@ -123,6 +124,11 @@ function ClientDashboardLayout() {
           return;
         }
         resolved = created as ClientProfile;
+      }
+      if (resolved.is_active === false) {
+        await supabase.auth.signOut();
+        navigate({ to: "/client/login" });
+        return;
       }
       setClient(resolved);
       setLoading(false);
