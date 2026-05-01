@@ -445,6 +445,12 @@ function PricingPage() {
           </Button>
         </div>
       </section>
+
+      <PurchaseModal
+        plan={purchaseTarget}
+        yearly={yearly}
+        onClose={() => setPurchaseTarget(null)}
+      />
     </PageShell>
   );
 }
