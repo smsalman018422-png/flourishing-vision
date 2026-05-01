@@ -112,5 +112,6 @@ export async function adminWrite<T = unknown>(
   });
   const body = (await res.json().catch(() => null)) as { data?: T[]; error?: string } | null;
   if (!res.ok || body?.error) return { data: [], error: body?.error ?? "Failed to save" };
+  invalidateAdminCache();
   return { data: body?.data ?? [], error: null };
 }
