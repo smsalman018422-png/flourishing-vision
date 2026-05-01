@@ -283,7 +283,8 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
     e.preventDefault();
     setError("");
 
-    const parsed = signupSchema.safeParse({ fullName, email, phone, companyName, password });
+    const normalizedEmail = email.trim().toLowerCase();
+    const parsed = signupSchema.safeParse({ fullName, email: normalizedEmail, phone, companyName, password });
     if (!parsed.success) {
       setError(parsed.error.issues[0].message);
       return;
@@ -304,12 +305,20 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
         password: parsed.data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/client/login`,
-          data: { full_name: parsed.data.fullName },
+          data: {
+            full_name: parsed.data.fullName,
+            phone: parsed.data.phone || null,
+            company_name: parsed.data.companyName || null,
+          },
         },
       });
 
       if (authError) {
-        setError(authError.message);
+        if (authError.message.includes("already registered")) {
+          setError("This email is already registered. Try signing in instead.");
+        } else {
+          setError(authError.message);
+        }
         return;
       }
       if (!authData.user) {
@@ -317,16 +326,21 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
         return;
       }
 
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const { error: profileError } = await sb.from("client_profiles").insert({
+        id: authData.user.id,
+        email: parsed.data.email,
+        full_name: parsed.data.fullName || "",
+        phone: phone || null,
+        whatsapp_number: phone || null,
+        company_name: companyName || null,
+        is_active: true,
+      });
+      if (profileError) console.error("Profile insert error:", profileError);
+
       if (authData.session) {
-        await supabase.from("client_profiles").insert({
-          id: authData.user.id,
-          email: parsed.data.email,
-          full_name: parsed.data.fullName,
-          phone: phone || null,
-          whatsapp_number: phone || null,
-          company_name: companyName || null,
-        });
-        await supabase.from("client_notifications").insert({
+        await sb.from("client_notifications").insert({
           client_id: authData.user.id,
           title: "Welcome to LetUsGrow! 🎉",
           body: "Your account is ready. Explore your dashboard to get started.",
