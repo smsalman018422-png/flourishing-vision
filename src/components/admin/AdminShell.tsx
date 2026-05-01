@@ -22,6 +22,7 @@ import {
   Crown,
   FileBarChart,
   MessageCircle,
+  Package,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -37,6 +38,7 @@ const nav = [
   { to: "/admin/team", label: "Team", Icon: Users },
   { to: "/admin/portfolio", label: "Portfolio", Icon: Briefcase },
   { to: "/admin/services", label: "Services", Icon: Sparkles },
+  { to: "/admin/packages", label: "Packages", Icon: Package },
   { to: "/admin/testimonials", label: "Testimonials", Icon: Quote },
   { to: "/admin/blog", label: "Blog", Icon: FileText },
   { to: "/admin/contacts", label: "Contacts", Icon: Mail },

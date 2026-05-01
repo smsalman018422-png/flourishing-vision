@@ -35,6 +35,7 @@ import { Route as AdminTeamRouteImport } from './routes/admin/team'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminPortfolioRouteImport } from './routes/admin/portfolio'
+import { Route as AdminPackagesRouteImport } from './routes/admin/packages'
 import { Route as AdminMembershipsRouteImport } from './routes/admin/memberships'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
@@ -182,6 +183,11 @@ const AdminPortfolioRoute = AdminPortfolioRouteImport.update({
   path: '/admin/portfolio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPackagesRoute = AdminPackagesRouteImport.update({
+  id: '/admin/packages',
+  path: '/admin/packages',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminMembershipsRoute = AdminMembershipsRouteImport.update({
   id: '/admin/memberships',
   path: '/admin/memberships',
@@ -282,6 +288,7 @@ export interface FileRoutesByFullPath {
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/memberships': typeof AdminMembershipsRoute
+  '/admin/packages': typeof AdminPackagesRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -326,6 +333,7 @@ export interface FileRoutesByTo {
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/memberships': typeof AdminMembershipsRoute
+  '/admin/packages': typeof AdminPackagesRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -370,6 +378,7 @@ export interface FileRoutesById {
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/memberships': typeof AdminMembershipsRoute
+  '/admin/packages': typeof AdminPackagesRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -416,6 +425,7 @@ export interface FileRouteTypes {
     | '/admin/contacts'
     | '/admin/login'
     | '/admin/memberships'
+    | '/admin/packages'
     | '/admin/portfolio'
     | '/admin/services'
     | '/admin/settings'
@@ -460,6 +470,7 @@ export interface FileRouteTypes {
     | '/admin/contacts'
     | '/admin/login'
     | '/admin/memberships'
+    | '/admin/packages'
     | '/admin/portfolio'
     | '/admin/services'
     | '/admin/settings'
@@ -503,6 +514,7 @@ export interface FileRouteTypes {
     | '/admin/contacts'
     | '/admin/login'
     | '/admin/memberships'
+    | '/admin/packages'
     | '/admin/portfolio'
     | '/admin/services'
     | '/admin/settings'
@@ -548,6 +560,7 @@ export interface RootRouteChildren {
   AdminContactsRoute: typeof AdminContactsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminMembershipsRoute: typeof AdminMembershipsRoute
+  AdminPackagesRoute: typeof AdminPackagesRoute
   AdminPortfolioRoute: typeof AdminPortfolioRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -749,6 +762,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPortfolioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/packages': {
+      id: '/admin/packages'
+      path: '/admin/packages'
+      fullPath: '/admin/packages'
+      preLoaderRoute: typeof AdminPackagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/memberships': {
       id: '/admin/memberships'
       path: '/admin/memberships'
@@ -941,6 +961,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminContactsRoute: AdminContactsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminMembershipsRoute: AdminMembershipsRoute,
+  AdminPackagesRoute: AdminPackagesRoute,
   AdminPortfolioRoute: AdminPortfolioRoute,
   AdminServicesRoute: AdminServicesRoute,
   AdminSettingsRoute: AdminSettingsRoute,

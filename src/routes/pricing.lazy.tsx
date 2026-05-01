@@ -1,21 +1,35 @@
 import { createLazyFileRoute, Link } from "@tanstack/react-router";
 import { PageShell } from "@/components/layout/PageShell";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   Check,
-  X,
   ArrowRight,
   Sparkles,
-  Sprout,
-  Rocket,
-  Shield,
-  Crown,
   ChevronDown,
   TrendingUp,
   Clock,
   BadgeCheck,
+  Shield,
+  Crown,
+  Sprout,
+  Rocket,
+  Star,
+  Zap,
+  Target,
+  Layers,
+  Award,
+  Diamond,
+  Flame,
+  Gem,
+  Heart,
+  Trophy,
+  Briefcase,
+  Globe,
+  Code,
+  Palette,
+  type LucideIcon,
 } from "lucide-react";
 import {
   Accordion,
@@ -23,220 +37,43 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { supabase } from "@/integrations/supabase/client";
+import { Skeleton } from "@/components/ui/skeleton";
 
-type Plan = {
-  id: string;
-  name: string;
-  icon: typeof Sprout;
-  monthly: number;
-  yearly: number;
-  tagline: string;
-  bestFor: string;
-  cta: string;
-  popular?: boolean;
-  premium?: boolean;
-  features: string[];
-  bonuses?: { label: string; items: string[] };
-  includesNote?: string;
+const ICON_MAP: Record<string, LucideIcon> = {
+  Sparkles, Sprout, Rocket, Shield, Crown, Star, Zap, TrendingUp, Target,
+  Layers, Award, Diamond, Flame, Gem, Heart, Trophy, Briefcase, Globe,
+  Code, Palette,
 };
 
-const PLANS: Plan[] = [
-  {
-    id: "starter",
-    name: "Starter Growth",
-    icon: Sprout,
-    monthly: 297,
-    yearly: 237,
-    tagline: "Perfect for local businesses and startups wanting a professional presence",
-    bestFor: "Restaurants, Local Shops, Startups, Personal Brands",
-    cta: "Get Started",
-    features: [
-      "15 Custom-Made Premium Image Posts",
-      "1 Social Media Platform Management",
-      "Professional Branded Post Design",
-      "Caption Writing Included",
-      "Basic Hashtag Research",
-      "Content Calendar Planning",
-      "HD Quality Creative Designs",
-      "Monthly Strategy Discussion",
-      "Basic Audience Engagement",
-      "Page Optimization Suggestions",
-      "Story Post Support (Up to 4 Stories)",
-      "Organic Reach Optimization",
-      "Competitor Monitoring",
-      "Basic Brand Consistency Setup",
-      "Basic CTA Optimization",
-      "Mobile-Friendly Visual Design",
-      "Monthly Performance Report",
-      "3 Business Days Delivery Time",
-      "Email Support",
-    ],
-  },
-  {
-    id: "business",
-    name: "Business Growth",
-    icon: Rocket,
-    monthly: 597,
-    yearly: 477,
-    tagline: "For businesses serious about consistent growth and stronger engagement",
-    bestFor: "Ecommerce, Gyms, Fashion Brands, Service Businesses",
-    cta: "Most Popular — Get Started",
-    popular: true,
-    features: [
-      "Facebook + Instagram Management",
-      "30 Custom-Made Image Posts",
-      "10 High-Engaging Text Posts",
-      "Professional Copywriting",
-      "High CTR Caption Writing",
-      "Content Strategy Planning",
-      "Viral Style Content Research",
-      "Story Designs Included",
-      "Basic Reel Content Ideas",
-      "Fast Support Response",
-      "Monthly Competitor Analysis",
-      "CTA Optimization",
-      "Engagement Optimization",
-      "Page Branding Improvements",
-      "Organic Growth Strategy",
-      "Scheduled Posting",
-      "Audience Behavior Analysis",
-      "Custom Branded Templates",
-      "Priority Support",
-      "Monthly Growth Report",
-      "Basic Ad Strategy Suggestions",
-      "Basic Funnel Suggestions",
-      "Profile Optimization",
-      "Comment Monitoring",
-    ],
-    bonuses: {
-      label: "Bonus",
-      items: ["Free Audit Every Month", "Trending Content Suggestions"],
-    },
-  },
-  {
-    id: "full",
-    name: "Full Management",
-    icon: Shield,
-    monthly: 857,
-    yearly: 685,
-    tagline: "Aggressive growth, premium management, and ad scaling support",
-    bestFor: "Established Brands, Agencies, Online Stores, Coaches",
-    cta: "Get Started",
-    features: [
-      "Multiple Platform Management",
-      "30 Custom-Made Image Posts",
-      "30 High-Engaging Text Posts",
-      "One Dedicated Account Manager",
-      "Run Up To 3 Meta Ads Campaigns",
-      "Manage Up To $2500 Ad Spend",
-      "Slack Support",
-      "Priority Fast Response",
-      "Advanced Audience Targeting",
-      "Conversion Focused Strategy",
-      "Advanced Content Planning",
-      "Viral Hook Optimization",
-      "Story + Feed Strategy",
-      "Brand Voice Development",
-      "Weekly Content Planning",
-      "Advanced Competitor Research",
-      "Monthly Creative Refresh",
-      "High-Engagement CTA Strategy",
-      "Community Management",
-      "Organic Growth Optimization",
-      "Retargeting Strategy Suggestions",
-      "Lead Generation Suggestions",
-      "Monthly Analytics Breakdown",
-      "Ad Performance Optimization",
-      "Creative Split Testing Suggestions",
-      "Landing Page Suggestions",
-      "Monthly Strategy Call",
-      "Trend Monitoring",
-      "AI Assisted Content Research",
-      "Premium Design Quality",
-    ],
-    bonuses: {
-      label: "Bonus",
-      items: [
-        "Emergency Post Support",
-        "Priority Queue Handling",
-        "Premium Business Consultation",
-      ],
-    },
-  },
-  {
-    id: "fullpage",
-    name: "Full Page Management",
-    icon: Crown,
-    monthly: 1297,
-    yearly: 1037,
-    tagline: "Premium done-for-you solution with a full social media team experience",
-    bestFor: "High-Growth Brands, Ecommerce, Real Estate, Law Firms, Med Spas",
-    cta: "Book a Strategy Call",
-    premium: true,
-    includesNote: "Includes everything in Full Management",
-    features: [
-      "Instagram + Facebook Full Management",
-      "Inbox & Message Replies",
-      "Comment Replies & Moderation",
-      "Customer Interaction Handling",
-      "Up To 5 Meta Ads Campaigns",
-      "Manage Up To $3500 Monthly Ad Spend",
-      "Weekly Performance Reports",
-      "Advanced Retargeting Strategy",
-      "Lead Funnel Optimization",
-      "One Dedicated Manager",
-      "Slack + Priority Support",
-      "Reputation Management",
-      "Advanced Audience Research",
-      "Daily Engagement Monitoring",
-      "Story Management",
-      "Content Publishing & Scheduling",
-      "Advanced Conversion Optimization",
-      "High-Performance Ad Strategy",
-      "Monthly Growth Planning",
-      "Custom Campaign Creation",
-      "Business Growth Consultation",
-      "Organic + Paid Growth Combination",
-      "Advanced Analytics Reporting",
-      "Crisis Response Support",
-      "Competitor Ad Monitoring",
-      "Advanced Brand Positioning",
-      "Conversion Focused Copywriting",
-      "Engagement Team Support",
-      "Trend Based Content Strategy",
-      "CTA Funnel Strategy",
-      "Lead Quality Optimization",
-      "High Priority Support Queue",
-      "Business Scaling Suggestions",
-    ],
-    bonuses: {
-      label: "Premium Bonuses",
-      items: [
-        "Weekly Strategy Meetings",
-        "Dedicated Priority Team",
-        "Emergency Campaign Support",
-        "Monthly Competitor Growth Analysis",
-        "Premium Brand Growth Blueprint",
-      ],
-    },
-  },
-];
+type FeatureItem = { text: string; type: "feature" | "bonus" };
 
-const COMPARISON: Array<{
-  feature: string;
-  values: [string | boolean, string | boolean, string | boolean, string | boolean];
-}> = [
-  { feature: "Platforms", values: ["1", "2", "Multiple", "IG + FB Full"] },
-  { feature: "Image Posts / month", values: ["15", "30", "30", "30+"] },
-  { feature: "Text Posts / month", values: ["—", "10", "30", "30+"] },
-  { feature: "Meta Ad Campaigns", values: [false, false, "Up to 3", "Up to 5"] },
-  { feature: "Ad Spend Managed", values: ["—", "—", "$2,500", "$3,500"] },
-  { feature: "Dedicated Manager", values: [false, false, true, true] },
-  { feature: "Support", values: ["Email", "Priority", "Slack", "Slack + Priority"] },
-  { feature: "Strategy Calls", values: ["Monthly", "Monthly", "Monthly", "Weekly"] },
-  { feature: "Reports", values: ["Monthly", "Monthly", "Monthly", "Weekly"] },
-  { feature: "Inbox & Comment Replies", values: [false, false, false, true] },
-];
+type Pkg = {
+  id: string;
+  category: string;
+  name: string;
+  slug: string;
+  price_monthly: number;
+  price_yearly: number;
+  tagline: string | null;
+  description: string | null;
+  icon_name: string;
+  features: FeatureItem[];
+  best_for: string | null;
+  is_popular: boolean;
+  is_premium: boolean;
+  is_visible: boolean;
+  order_index: number;
+  cta_text: string;
+  cta_link: string;
+};
+
+const CATEGORY_LABELS: Record<string, string> = {
+  social_media: "Social Media",
+  web_development: "Web Development",
+  creator: "Creator",
+  custom: "Custom",
+};
 
 const FAQS = [
   {
@@ -249,7 +86,7 @@ const FAQS = [
   },
   {
     q: "How long until I see results?",
-    a: "Most clients see meaningful engagement growth within 30–45 days. Paid ads typically show measurable ROI within the first 60 days as we optimise campaigns.",
+    a: "Most clients see meaningful engagement growth within 30–45 days. Paid ads typically show measurable ROI within the first 60 days.",
   },
   {
     q: "Can I cancel anytime?",
@@ -257,7 +94,7 @@ const FAQS = [
   },
   {
     q: "Do you offer custom packages?",
-    a: "Yes — we build hybrid packages all the time. Talk to our team and we'll tailor a plan to your goals, channels and budget.",
+    a: "Yes — talk to our team and we'll tailor a plan to your goals, channels and budget.",
   },
   {
     q: "What payment methods do you accept?",
@@ -269,8 +106,83 @@ export const Route = createLazyFileRoute("/pricing")({
   component: PricingPage,
 });
 
+function normalizeFeatures(raw: unknown): FeatureItem[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((item) => {
+      if (typeof item === "string") return { text: item, type: "feature" as const };
+      if (item && typeof item === "object") {
+        const obj = item as { text?: unknown; type?: unknown };
+        const text = typeof obj.text === "string" ? obj.text : "";
+        const type = obj.type === "bonus" ? "bonus" : "feature";
+        return { text, type } as FeatureItem;
+      }
+      return null;
+    })
+    .filter((f): f is FeatureItem => !!f && !!f.text);
+}
+
 function PricingPage() {
   const [yearly, setYearly] = useState(false);
+  const [packages, setPackages] = useState<Pkg[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState<string>("social_media");
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      const { data, error } = await supabase
+        .from("packages")
+        .select("*")
+        .eq("is_visible", true)
+        .order("category")
+        .order("order_index");
+      if (cancelled) return;
+      if (!error && data) {
+        setPackages(
+          data.map((d) => ({ ...d, features: normalizeFeatures(d.features) })) as Pkg[],
+        );
+      }
+      setLoading(false);
+    };
+    load();
+
+    const channel = supabase
+      .channel("packages-public")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "packages" },
+        () => load(),
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Available categories from data
+  const categories = useMemo(() => {
+    const set = new Set(packages.map((p) => p.category));
+    const known = ["social_media", "web_development", "creator", "custom"].filter((c) =>
+      set.has(c),
+    );
+    const extra = Array.from(set).filter((c) => !known.includes(c));
+    return [...known, ...extra];
+  }, [packages]);
+
+  // Default category to first available
+  useEffect(() => {
+    if (categories.length && !categories.includes(activeCategory)) {
+      setActiveCategory(categories[0]);
+    }
+  }, [categories, activeCategory]);
+
+  const visiblePackages = useMemo(
+    () => packages.filter((p) => p.category === activeCategory),
+    [packages, activeCategory],
+  );
 
   return (
     <PageShell>
@@ -286,7 +198,8 @@ function PricingPage() {
             transition={{ duration: 0.5 }}
             className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary"
           >
-            <TrendingUp className="h-3.5 w-3.5" /> Social Media Management
+            <TrendingUp className="h-3.5 w-3.5" />
+            {CATEGORY_LABELS[activeCategory] ?? "Packages"}
           </motion.div>
           <motion.h1
             initial={{ opacity: 0, y: 16 }}
@@ -307,8 +220,29 @@ function PricingPage() {
         </div>
       </section>
 
+      {/* Category tabs */}
+      {categories.length > 1 && (
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex justify-center">
+          <div className="flex flex-wrap gap-2 justify-center">
+            {categories.map((c) => (
+              <button
+                key={c}
+                onClick={() => setActiveCategory(c)}
+                className={`px-5 py-2 rounded-full text-sm font-medium transition border ${
+                  activeCategory === c
+                    ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/30"
+                    : "bg-card/60 border-border/60 text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {CATEGORY_LABELS[c] ?? c}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Billing toggle */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 flex justify-center">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 mt-6 flex justify-center">
         <LayoutGroup>
           <div className="relative inline-flex items-center rounded-full border border-border/60 bg-card/60 backdrop-blur-xl p-1">
             <button
@@ -355,74 +289,33 @@ function PricingPage() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[1100px] rounded-full bg-primary/10 blur-[160px]" />
         </div>
 
-        {/* Mobile horizontal scroll, tablet 2-col, desktop 4-col */}
-        <div className="relative grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 lg:gap-5 xl:items-stretch">
-          {PLANS.map((plan, i) => (
-            <PlanCard key={plan.id} plan={plan} yearly={yearly} index={i} />
-          ))}
-        </div>
-      </section>
-
-      {/* COMPARISON */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16">
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <p className="text-xs font-medium text-primary uppercase tracking-[0.3em]">Compare</p>
-          <h2 className="mt-3 text-3xl sm:text-4xl font-display font-semibold">
-            Find your perfect fit
-          </h2>
-        </div>
-
-        {/* Desktop table */}
-        <div className="hidden md:block overflow-hidden rounded-3xl border border-border/60 bg-card/60 backdrop-blur-xl">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left bg-card/40">
-                <th className="p-5 font-medium text-muted-foreground">Feature</th>
-                <th className="p-5 font-medium">Starter</th>
-                <th className="p-5 font-medium text-primary">Business</th>
-                <th className="p-5 font-medium">Full Mgmt</th>
-                <th className="p-5 font-medium text-amber-400">Full Page</th>
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARISON.map((row) => (
-                <tr key={row.feature} className="border-t border-border/60">
-                  <td className="p-5 text-muted-foreground">{row.feature}</td>
-                  {row.values.map((v, idx) => (
-                    <td key={idx} className="p-5">
-                      {renderCell(v)}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile collapsible */}
-        <div className="md:hidden">
-          <Accordion type="single" collapsible className="space-y-2">
-            {PLANS.map((plan, planIdx) => (
-              <AccordionItem
-                key={plan.id}
-                value={plan.id}
-                className="rounded-2xl border border-border/60 bg-card/60 px-4"
-              >
-                <AccordionTrigger className="min-h-[48px]">{plan.name}</AccordionTrigger>
-                <AccordionContent>
-                  <ul className="space-y-3 pb-3">
-                    {COMPARISON.map((row) => (
-                      <li key={row.feature} className="flex justify-between text-sm gap-4">
-                        <span className="text-muted-foreground">{row.feature}</span>
-                        <span className="text-right">{renderCell(row.values[planIdx])}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
+        {loading ? (
+          <div className="relative grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-[600px] rounded-3xl" />
             ))}
-          </Accordion>
-        </div>
+          </div>
+        ) : visiblePackages.length === 0 ? (
+          <div className="relative text-center py-16">
+            <p className="text-muted-foreground">
+              No packages available in this category yet.
+            </p>
+          </div>
+        ) : (
+          <div
+            className={`relative grid grid-cols-1 sm:grid-cols-2 ${
+              visiblePackages.length >= 4
+                ? "xl:grid-cols-4"
+                : visiblePackages.length === 3
+                  ? "lg:grid-cols-3"
+                  : ""
+            } gap-6 lg:gap-5 xl:items-stretch`}
+          >
+            {visiblePackages.map((plan, i) => (
+              <PlanCard key={plan.id} plan={plan} yearly={yearly} index={i} />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* CUSTOM */}
@@ -529,14 +422,24 @@ function PricingPage() {
   );
 }
 
-function PlanCard({ plan, yearly, index }: { plan: Plan; yearly: boolean; index: number }) {
+function PlanCard({ plan, yearly, index }: { plan: Pkg; yearly: boolean; index: number }) {
   const [expanded, setExpanded] = useState(false);
-  const Icon = plan.icon;
-  const price = yearly ? plan.yearly : plan.monthly;
-  const originalPrice = yearly ? plan.monthly : null;
+  const Icon = ICON_MAP[plan.icon_name] ?? Sparkles;
+  const monthlyDisplay = yearly
+    ? plan.price_yearly > 0
+      ? Math.round(plan.price_yearly / 12)
+      : 0
+    : plan.price_monthly;
+  const showStrikethrough = yearly && plan.price_monthly > monthlyDisplay;
+
+  const regularFeatures = plan.features.filter((f) => f.type === "feature");
+  const bonuses = plan.features.filter((f) => f.type === "bonus");
+
   const visibleCount = 7;
-  const visibleFeatures = expanded ? plan.features : plan.features.slice(0, visibleCount);
-  const hasMore = plan.features.length > visibleCount;
+  const visibleFeatures = expanded ? regularFeatures : regularFeatures.slice(0, visibleCount);
+  const hasMore = regularFeatures.length > visibleCount || bonuses.length > 0;
+
+  const ctaIsExternal = /^https?:\/\//.test(plan.cta_link);
 
   return (
     <motion.div
@@ -544,38 +447,35 @@ function PlanCard({ plan, yearly, index }: { plan: Plan; yearly: boolean; index:
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.5, delay: index * 0.08 }}
-      className={`group relative ${plan.popular ? "xl:-my-3 xl:scale-[1.03]" : ""}`}
+      className={`group relative ${plan.is_popular ? "xl:-my-3 xl:scale-[1.03]" : ""}`}
     >
-      {/* Glow border for popular */}
-      {plan.popular && (
+      {plan.is_popular && (
         <>
           <div className="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-primary via-accent to-primary opacity-90 blur-md" />
           <div className="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-primary to-accent" />
         </>
       )}
-      {/* Gold border for premium */}
-      {plan.premium && (
+      {plan.is_premium && (
         <div className="absolute -inset-[1px] rounded-3xl bg-gradient-to-br from-amber-400/60 via-amber-200/30 to-amber-500/60" />
       )}
 
       <div
         className={`relative h-full flex flex-col rounded-3xl border bg-card/70 backdrop-blur-xl p-6 lg:p-7 transition-all duration-300 group-hover:-translate-y-1 ${
-          plan.popular
+          plan.is_popular
             ? "border-transparent shadow-[0_0_60px_-15px_oklch(0.62_0.16_150/0.7)]"
-            : plan.premium
+            : plan.is_premium
               ? "border-transparent shadow-[0_0_50px_-20px_rgba(251,191,36,0.5)]"
               : "border-border/60 group-hover:border-primary/40 group-hover:shadow-[0_0_40px_-15px_oklch(0.62_0.16_150/0.5)]"
         }`}
       >
-        {/* Popular badge */}
-        {plan.popular && (
+        {plan.is_popular && (
           <div className="absolute -top-3 left-1/2 -translate-x-1/2">
             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-primary text-primary-foreground text-[10px] font-bold tracking-wider uppercase shadow-lg shadow-primary/40">
               <Sparkles className="h-3 w-3" /> Most Popular
             </span>
           </div>
         )}
-        {plan.premium && (
+        {plan.is_premium && (
           <div className="absolute -top-3 left-1/2 -translate-x-1/2">
             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 text-black text-[10px] font-bold tracking-wider uppercase shadow-lg shadow-amber-500/30">
               <Crown className="h-3 w-3" /> Premium
@@ -583,12 +483,11 @@ function PlanCard({ plan, yearly, index }: { plan: Plan; yearly: boolean; index:
           </div>
         )}
 
-        {/* Icon */}
         <div
           className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl ${
-            plan.premium
+            plan.is_premium
               ? "bg-amber-400/15 text-amber-400"
-              : plan.popular
+              : plan.is_popular
                 ? "bg-primary/20 text-primary"
                 : "bg-primary/10 text-primary"
           }`}
@@ -596,11 +495,11 @@ function PlanCard({ plan, yearly, index }: { plan: Plan; yearly: boolean; index:
           <Icon className="h-6 w-6" />
         </div>
 
-        {/* Name + tagline */}
         <h3 className="mt-4 text-2xl font-bold font-display">{plan.name}</h3>
-        <p className="mt-1.5 text-sm text-muted-foreground min-h-[40px]">{plan.tagline}</p>
+        {plan.tagline && (
+          <p className="mt-1.5 text-sm text-muted-foreground min-h-[40px]">{plan.tagline}</p>
+        )}
 
-        {/* Price */}
         <div className="mt-5 min-h-[68px]">
           <AnimatePresence mode="popLayout">
             <motion.div
@@ -613,148 +512,133 @@ function PlanCard({ plan, yearly, index }: { plan: Plan; yearly: boolean; index:
             >
               <span
                 className={`text-4xl lg:text-5xl font-black tracking-tight ${
-                  plan.premium ? "text-amber-400" : ""
+                  plan.is_premium ? "text-amber-400" : ""
                 }`}
               >
-                ${price.toLocaleString()}
+                ${monthlyDisplay.toLocaleString()}
               </span>
               <span className="text-muted-foreground mb-1.5 text-sm">/month</span>
-              {originalPrice && (
+              {showStrikethrough && (
                 <span className="text-muted-foreground line-through text-sm mb-1.5">
-                  ${originalPrice}
+                  ${plan.price_monthly}
                 </span>
               )}
             </motion.div>
           </AnimatePresence>
-          {yearly && (
+          {yearly && plan.price_yearly > 0 && (
             <p className="text-xs text-primary font-medium mt-1">
-              Billed yearly · ${(plan.yearly * 12).toLocaleString()}/yr · Save 20%
+              Billed yearly · ${plan.price_yearly.toLocaleString()}/yr · Save 20%
             </p>
           )}
         </div>
 
-        {/* CTA */}
-        <Link
-          to="/contact"
-          className={`mt-5 inline-flex items-center justify-center w-full rounded-full px-6 py-3 font-semibold transition text-sm min-h-[44px] ${
-            plan.popular
-              ? "bg-primary text-primary-foreground hover:opacity-90 shadow-lg shadow-primary/30"
-              : plan.premium
-                ? "border-2 border-amber-400/60 text-amber-400 hover:bg-amber-400/10"
-                : "border border-primary/40 text-primary hover:bg-primary/10"
-          }`}
-        >
-          {plan.cta}
-        </Link>
-
-        {/* Includes note */}
-        {plan.includesNote && (
-          <div className="mt-4 rounded-xl border border-amber-400/30 bg-amber-400/5 px-3 py-2 text-xs font-medium text-amber-400 flex items-center gap-2">
-            <BadgeCheck className="h-3.5 w-3.5" /> {plan.includesNote}
-          </div>
+        {ctaIsExternal ? (
+          <a
+            href={plan.cta_link}
+            target="_blank"
+            rel="noreferrer"
+            className={ctaClass(plan)}
+          >
+            {plan.cta_text}
+          </a>
+        ) : (
+          <Link to={plan.cta_link} className={ctaClass(plan)}>
+            {plan.cta_text}
+          </Link>
         )}
 
-        {/* Features */}
         <ul className="mt-6 space-y-2.5 flex-1">
-          {visibleFeatures.map((f) => (
-            <li key={f} className="flex items-start gap-2.5 text-sm">
+          {visibleFeatures.map((f, idx) => (
+            <li key={idx} className="flex items-start gap-2.5 text-sm">
               <span
                 className={`mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
-                  plan.popular ? "bg-primary" : "bg-primary/15"
+                  plan.is_popular ? "bg-primary" : "bg-primary/15"
                 }`}
               >
                 <Check
                   className={`h-2.5 w-2.5 ${
-                    plan.popular ? "text-primary-foreground" : "text-primary"
+                    plan.is_popular ? "text-primary-foreground" : "text-primary"
                   }`}
                   strokeWidth={4}
                 />
               </span>
-              <span className="text-foreground/90">{f}</span>
+              <span className="text-foreground/90">{f.text}</span>
             </li>
           ))}
         </ul>
 
-        {/* Expand */}
         {hasMore && (
           <button
             onClick={() => setExpanded((v) => !v)}
             className="mt-4 inline-flex items-center justify-center gap-1.5 text-xs font-semibold text-primary hover:underline"
           >
-            {expanded ? "Show less" : `View all ${plan.features.length} features`}
+            {expanded ? "Show less" : `View all ${regularFeatures.length} features`}
             <ChevronDown
               className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`}
             />
           </button>
         )}
 
-        {/* Bonuses */}
-        {plan.bonuses && (
-          <AnimatePresence initial={false}>
-            {expanded && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden"
+        <AnimatePresence initial={false}>
+          {expanded && bonuses.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <div
+                className={`mt-4 rounded-2xl p-4 border ${
+                  plan.is_premium
+                    ? "border-amber-400/30 bg-gradient-to-br from-amber-400/10 to-transparent"
+                    : "border-primary/30 bg-gradient-to-br from-primary/10 to-transparent"
+                }`}
               >
-                <div
-                  className={`mt-4 rounded-2xl p-4 border ${
-                    plan.premium
-                      ? "border-amber-400/30 bg-gradient-to-br from-amber-400/10 to-transparent"
-                      : "border-primary/30 bg-gradient-to-br from-primary/10 to-transparent"
+                <p
+                  className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
+                    plan.is_premium ? "text-amber-400" : "text-primary"
                   }`}
                 >
-                  <p
-                    className={`text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 ${
-                      plan.premium ? "text-amber-400" : "text-primary"
-                    }`}
-                  >
-                    <Sparkles className="h-3 w-3" /> {plan.bonuses.label}
-                  </p>
-                  <ul className="mt-3 space-y-2">
-                    {plan.bonuses.items.map((b) => (
-                      <li key={b} className="flex items-start gap-2 text-sm">
-                        <Sparkles
-                          className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${
-                            plan.premium ? "text-amber-400" : "text-primary"
-                          }`}
-                        />
-                        <span>{b}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        )}
+                  <Sparkles className="h-3 w-3" />
+                  {plan.is_premium ? "Premium Bonuses" : "Bonus"}
+                </p>
+                <ul className="mt-3 space-y-2">
+                  {bonuses.map((b, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sm">
+                      <Sparkles
+                        className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${
+                          plan.is_premium ? "text-amber-400" : "text-primary"
+                        }`}
+                      />
+                      <span>{b.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Best for */}
-        <div className="mt-6 pt-5 border-t border-border/60">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            Best For
-          </p>
-          <p className="mt-1.5 text-xs text-foreground/80">{plan.bestFor}</p>
-        </div>
+        {plan.best_for && (
+          <div className="mt-6 pt-5 border-t border-border/60">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Best For
+            </p>
+            <p className="mt-1.5 text-xs text-foreground/80">{plan.best_for}</p>
+          </div>
+        )}
       </div>
     </motion.div>
   );
 }
 
-function renderCell(v: string | boolean) {
-  if (v === true)
-    return (
-      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-primary">
-        <Check className="h-3.5 w-3.5" strokeWidth={3} />
-      </span>
-    );
-  if (v === false)
-    return (
-      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-muted text-muted-foreground/50">
-        <X className="h-3.5 w-3.5" />
-      </span>
-    );
-  return <span className="font-medium">{v}</span>;
+function ctaClass(plan: Pkg) {
+  return `mt-5 inline-flex items-center justify-center w-full rounded-full px-6 py-3 font-semibold transition text-sm min-h-[44px] ${
+    plan.is_popular
+      ? "bg-primary text-primary-foreground hover:opacity-90 shadow-lg shadow-primary/30"
+      : plan.is_premium
+        ? "border-2 border-amber-400/60 text-amber-400 hover:bg-amber-400/10"
+        : "border border-primary/40 text-primary hover:bg-primary/10"
+  }`;
 }

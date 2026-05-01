@@ -10,6 +10,7 @@ const ALLOWED_TABLES = new Set([
   "newsletter_subscribers",
   "site_settings",
   "user_roles",
+  "packages",
 ]);
 
 const TABLE_COLUMNS: Record<string, readonly string[]> = {
@@ -71,6 +72,24 @@ const TABLE_COLUMNS: Record<string, readonly string[]> = {
   newsletter_subscribers: ["email"],
   site_settings: ["key", "value"],
   user_roles: ["user_id", "role"],
+  packages: [
+    "category",
+    "name",
+    "slug",
+    "price_monthly",
+    "price_yearly",
+    "tagline",
+    "description",
+    "icon_name",
+    "features",
+    "best_for",
+    "is_popular",
+    "is_premium",
+    "is_visible",
+    "order_index",
+    "cta_text",
+    "cta_link",
+  ],
 };
 
 const ARRAY_COLUMNS = new Set(["gallery_images", "features", "skills"]);
