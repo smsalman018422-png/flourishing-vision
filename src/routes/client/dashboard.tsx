@@ -6,7 +6,6 @@ import {
   LayoutDashboard,
   FolderKanban,
   FileBarChart,
-  Crown,
   Package,
   CreditCard,
   MessageCircle,
