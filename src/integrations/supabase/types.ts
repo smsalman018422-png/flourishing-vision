@@ -127,6 +127,10 @@ export type Database = {
       }
       client_memberships: {
         Row: {
+          amount: number
+          auto_renew: boolean
+          billing_cycle: string
+          cancelled_at: string | null
           client_id: string
           created_at: string
           end_date: string
@@ -136,6 +140,10 @@ export type Database = {
           status: string
         }
         Insert: {
+          amount?: number
+          auto_renew?: boolean
+          billing_cycle?: string
+          cancelled_at?: string | null
           client_id: string
           created_at?: string
           end_date: string
@@ -145,6 +153,10 @@ export type Database = {
           status?: string
         }
         Update: {
+          amount?: number
+          auto_renew?: boolean
+          billing_cycle?: string
+          cancelled_at?: string | null
           client_id?: string
           created_at?: string
           end_date?: string
@@ -251,6 +263,7 @@ export type Database = {
           company_name: string | null
           country: string | null
           created_at: string
+          email: string | null
           full_name: string
           id: string
           phone: string | null
@@ -265,6 +278,7 @@ export type Database = {
           company_name?: string | null
           country?: string | null
           created_at?: string
+          email?: string | null
           full_name: string
           id: string
           phone?: string | null
@@ -279,6 +293,7 @@ export type Database = {
           company_name?: string | null
           country?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string
           id?: string
           phone?: string | null
@@ -544,6 +559,7 @@ export type Database = {
           is_visible: boolean
           name: string
           price_monthly: number
+          price_yearly: number
           slug: string
           sort_order: number
         }
@@ -555,6 +571,7 @@ export type Database = {
           is_visible?: boolean
           name: string
           price_monthly?: number
+          price_yearly?: number
           slug: string
           sort_order?: number
         }
@@ -566,6 +583,7 @@ export type Database = {
           is_visible?: boolean
           name?: string
           price_monthly?: number
+          price_yearly?: number
           slug?: string
           sort_order?: number
         }

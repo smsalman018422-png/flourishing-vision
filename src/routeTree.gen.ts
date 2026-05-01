@@ -34,8 +34,12 @@ import { Route as AdminTeamRouteImport } from './routes/admin/team'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminPortfolioRouteImport } from './routes/admin/portfolio'
+import { Route as AdminMembershipsRouteImport } from './routes/admin/memberships'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
+import { Route as AdminClientsRouteImport } from './routes/admin/clients'
+import { Route as AdminClientTicketsRouteImport } from './routes/admin/client-tickets'
+import { Route as AdminClientReportsRouteImport } from './routes/admin/client-reports'
 import { Route as AdminBlogRouteImport } from './routes/admin/blog'
 import { Route as ClientDashboardIndexRouteImport } from './routes/client/dashboard.index'
 import { Route as ClientDashboardTicketsRouteImport } from './routes/client/dashboard.tickets'
@@ -172,6 +176,11 @@ const AdminPortfolioRoute = AdminPortfolioRouteImport.update({
   path: '/admin/portfolio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminMembershipsRoute = AdminMembershipsRouteImport.update({
+  id: '/admin/memberships',
+  path: '/admin/memberships',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
@@ -180,6 +189,21 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
 const AdminContactsRoute = AdminContactsRouteImport.update({
   id: '/admin/contacts',
   path: '/admin/contacts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminClientsRoute = AdminClientsRouteImport.update({
+  id: '/admin/clients',
+  path: '/admin/clients',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminClientTicketsRoute = AdminClientTicketsRouteImport.update({
+  id: '/admin/client-tickets',
+  path: '/admin/client-tickets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminClientReportsRoute = AdminClientReportsRouteImport.update({
+  id: '/admin/client-reports',
+  path: '/admin/client-reports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminBlogRoute = AdminBlogRouteImport.update({
@@ -246,8 +270,12 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRouteWithChildren
   '/team': typeof TeamRoute
   '/admin/blog': typeof AdminBlogRoute
+  '/admin/client-reports': typeof AdminClientReportsRoute
+  '/admin/client-tickets': typeof AdminClientTicketsRoute
+  '/admin/clients': typeof AdminClientsRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -285,8 +313,12 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRouteWithChildren
   '/team': typeof TeamRoute
   '/admin/blog': typeof AdminBlogRoute
+  '/admin/client-reports': typeof AdminClientReportsRoute
+  '/admin/client-tickets': typeof AdminClientTicketsRoute
+  '/admin/clients': typeof AdminClientsRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -324,8 +356,12 @@ export interface FileRoutesById {
   '/services': typeof ServicesRouteWithChildren
   '/team': typeof TeamRoute
   '/admin/blog': typeof AdminBlogRoute
+  '/admin/client-reports': typeof AdminClientReportsRoute
+  '/admin/client-tickets': typeof AdminClientTicketsRoute
+  '/admin/clients': typeof AdminClientsRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/memberships': typeof AdminMembershipsRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
   '/admin/services': typeof AdminServicesRoute
   '/admin/settings': typeof AdminSettingsRoute
@@ -365,8 +401,12 @@ export interface FileRouteTypes {
     | '/services'
     | '/team'
     | '/admin/blog'
+    | '/admin/client-reports'
+    | '/admin/client-tickets'
+    | '/admin/clients'
     | '/admin/contacts'
     | '/admin/login'
+    | '/admin/memberships'
     | '/admin/portfolio'
     | '/admin/services'
     | '/admin/settings'
@@ -404,8 +444,12 @@ export interface FileRouteTypes {
     | '/services'
     | '/team'
     | '/admin/blog'
+    | '/admin/client-reports'
+    | '/admin/client-tickets'
+    | '/admin/clients'
     | '/admin/contacts'
     | '/admin/login'
+    | '/admin/memberships'
     | '/admin/portfolio'
     | '/admin/services'
     | '/admin/settings'
@@ -442,8 +486,12 @@ export interface FileRouteTypes {
     | '/services'
     | '/team'
     | '/admin/blog'
+    | '/admin/client-reports'
+    | '/admin/client-tickets'
+    | '/admin/clients'
     | '/admin/contacts'
     | '/admin/login'
+    | '/admin/memberships'
     | '/admin/portfolio'
     | '/admin/services'
     | '/admin/settings'
@@ -482,8 +530,12 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRouteWithChildren
   TeamRoute: typeof TeamRoute
   AdminBlogRoute: typeof AdminBlogRoute
+  AdminClientReportsRoute: typeof AdminClientReportsRoute
+  AdminClientTicketsRoute: typeof AdminClientTicketsRoute
+  AdminClientsRoute: typeof AdminClientsRoute
   AdminContactsRoute: typeof AdminContactsRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminMembershipsRoute: typeof AdminMembershipsRoute
   AdminPortfolioRoute: typeof AdminPortfolioRoute
   AdminServicesRoute: typeof AdminServicesRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
@@ -677,6 +729,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPortfolioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/memberships': {
+      id: '/admin/memberships'
+      path: '/admin/memberships'
+      fullPath: '/admin/memberships'
+      preLoaderRoute: typeof AdminMembershipsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
@@ -689,6 +748,27 @@ declare module '@tanstack/react-router' {
       path: '/admin/contacts'
       fullPath: '/admin/contacts'
       preLoaderRoute: typeof AdminContactsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/clients': {
+      id: '/admin/clients'
+      path: '/admin/clients'
+      fullPath: '/admin/clients'
+      preLoaderRoute: typeof AdminClientsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/client-tickets': {
+      id: '/admin/client-tickets'
+      path: '/admin/client-tickets'
+      fullPath: '/admin/client-tickets'
+      preLoaderRoute: typeof AdminClientTicketsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/client-reports': {
+      id: '/admin/client-reports'
+      path: '/admin/client-reports'
+      fullPath: '/admin/client-reports'
+      preLoaderRoute: typeof AdminClientReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/blog': {
@@ -835,8 +915,12 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute: ServicesRouteWithChildren,
   TeamRoute: TeamRoute,
   AdminBlogRoute: AdminBlogRoute,
+  AdminClientReportsRoute: AdminClientReportsRoute,
+  AdminClientTicketsRoute: AdminClientTicketsRoute,
+  AdminClientsRoute: AdminClientsRoute,
   AdminContactsRoute: AdminContactsRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminMembershipsRoute: AdminMembershipsRoute,
   AdminPortfolioRoute: AdminPortfolioRoute,
   AdminServicesRoute: AdminServicesRoute,
   AdminSettingsRoute: AdminSettingsRoute,
