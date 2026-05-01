@@ -192,7 +192,7 @@ function ClientsPage() {
           {/* Mobile cards */}
           <div className="md:hidden space-y-3">
             {filtered.map((c) => (
-              <Card key={c.id}>
+              <Card key={c.id} onClick={() => setSelectedClient(c)} className="cursor-pointer">
                 <div className="flex items-center gap-3">
                   <Avatar name={c.full_name} url={c.avatar_url} />
                   <div className="flex-1 min-w-0">
