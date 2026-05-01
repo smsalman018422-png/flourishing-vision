@@ -257,6 +257,32 @@ export function Navbar() {
                     </motion.div>
                   );
                 })}
+
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.08 + links.length * 0.05, duration: 0.3, ease: "easeOut" }}
+                >
+                  {authState.kind === "anon" ? (
+                    <Link
+                      to="/client/login"
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-2 min-h-12 px-4 rounded-xl text-base text-foreground hover:bg-muted transition-colors"
+                    >
+                      <LogIn className="h-4 w-4" />
+                      Client Login
+                    </Link>
+                  ) : (
+                    <Link
+                      to={authState.kind === "admin" ? "/admin" : "/client/dashboard"}
+                      onClick={() => setOpen(false)}
+                      className="flex items-center gap-2 min-h-12 px-4 rounded-xl text-base text-foreground hover:bg-muted transition-colors"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      {authState.kind === "admin" ? "Admin" : "Dashboard"}
+                    </Link>
+                  )}
+                </motion.div>
               </nav>
 
               <motion.div
