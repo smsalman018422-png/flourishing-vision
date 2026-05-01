@@ -172,14 +172,15 @@ function ClientDashboardOverview() {
   }, []);
 
   const loadAll = useCallback(async (uid: string) => {
-    setProfile((prev) =>
-      prev ?? {
-        id: uid,
-        full_name: "Client",
-        company_name: null,
-        account_manager_name: null,
-        account_manager_whatsapp: null,
-      },
+    setProfile(
+      (prev) =>
+        prev ?? {
+          id: uid,
+          full_name: "Client",
+          company_name: null,
+          account_manager_name: null,
+          account_manager_whatsapp: null,
+        },
     );
     setLoading(false);
     setError(null);
@@ -299,13 +300,16 @@ function ClientDashboardOverview() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to load dashboard";
       setError(msg);
-      setProfile((prev) => prev ?? {
-        id: uid,
-        full_name: "Client",
-        company_name: null,
-        account_manager_name: null,
-        account_manager_whatsapp: null,
-      });
+      setProfile(
+        (prev) =>
+          prev ?? {
+            id: uid,
+            full_name: "Client",
+            company_name: null,
+            account_manager_name: null,
+            account_manager_whatsapp: null,
+          },
+      );
       setMembership(null);
       setActiveProjects(0);
       setReportsThisMonth(0);
