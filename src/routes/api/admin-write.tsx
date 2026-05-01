@@ -92,8 +92,8 @@ const TABLE_COLUMNS: Record<string, readonly string[]> = {
   ],
 };
 
-const ARRAY_COLUMNS = new Set(["gallery_images", "skills"]);
-const JSON_COLUMNS = new Set(["packages", "process", "value", "features"]);
+const ARRAY_COLUMNS = new Set(["gallery_images", "features", "skills"]);
+const JSON_COLUMNS = new Set(["packages", "process", "value"]);
 
 type AdminWriteRequest = {
   table?: string;
