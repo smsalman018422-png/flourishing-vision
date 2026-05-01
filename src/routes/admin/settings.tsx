@@ -15,6 +15,7 @@ const TABS = [
   { id: "hero", label: "Hero" },
   { id: "about", label: "About" },
   { id: "calendly", label: "Calendly" },
+  { id: "legal", label: "Legal pages" },
   { id: "admins", label: "Admins" },
 ] as const;
 
@@ -42,6 +43,11 @@ const SECTION_KEYS: Record<Exclude<TabId, "admins">, { key: string; label: strin
   ],
   about: [{ key: "about_long", label: "About content", multiline: true }],
   calendly: [{ key: "calendly_url", label: "Calendly URL", placeholder: "https://calendly.com/…" }],
+  legal: [
+    { key: "legal_privacy", label: "Privacy Policy (/privacy)", multiline: true, placeholder: "Write your full Privacy Policy here. Plain text or simple paragraphs." },
+    { key: "legal_terms", label: "Terms of Service (/terms)", multiline: true, placeholder: "Write your full Terms of Service here." },
+    { key: "legal_cookies", label: "Cookie Policy (/cookies)", multiline: true, placeholder: "Write your full Cookie Policy here." },
+  ],
 };
 
 export const Route = createFileRoute("/admin/settings")({
