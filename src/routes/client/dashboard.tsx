@@ -93,12 +93,31 @@ function ClientDashboardLayout() {
         .eq("id", uid)
         .maybeSingle();
       if (!mounted) return;
-      if (!profile) {
-        await supabase.auth.signOut();
-        navigate({ to: "/client/login" });
-        return;
+      let resolved = profile as ClientProfile | null;
+      if (!resolved) {
+        // Auto-create profile for self-signed-up users on first dashboard visit
+        const sessionUser = data.session?.user;
+        const fullName =
+          (sessionUser?.user_metadata?.full_name as string | undefined) ||
+          sessionUser?.email?.split("@")[0] ||
+          "Client";
+        const { data: created, error: createErr } = await supabase
+          .from("client_profiles")
+          .insert({
+            id: uid,
+            email: sessionUser?.email ?? null,
+            full_name: fullName,
+          })
+          .select("id,full_name,company_name,avatar_url")
+          .maybeSingle();
+        if (createErr || !created) {
+          await supabase.auth.signOut();
+          navigate({ to: "/client/login" });
+          return;
+        }
+        resolved = created as ClientProfile;
       }
-      setClient(profile as ClientProfile);
+      setClient(resolved);
       setLoading(false);
     };
     void check();

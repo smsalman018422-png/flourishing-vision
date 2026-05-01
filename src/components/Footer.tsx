@@ -161,8 +161,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/client/dashboard" className="text-sm text-foreground/80 hover:text-primary transition-colors">
-                  Client Dashboard
+                <Link to="/client/signup" className="text-sm text-foreground/80 hover:text-primary transition-colors">
+                  Create Account
                 </Link>
               </li>
             </ul>

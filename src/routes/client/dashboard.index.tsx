@@ -367,6 +367,23 @@ function ClientDashboardOverview() {
         </div>
       </section>
 
+      {!membership && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="py-8 text-center space-y-4">
+            <Crown className="w-10 h-10 text-primary mx-auto" />
+            <div>
+              <h3 className="text-xl font-semibold">Choose Your Plan</h3>
+              <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
+                Select a membership plan to unlock all features and start growing your brand.
+              </p>
+            </div>
+            <Button asChild>
+              <Link to="/pricing">View Plans</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stat cards */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
