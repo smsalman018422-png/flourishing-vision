@@ -92,6 +92,7 @@ const NEXT_PLAN: Record<string, string> = {
 };
 
 const RETRY_DELAYS = [1000, 2000, 3000];
+const QUERY_TIMEOUT_MS = 2500;
 
 type RetryableResult = {
   error: { message?: string; code?: string } | null;
@@ -100,7 +101,15 @@ type RetryableResult = {
 async function withQueryRetry<T extends RetryableResult>(label: string, run: () => Promise<T>) {
   let lastError: T["error"] = null;
   for (let attempt = 0; attempt < RETRY_DELAYS.length; attempt += 1) {
-    const result = await run();
+    const result = await Promise.race([
+      run(),
+      new Promise<T>((resolve) =>
+        window.setTimeout(
+          () => resolve({ error: { message: `Timed out loading ${label}` } } as T),
+          QUERY_TIMEOUT_MS,
+        ),
+      ),
+    ]);
     if (!result.error || result.error.code === "PGRST116") return result;
     lastError = result.error;
     if (attempt < RETRY_DELAYS.length - 1) {
@@ -163,7 +172,16 @@ function ClientDashboardOverview() {
   }, []);
 
   const loadAll = useCallback(async (uid: string) => {
-    setLoading(true);
+    setProfile((prev) =>
+      prev ?? {
+        id: uid,
+        full_name: "Client",
+        company_name: null,
+        account_manager_name: null,
+        account_manager_whatsapp: null,
+      },
+    );
+    setLoading(false);
     setError(null);
     const monthStart = new Date();
     monthStart.setDate(1);
@@ -281,14 +299,9 @@ function ClientDashboardOverview() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to load dashboard";
       setError(msg);
-      const { data } = await supabase.auth.getSession();
-      const sessionUser = data.session?.user;
-      setProfile({
+      setProfile((prev) => prev ?? {
         id: uid,
-        full_name:
-          (sessionUser?.user_metadata?.full_name as string | undefined) ||
-          sessionUser?.email?.split("@")[0] ||
-          "Client",
+        full_name: "Client",
         company_name: null,
         account_manager_name: null,
         account_manager_whatsapp: null,
