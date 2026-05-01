@@ -44,7 +44,7 @@ function ClientAuthPage() {
         sb.from("client_profiles").select("id").eq("id", uid).maybeSingle(),
       ]);
       if (cancelled) return;
-      const isAdmin = (roles ?? []).some((r) => r.role === "admin");
+      const isAdmin = (roles ?? []).some((r: { role: string }) => r.role === "admin");
       if (isAdmin) navigate({ to: "/admin" });
       else if (profile) navigate({ to: "/client/dashboard" });
     };
