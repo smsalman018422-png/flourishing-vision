@@ -338,7 +338,7 @@ function ClientDashboardOverview() {
 
   if (loading) return <DashboardSkeleton />;
 
-  if (error) {
+  if (error && !profile) {
     return (
       <Card>
         <CardContent className="py-16 text-center space-y-4">
@@ -369,6 +369,23 @@ function ClientDashboardOverview() {
 
   return (
     <div className="space-y-8">
+      {error && (
+        <Card className="border-amber-500/30 bg-amber-500/10">
+          <CardContent className="py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium">Some dashboard data couldn't load.</p>
+                <p className="text-xs text-muted-foreground">You can keep using the dashboard, or try loading the latest data again.</p>
+              </div>
+            </div>
+            <Button onClick={() => userId && loadAll(userId)} variant="outline" size="sm" className="shrink-0">
+              <RefreshCw className="h-4 w-4 mr-2" /> Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Welcome */}
       <section className="glass rounded-2xl p-6 sm:p-8 border border-border/40">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
