@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, Send, ArrowLeft, MessageCircle } from "lucide-react";
+import { LoadingState } from "@/components/admin/States";
+import { applyRealtimeChange, fetchWithCache, invalidateAdminCache } from "@/lib/admin-data";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const sb = supabase as any;
@@ -61,13 +63,17 @@ function TicketsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("all");
 
-  const fetchTickets = async () => {
-    setLoading(true);
-    const { data } = await sb
+  const fetchTickets = async (force = false) => {
+    if (force) invalidateAdminCache("admin-client-tickets");
+    if (tickets.length === 0) setLoading(true);
+    const data = await fetchWithCache("admin-client-tickets", async () => {
+      const { data } = await sb
       .from("client_tickets")
-      .select("*, client:client_profiles(full_name,email)")
+      .select("id,ticket_number,subject,status,priority,client_id,last_message_at,updated_at, client:client_profiles(full_name,email)")
       .order("last_message_at", { ascending: false });
-    setTickets(data ?? []);
+      return data ?? [];
+    });
+    setTickets(data);
     setLoading(false);
   };
 
@@ -75,7 +81,9 @@ function TicketsPage() {
     fetchTickets();
     const ch = sb
       .channel("admin-tickets")
-      .on("postgres_changes", { event: "*", schema: "public", table: "client_tickets" }, fetchTickets)
+      .on("postgres_changes", { event: "*", schema: "public", table: "client_tickets" }, (payload: { eventType: "INSERT" | "UPDATE" | "DELETE"; new: Partial<Ticket>; old: Partial<Ticket> }) => {
+        setTickets((prev) => applyRealtimeChange(prev, payload));
+      })
       .subscribe();
     return () => { sb.removeChannel(ch); };
   }, []);
@@ -92,7 +100,7 @@ function TicketsPage() {
       <ChatView
         ticket={selected}
         onBack={() => navigate({ to: "/admin/client-tickets", search: { id: undefined } })}
-        onChanged={fetchTickets}
+        onChanged={() => fetchTickets(true)}
       />
     );
   }
@@ -116,7 +124,7 @@ function TicketsPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center p-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+        <Card className="p-0"><LoadingState rows={8} /></Card>
       ) : filtered.length === 0 ? (
         <Card className="text-center py-12">
           <MessageCircle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
@@ -235,7 +243,7 @@ function ChatView({ ticket, onBack, onChanged }: { ticket: Ticket; onBack: () =>
       await sb.from("client_notifications").insert({
         client_id: ticket.client_id,
         title: "New reply on your ticket",
-        message: `Re: ${ticket.subject}`,
+        body: `Re: ${ticket.subject}`,
         type: "info",
         link: `/client/dashboard/tickets?id=${ticket.id}`,
       });

@@ -1,10 +1,19 @@
-import { AlertTriangle, Inbox, Loader2, Plus, RefreshCw } from "lucide-react";
+import { AlertTriangle, Inbox, Plus, RefreshCw } from "lucide-react";
 import { Button } from "./ui";
 
-export function LoadingState() {
+export function LoadingState({ rows = 5 }: { rows?: number }) {
   return (
-    <div className="p-12 grid place-items-center">
-      <Loader2 className="h-5 w-5 animate-spin text-primary" />
+    <div className="space-y-3 p-3 sm:p-4">
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4 rounded-lg bg-muted/20 p-4 animate-pulse">
+          <div className="h-11 w-11 rounded-full bg-primary/10" />
+          <div className="flex-1 space-y-2">
+            <div className="h-4 w-1/3 rounded bg-primary/10" />
+            <div className="h-3 w-1/2 rounded bg-primary/10" />
+          </div>
+          <div className="hidden sm:block h-8 w-20 rounded bg-primary/10" />
+        </div>
+      ))}
     </div>
   );
 }

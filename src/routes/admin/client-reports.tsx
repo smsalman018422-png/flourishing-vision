@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { LoadingState } from "@/components/admin/States";
+import { applyRealtimeChange, fetchWithCache, invalidateAdminCache } from "@/lib/admin-data";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
@@ -53,20 +55,34 @@ function ReportsPage() {
   const [filterClient, setFilterClient] = useState<string>("all");
   const [openUpload, setOpenUpload] = useState(false);
 
-  const fetchAll = async () => {
-    setLoading(true);
-    const [{ data: r }, { data: c }, { data: p }] = await Promise.all([
-      sb.from("client_reports").select("*, client:client_profiles(full_name)").order("created_at", { ascending: false }),
-      sb.from("client_profiles").select("id,full_name").order("full_name"),
-      sb.from("client_projects").select("id,client_id,name"),
-    ]);
-    setReports(r ?? []);
-    setClients(c ?? []);
-    setProjects(p ?? []);
+  const fetchAll = async (force = false) => {
+    if (force) invalidateAdminCache("admin-client-reports");
+    if (reports.length === 0) setLoading(true);
+    const { r, c, p } = await fetchWithCache("admin-client-reports", async () => {
+      const [reportsRes, clientsRes, projectsRes] = await Promise.all([
+        sb.from("client_reports").select("id,client_id,title,report_type,week_start,week_end,file_url,file_path,is_published,created_at, client:client_profiles(full_name)").order("created_at", { ascending: false }),
+        sb.from("client_profiles").select("id,full_name").order("full_name"),
+        sb.from("client_projects").select("id,client_id,name"),
+      ]);
+      return { r: reportsRes.data ?? [], c: clientsRes.data ?? [], p: projectsRes.data ?? [] };
+    });
+    setReports(r);
+    setClients(c);
+    setProjects(p);
     setLoading(false);
   };
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => {
+    fetchAll();
+    const ch = sb
+      .channel("admin-client-reports")
+      .on("postgres_changes", { event: "*", schema: "public", table: "client_reports" }, (payload: { eventType: "INSERT" | "UPDATE" | "DELETE"; new: Partial<Report>; old: Partial<Report> }) => {
+        setReports((prev) => applyRealtimeChange(prev, payload));
+      })
+      .subscribe();
+    return () => { sb.removeChannel(ch); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = useMemo(
     () => filterClient === "all" ? reports : reports.filter((r) => r.client_id === filterClient),
@@ -96,7 +112,7 @@ function ReportsPage() {
       </Card>
 
       {loading ? (
-        <div className="flex justify-center p-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+        <Card className="p-0"><LoadingState rows={8} /></Card>
       ) : filtered.length === 0 ? (
         <Card className="text-center py-12">
           <FileBarChart className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
@@ -148,7 +164,7 @@ function ReportsPage() {
         onOpenChange={setOpenUpload}
         clients={clients}
         projects={projects}
-        onSaved={fetchAll}
+        onSaved={() => fetchAll(true)}
       />
     </>
   );
@@ -271,7 +287,7 @@ function UploadReportDialog({
         await sb.from("client_notifications").insert({
           client_id: form.client_id,
           title: "New report available",
-          message: `New report available: ${form.title}`,
+          body: `New report available: ${form.title}`,
           type: "info",
           link: "/client/dashboard/reports",
         });

@@ -28,6 +28,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const sb = supabase as any;
+
 export const Route = createFileRoute("/client/dashboard")({
   head: () => ({
     meta: [
@@ -43,6 +46,7 @@ type ClientProfile = {
   full_name: string;
   company_name: string | null;
   avatar_url: string | null;
+  is_active?: boolean;
 };
 
 const nav: Array<{ to: string; label: string; Icon: typeof LayoutDashboard; exact?: boolean }> = [
@@ -87,9 +91,9 @@ function ClientDashboardLayout() {
         navigate({ to: "/client/login" });
         return;
       }
-      const { data: profile } = await supabase
+      const { data: profile } = await sb
         .from("client_profiles")
-        .select("id,full_name,company_name,avatar_url")
+        .select("id,full_name,company_name,avatar_url,is_active")
         .eq("id", uid)
         .maybeSingle();
       if (!mounted) return;
@@ -101,14 +105,18 @@ function ClientDashboardLayout() {
           (sessionUser?.user_metadata?.full_name as string | undefined) ||
           sessionUser?.email?.split("@")[0] ||
           "Client";
-        const { data: created, error: createErr } = await supabase
+        const { data: created, error: createErr } = await sb
           .from("client_profiles")
           .insert({
             id: uid,
-            email: sessionUser?.email ?? null,
+            email: sessionUser?.email?.trim().toLowerCase() ?? null,
             full_name: fullName,
+            phone: (sessionUser?.user_metadata?.phone as string | undefined) || null,
+            whatsapp_number: (sessionUser?.user_metadata?.phone as string | undefined) || null,
+            company_name: (sessionUser?.user_metadata?.company_name as string | undefined) || null,
+            is_active: true,
           })
-          .select("id,full_name,company_name,avatar_url")
+          .select("id,full_name,company_name,avatar_url,is_active")
           .maybeSingle();
         if (createErr || !created) {
           await supabase.auth.signOut();
@@ -116,6 +124,11 @@ function ClientDashboardLayout() {
           return;
         }
         resolved = created as ClientProfile;
+      }
+      if (resolved.is_active === false) {
+        await supabase.auth.signOut();
+        navigate({ to: "/client/login" });
+        return;
       }
       setClient(resolved);
       setLoading(false);

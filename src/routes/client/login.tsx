@@ -7,6 +7,7 @@ import { z } from "zod";
 import { Button, Field, TextInput } from "@/components/admin/ui";
 
 type Tab = "login" | "signup";
+const sb = supabase as any;
 
 export const Route = createFileRoute("/client/login")({
   validateSearch: (s: Record<string, unknown>): { tab?: Tab } => ({
@@ -39,11 +40,11 @@ function ClientAuthPage() {
       const uid = data.session?.user.id;
       if (!uid || cancelled) return;
       const [{ data: roles }, { data: profile }] = await Promise.all([
-        supabase.from("user_roles").select("role").eq("user_id", uid),
-        supabase.from("client_profiles").select("id").eq("id", uid).maybeSingle(),
+        sb.from("user_roles").select("role").eq("user_id", uid),
+        sb.from("client_profiles").select("id").eq("id", uid).maybeSingle(),
       ]);
       if (cancelled) return;
-      const isAdmin = (roles ?? []).some((r) => r.role === "admin");
+      const isAdmin = (roles ?? []).some((r: { role: string }) => r.role === "admin");
       if (isAdmin) navigate({ to: "/admin" });
       else if (profile) navigate({ to: "/client/dashboard" });
     };
@@ -124,32 +125,56 @@ function LoginForm() {
     setBusy(true);
     setError("");
     try {
+      const normalizedEmail = email.trim().toLowerCase();
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email,
+        email: normalizedEmail,
         password,
       });
       if (authError || !authData.user) {
-        setError(authError?.message ?? "Sign-in failed");
+        const message = authError?.message ?? "Sign-in failed";
+        if (message.includes("Invalid login credentials")) {
+          setError("Wrong email or password. Please check and try again.");
+        } else if (message.includes("Email not confirmed")) {
+          setError("Please verify your email first. Check your inbox.");
+        } else {
+          setError(message);
+        }
         return;
       }
-      const { data: profile } = await supabase
+      const { data: profile } = await sb
         .from("client_profiles")
-        .select("id")
+        .select("id,full_name,is_active")
         .eq("id", authData.user.id)
         .maybeSingle();
       if (!profile) {
         // Auto-create a profile for users created elsewhere (e.g. admins)
-        await supabase.from("client_profiles").insert({
+        await sb.from("client_profiles").insert({
           id: authData.user.id,
-          email: authData.user.email,
+          email: authData.user.email?.trim().toLowerCase() || normalizedEmail,
           full_name:
             (authData.user.user_metadata?.full_name as string | undefined) ||
             authData.user.email?.split("@")[0] ||
             "Client",
+          phone: (authData.user.user_metadata?.phone as string | undefined) || null,
+          whatsapp_number: (authData.user.user_metadata?.phone as string | undefined) || null,
+          company_name: (authData.user.user_metadata?.company_name as string | undefined) || null,
+          is_active: true,
         });
+      } else if (profile.is_active === false) {
+        setError("Your account has been deactivated. Contact support.");
+        await supabase.auth.signOut();
+        return;
+      }
+
+      const { data: roles } = await sb.from("user_roles").select("role").eq("user_id", authData.user.id);
+      if ((roles ?? []).some((r: { role: string }) => r.role === "admin")) {
+        navigate({ to: "/admin" });
+        return;
       }
       toast.success("Welcome back");
       navigate({ to: "/client/dashboard" });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setBusy(false);
     }
@@ -258,7 +283,8 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
     e.preventDefault();
     setError("");
 
-    const parsed = signupSchema.safeParse({ fullName, email, phone, companyName, password });
+    const normalizedEmail = email.trim().toLowerCase();
+    const parsed = signupSchema.safeParse({ fullName, email: normalizedEmail, phone, companyName, password });
     if (!parsed.success) {
       setError(parsed.error.issues[0].message);
       return;
@@ -279,12 +305,21 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
         password: parsed.data.password,
         options: {
           emailRedirectTo: `${window.location.origin}/client/login`,
-          data: { full_name: parsed.data.fullName },
+          data: {
+            full_name: parsed.data.fullName,
+            phone: parsed.data.phone || null,
+            company_name: parsed.data.companyName || null,
+          },
         },
       });
 
       if (authError) {
-        setError(authError.message);
+        if (authError.message.includes("already registered")) {
+          setError("This email is already registered. Try signing in instead.");
+          onSwitchToLogin();
+        } else {
+          setError(authError.message);
+        }
         return;
       }
       if (!authData.user) {
@@ -292,16 +327,21 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
         return;
       }
 
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const { error: profileError } = await sb.from("client_profiles").insert({
+        id: authData.user.id,
+        email: parsed.data.email,
+        full_name: parsed.data.fullName || "",
+        phone: phone || null,
+        whatsapp_number: phone || null,
+        company_name: companyName || null,
+        is_active: true,
+      });
+      if (profileError) console.error("Profile insert error:", profileError);
+
       if (authData.session) {
-        await supabase.from("client_profiles").insert({
-          id: authData.user.id,
-          email: parsed.data.email,
-          full_name: parsed.data.fullName,
-          phone: phone || null,
-          whatsapp_number: phone || null,
-          company_name: companyName || null,
-        });
-        await supabase.from("client_notifications").insert({
+        await sb.from("client_notifications").insert({
           client_id: authData.user.id,
           title: "Welcome to LetUsGrow! 🎉",
           body: "Your account is ready. Explore your dashboard to get started.",

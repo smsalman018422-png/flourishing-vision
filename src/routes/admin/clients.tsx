@@ -13,6 +13,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { LoadingState } from "@/components/admin/States";
+import { applyRealtimeChange, fetchWithCache, invalidateAdminCache } from "@/lib/admin-data";
 import { toast } from "sonner";
 import { Plus, Search, Eye, EyeOff, Loader2, Users, UserX, UserCheck } from "lucide-react";
 
@@ -29,6 +31,7 @@ type Client = {
   country: string | null;
   avatar_url: string | null;
   created_at: string;
+  is_active: boolean;
   membership?: {
     status: string;
     plan?: { name: string } | null;
@@ -53,25 +56,28 @@ function ClientsPage() {
   const [search, setSearch] = useState("");
   const [openAdd, setOpenAdd] = useState(false);
 
-  const fetchClients = async () => {
-    setLoading(true);
-    const { data: profiles } = await sb
-      .from("client_profiles")
-      .select("*")
-      .order("created_at", { ascending: false });
-    const { data: memberships } = await sb
-      .from("client_memberships")
-      .select("client_id, status, plan:membership_plans(name)");
+  const fetchClients = async (force = false) => {
+    if (force) invalidateAdminCache("admin-clients");
+    if (clients.length === 0) setLoading(true);
+    const list = await fetchWithCache("admin-clients", async () => {
+      const { data: profiles } = await sb
+        .from("client_profiles")
+        .select("id,full_name,email,company_name,phone,whatsapp_number,country,avatar_url,created_at,is_active")
+        .order("created_at", { ascending: false });
+      const { data: memberships } = await sb
+        .from("client_memberships")
+        .select("client_id, status, plan:membership_plans(name)");
 
-    const memMap = new Map<string, { status: string; plan?: { name: string } | null }>();
-    (memberships ?? []).forEach((m: { client_id: string; status: string; plan: { name: string } | null }) => {
-      if (!memMap.has(m.client_id)) memMap.set(m.client_id, { status: m.status, plan: m.plan });
+      const memMap = new Map<string, { status: string; plan?: { name: string } | null }>();
+      (memberships ?? []).forEach((m: { client_id: string; status: string; plan: { name: string } | null }) => {
+        if (!memMap.has(m.client_id)) memMap.set(m.client_id, { status: m.status, plan: m.plan });
+      });
+
+      return (profiles ?? []).map((p: Client) => ({
+        ...p,
+        membership: memMap.get(p.id) ?? null,
+      }));
     });
-
-    const list = (profiles ?? []).map((p: Client) => ({
-      ...p,
-      membership: memMap.get(p.id) ?? null,
-    }));
     setClients(list);
     setLoading(false);
   };
@@ -88,6 +94,20 @@ function ClientsPage() {
   useEffect(() => {
     fetchClients();
     fetchPlans();
+    const profiles = sb
+      .channel("admin-client-profiles")
+      .on("postgres_changes", { event: "*", schema: "public", table: "client_profiles" }, (payload: { eventType: "INSERT" | "UPDATE" | "DELETE"; new: Partial<Client>; old: Partial<Client> }) => {
+        setClients((prev) => applyRealtimeChange(prev, payload));
+      })
+      .subscribe();
+    const memberships = sb
+      .channel("admin-client-memberships")
+      .on("postgres_changes", { event: "*", schema: "public", table: "client_memberships" }, (payload: { eventType: "INSERT" | "UPDATE" | "DELETE"; new: { client_id?: string; status?: string }; old: { client_id?: string } }) => {
+        setClients((prev) => prev.map((c) => c.id === (payload.new.client_id ?? payload.old.client_id) ? { ...c, membership: { ...(c.membership ?? {}), status: payload.new.status ?? c.membership?.status ?? "inactive" } } : c));
+      })
+      .subscribe();
+    return () => { sb.removeChannel(profiles); sb.removeChannel(memberships); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = useMemo(() => {
@@ -125,7 +145,7 @@ function ClientsPage() {
       </Card>
 
       {loading ? (
-        <div className="flex justify-center p-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+        <Card className="p-0"><LoadingState rows={8} /></Card>
       ) : filtered.length === 0 ? (
         <Card className="text-center py-12">
           <Users className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
@@ -194,7 +214,7 @@ function ClientsPage() {
         open={openAdd}
         onOpenChange={setOpenAdd}
         plans={plans}
-        onCreated={fetchClients}
+        onCreated={() => fetchClients(true)}
       />
     </>
   );
@@ -269,10 +289,11 @@ function AddClientDialog({
     }
     setSubmitting(true);
     try {
+      const normalizedEmail = form.email.trim().toLowerCase();
       const { data: authData, error: authError } = await sb.auth.signUp({
-        email: form.email.trim(),
+        email: normalizedEmail,
         password: form.password,
-        options: { data: { full_name: form.full_name } },
+        options: { data: { full_name: form.full_name, phone: form.phone || null, company_name: form.company_name || null } },
       });
       if (authError) throw authError;
       const userId = authData.user?.id;
@@ -280,12 +301,13 @@ function AddClientDialog({
 
       await sb.from("client_profiles").upsert({
         id: userId,
-        email: form.email.trim(),
+        email: normalizedEmail,
         full_name: form.full_name.trim(),
         company_name: form.company_name || null,
         phone: form.phone || null,
         whatsapp_number: form.whatsapp || null,
         country: form.country || null,
+        is_active: true,
       });
 
       const plan = plans.find((p) => p.id === form.plan_id);
@@ -308,12 +330,12 @@ function AddClientDialog({
       await sb.from("client_notifications").insert({
         client_id: userId,
         title: "Welcome to LetUsGrow!",
-        message: `Your ${plan?.name ?? "plan"} is now active. Explore your dashboard to get started.`,
+        body: `Your ${plan?.name ?? "plan"} is now active. Explore your dashboard to get started.`,
         type: "success",
         link: "/client/dashboard",
       });
 
-      toast.success(`Client created! Login: ${form.email}`);
+      toast.success(`Client created! Login: ${normalizedEmail}`);
       reset();
       onOpenChange(false);
       onCreated();

@@ -53,7 +53,7 @@ function ContactsAdmin() {
     setLoadError(null);
     const { data, error } = await adminData<Submission>({
       table: "contact_submissions",
-      select: "*",
+      select: "id,full_name,email,phone,company,service,budget,message,status,created_at",
       orders: [{ column: "created_at", ascending: false }],
       limit: 500,
     });
