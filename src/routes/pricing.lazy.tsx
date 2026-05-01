@@ -1,8 +1,18 @@
-import { createLazyFileRoute, Link } from "@tanstack/react-router";
+import { createLazyFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { PageShell } from "@/components/layout/PageShell";
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { CreditCard, MessageCircle, LogIn, UserPlus, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import {
   Check,
   ArrowRight,
