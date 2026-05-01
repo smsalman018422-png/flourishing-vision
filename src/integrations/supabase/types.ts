@@ -613,6 +613,72 @@ export type Database = {
         }
         Relationships: []
       }
+      packages: {
+        Row: {
+          best_for: string | null
+          category: string
+          created_at: string
+          cta_link: string
+          cta_text: string
+          description: string | null
+          features: Json
+          icon_name: string
+          id: string
+          is_popular: boolean
+          is_premium: boolean
+          is_visible: boolean
+          name: string
+          order_index: number
+          price_monthly: number
+          price_yearly: number
+          slug: string
+          tagline: string | null
+          updated_at: string
+        }
+        Insert: {
+          best_for?: string | null
+          category?: string
+          created_at?: string
+          cta_link?: string
+          cta_text?: string
+          description?: string | null
+          features?: Json
+          icon_name?: string
+          id?: string
+          is_popular?: boolean
+          is_premium?: boolean
+          is_visible?: boolean
+          name: string
+          order_index?: number
+          price_monthly?: number
+          price_yearly?: number
+          slug: string
+          tagline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          best_for?: string | null
+          category?: string
+          created_at?: string
+          cta_link?: string
+          cta_text?: string
+          description?: string | null
+          features?: Json
+          icon_name?: string
+          id?: string
+          is_popular?: boolean
+          is_premium?: boolean
+          is_visible?: boolean
+          name?: string
+          order_index?: number
+          price_monthly?: number
+          price_yearly?: number
+          slug?: string
+          tagline?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       portfolio: {
         Row: {
           after_image_url: string | null
