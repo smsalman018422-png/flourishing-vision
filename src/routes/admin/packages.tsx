@@ -94,6 +94,131 @@ export const Route = createFileRoute("/admin/packages")({
   ),
 });
 
+type PendingRequest = {
+  id: string;
+  client_id: string;
+  package_id: string;
+  billing_cycle: string;
+  amount: number;
+  status: string;
+  created_at: string;
+  package?: { name: string } | null;
+  client?: { full_name: string; email: string | null } | null;
+};
+
+function PendingApprovals() {
+  const [rows, setRows] = useState<PendingRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const load = async () => {
+    setLoading(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = (await import("@/integrations/supabase/client")).supabase as any;
+    const { data } = await sb
+      .from("package_purchase_requests")
+      .select("*, package:packages(name), client:client_profiles(full_name,email)")
+      .eq("status", "pending")
+      .order("created_at", { ascending: false });
+    setRows(data ?? []);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const setup = async () => {
+      const { supabase: sb } = await import("@/integrations/supabase/client");
+      const channel = sb
+        .channel("admin-purchase-requests")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "package_purchase_requests" },
+          () => load(),
+        )
+        .subscribe();
+      return () => {
+        sb.removeChannel(channel);
+      };
+    };
+    let cleanup: (() => void) | undefined;
+    setup().then((c) => (cleanup = c));
+    return () => cleanup?.();
+  }, []);
+
+  const act = async (id: string, action: "approve" | "reject") => {
+    setBusyId(id);
+    try {
+      const { supabase: sb } = await import("@/integrations/supabase/client");
+      const { data: sess } = await sb.auth.getSession();
+      const token = sess.session?.access_token;
+      const res = await fetch("/api/purchase-approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ request_id: id, action }),
+      });
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.ok) {
+        toast.error(body?.error || "Action failed");
+      } else {
+        toast.success(action === "approve" ? "Package activated" : "Request rejected");
+        load();
+      }
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  if (loading) return null;
+  if (rows.length === 0) return null;
+
+  return (
+    <Card className="p-4 mb-5 border-primary/40 bg-primary/5">
+      <div className="flex items-center gap-2 mb-3">
+        <Sparkles className="h-4 w-4 text-primary" />
+        <h3 className="font-semibold">Pending Approvals</h3>
+        <span className="text-xs px-2 py-0.5 rounded-full bg-primary text-primary-foreground font-bold">
+          {rows.length}
+        </span>
+      </div>
+      <div className="space-y-2">
+        {rows.map((r) => (
+          <div
+            key={r.id}
+            className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg border border-border/60 bg-background"
+          >
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-sm">
+                {r.client?.full_name ?? "Unknown client"}
+                <span className="text-muted-foreground"> · {r.client?.email}</span>
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {r.package?.name ?? "Package"} · {r.billing_cycle} · ${r.amount} ·{" "}
+                {new Date(r.created_at).toLocaleDateString()}
+              </p>
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <Button
+                onClick={() => act(r.id, "approve")}
+                disabled={busyId === r.id}
+              >
+                Approve
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => act(r.id, "reject")}
+                disabled={busyId === r.id}
+              >
+                Reject
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 function PackagesAdmin() {
   const [rows, setRows] = useState<Pkg[]>([]);
   const [loading, setLoading] = useState(true);
