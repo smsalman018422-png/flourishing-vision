@@ -225,7 +225,7 @@ function TicketsPage() {
               ticket={selectedTicket}
               userId={userId!}
               onBack={() =>
-                navigate({ to: "/client/dashboard/tickets", search: {} })
+                navigate({ to: "/client/dashboard/tickets", search: { id: undefined } })
               }
               onUpdate={() => void loadTickets()}
             />

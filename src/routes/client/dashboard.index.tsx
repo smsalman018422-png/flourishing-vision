@@ -532,7 +532,7 @@ function ClientDashboardOverview() {
           </Link>
         </Button>
         <Button asChild variant="outline" className="h-auto py-4 justify-start">
-          <Link to="/client/dashboard/tickets">
+          <Link to="/client/dashboard/tickets" search={{ id: undefined }}>
             <LifeBuoy className="h-4 w-4 mr-2" />
             Create Support Ticket
           </Link>
