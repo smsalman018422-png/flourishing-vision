@@ -160,6 +160,26 @@ export function Navbar() {
                 </AnimatePresence>
               </button>
 
+              {authState.kind === "anon" ? (
+                <Link
+                  to="/client/login"
+                  className="hidden lg:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <LogIn className="h-3.5 w-3.5" />
+                  Client Login
+                </Link>
+              ) : (
+                <Link
+                  to={authState.kind === "admin" ? "/admin" : "/client/dashboard"}
+                  className="hidden lg:inline-flex items-center gap-2 h-9 pl-2 pr-3 rounded-xl text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
+                >
+                  <span className="h-7 w-7 rounded-full bg-gradient-primary text-primary-foreground grid place-items-center text-[11px] font-semibold">
+                    {initials}
+                  </span>
+                  {authState.kind === "admin" ? "Admin" : "Dashboard"}
+                </Link>
+              )}
+
               <Link
                 to="/contact"
                 className="hidden lg:inline-flex items-center h-9 px-4 rounded-xl text-sm font-medium bg-gradient-primary text-primary-foreground shadow-glow hover:shadow-elegant hover:-translate-y-0.5 active:translate-y-0 transition-all"
