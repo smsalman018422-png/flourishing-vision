@@ -36,6 +36,8 @@ import { Route as AdminPortfolioRouteImport } from './routes/admin/portfolio'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
 import { Route as AdminBlogRouteImport } from './routes/admin/blog'
+import { Route as ClientDashboardReportsRouteImport } from './routes/client/dashboard.reports'
+import { Route as ClientDashboardProjectsRouteImport } from './routes/client/dashboard.projects'
 import { Route as ApiPublicBlogRouteImport } from './routes/api/public/blog'
 
 const TeamRoute = TeamRouteImport.update({
@@ -173,6 +175,16 @@ const AdminBlogRoute = AdminBlogRouteImport.update({
   path: '/admin/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientDashboardReportsRoute = ClientDashboardReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => ClientDashboardRoute,
+} as any)
+const ClientDashboardProjectsRoute = ClientDashboardProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => ClientDashboardRoute,
+} as any)
 const ApiPublicBlogRoute = ApiPublicBlogRouteImport.update({
   id: '/api/public/blog',
   path: '/api/public/blog',
@@ -203,11 +215,13 @@ export interface FileRoutesByFullPath {
   '/api/admin-write': typeof ApiAdminWriteRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/client/dashboard': typeof ClientDashboardRoute
+  '/client/dashboard': typeof ClientDashboardRouteWithChildren
   '/portfolio/$slug': typeof PortfolioSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/blog': typeof ApiPublicBlogRoute
+  '/client/dashboard/projects': typeof ClientDashboardProjectsRoute
+  '/client/dashboard/reports': typeof ClientDashboardReportsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -233,11 +247,13 @@ export interface FileRoutesByTo {
   '/api/admin-write': typeof ApiAdminWriteRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/client/dashboard': typeof ClientDashboardRoute
+  '/client/dashboard': typeof ClientDashboardRouteWithChildren
   '/portfolio/$slug': typeof PortfolioSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin': typeof AdminIndexRoute
   '/api/public/blog': typeof ApiPublicBlogRoute
+  '/client/dashboard/projects': typeof ClientDashboardProjectsRoute
+  '/client/dashboard/reports': typeof ClientDashboardReportsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -264,11 +280,13 @@ export interface FileRoutesById {
   '/api/admin-write': typeof ApiAdminWriteRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/client/dashboard': typeof ClientDashboardRoute
+  '/client/dashboard': typeof ClientDashboardRouteWithChildren
   '/portfolio/$slug': typeof PortfolioSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/blog': typeof ApiPublicBlogRoute
+  '/client/dashboard/projects': typeof ClientDashboardProjectsRoute
+  '/client/dashboard/reports': typeof ClientDashboardReportsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -301,6 +319,8 @@ export interface FileRouteTypes {
     | '/services/$slug'
     | '/admin/'
     | '/api/public/blog'
+    | '/client/dashboard/projects'
+    | '/client/dashboard/reports'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -331,6 +351,8 @@ export interface FileRouteTypes {
     | '/services/$slug'
     | '/admin'
     | '/api/public/blog'
+    | '/client/dashboard/projects'
+    | '/client/dashboard/reports'
   id:
     | '__root__'
     | '/'
@@ -361,6 +383,8 @@ export interface FileRouteTypes {
     | '/services/$slug'
     | '/admin/'
     | '/api/public/blog'
+    | '/client/dashboard/projects'
+    | '/client/dashboard/reports'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -386,7 +410,7 @@ export interface RootRouteChildren {
   ApiAdminUploadRoute: typeof ApiAdminUploadRoute
   ApiAdminWriteRoute: typeof ApiAdminWriteRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
-  ClientDashboardRoute: typeof ClientDashboardRoute
+  ClientDashboardRoute: typeof ClientDashboardRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
   ApiPublicBlogRoute: typeof ApiPublicBlogRoute
 }
@@ -582,6 +606,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBlogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/client/dashboard/reports': {
+      id: '/client/dashboard/reports'
+      path: '/reports'
+      fullPath: '/client/dashboard/reports'
+      preLoaderRoute: typeof ClientDashboardReportsRouteImport
+      parentRoute: typeof ClientDashboardRoute
+    }
+    '/client/dashboard/projects': {
+      id: '/client/dashboard/projects'
+      path: '/projects'
+      fullPath: '/client/dashboard/projects'
+      preLoaderRoute: typeof ClientDashboardProjectsRouteImport
+      parentRoute: typeof ClientDashboardRoute
+    }
     '/api/public/blog': {
       id: '/api/public/blog'
       path: '/api/public/blog'
@@ -626,6 +664,20 @@ const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
   ServicesRouteChildren,
 )
 
+interface ClientDashboardRouteChildren {
+  ClientDashboardProjectsRoute: typeof ClientDashboardProjectsRoute
+  ClientDashboardReportsRoute: typeof ClientDashboardReportsRoute
+}
+
+const ClientDashboardRouteChildren: ClientDashboardRouteChildren = {
+  ClientDashboardProjectsRoute: ClientDashboardProjectsRoute,
+  ClientDashboardReportsRoute: ClientDashboardReportsRoute,
+}
+
+const ClientDashboardRouteWithChildren = ClientDashboardRoute._addFileChildren(
+  ClientDashboardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
@@ -649,7 +701,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminUploadRoute: ApiAdminUploadRoute,
   ApiAdminWriteRoute: ApiAdminWriteRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
-  ClientDashboardRoute: ClientDashboardRoute,
+  ClientDashboardRoute: ClientDashboardRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
   ApiPublicBlogRoute: ApiPublicBlogRoute,
 }
