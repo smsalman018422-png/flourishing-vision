@@ -71,6 +71,226 @@ export type Database = {
         }
         Relationships: []
       }
+      client_memberships: {
+        Row: {
+          client_id: string
+          created_at: string
+          end_date: string
+          id: string
+          plan_id: string
+          start_date: string
+          status: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          end_date: string
+          id?: string
+          plan_id: string
+          start_date?: string
+          status?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          end_date?: string
+          id?: string
+          plan_id?: string
+          start_date?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_memberships_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "membership_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_notifications: {
+        Row: {
+          body: string | null
+          client_id: string
+          created_at: string
+          id: string
+          is_read: boolean
+          title: string
+          type: string
+        }
+        Insert: {
+          body?: string | null
+          client_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          title: string
+          type?: string
+        }
+        Update: {
+          body?: string | null
+          client_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      client_profiles: {
+        Row: {
+          account_manager_name: string | null
+          account_manager_whatsapp: string | null
+          avatar_url: string | null
+          company_name: string | null
+          created_at: string
+          full_name: string
+          id: string
+          phone: string | null
+          updated_at: string
+          whatsapp_number: string | null
+        }
+        Insert: {
+          account_manager_name?: string | null
+          account_manager_whatsapp?: string | null
+          avatar_url?: string | null
+          company_name?: string | null
+          created_at?: string
+          full_name: string
+          id: string
+          phone?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Update: {
+          account_manager_name?: string | null
+          account_manager_whatsapp?: string | null
+          avatar_url?: string | null
+          company_name?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
+      client_projects: {
+        Row: {
+          client_id: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          name: string
+          start_date: string | null
+          status: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          start_date?: string | null
+          status?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          start_date?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      client_reports: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          is_read: boolean
+          period_end: string | null
+          period_start: string | null
+          project_id: string | null
+          report_url: string | null
+          summary: string | null
+          title: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          period_end?: string | null
+          period_start?: string | null
+          project_id?: string | null
+          report_url?: string | null
+          summary?: string | null
+          title: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          period_end?: string | null
+          period_start?: string | null
+          project_id?: string | null
+          report_url?: string | null
+          summary?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "client_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_tickets: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          message: string
+          priority: string
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          message: string
+          priority?: string
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          priority?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contact_submissions: {
         Row: {
           budget: string | null
@@ -107,6 +327,42 @@ export type Database = {
           phone?: string | null
           service?: string | null
           status?: Database["public"]["Enums"]["contact_status"]
+        }
+        Relationships: []
+      }
+      membership_plans: {
+        Row: {
+          created_at: string
+          currency: string
+          features: Json
+          id: string
+          is_visible: boolean
+          name: string
+          price_monthly: number
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          features?: Json
+          id?: string
+          is_visible?: boolean
+          name: string
+          price_monthly?: number
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          features?: Json
+          id?: string
+          is_visible?: boolean
+          name?: string
+          price_monthly?: number
+          slug?: string
+          sort_order?: number
         }
         Relationships: []
       }
@@ -400,7 +656,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "client"
       contact_status: "new" | "contacted" | "closed"
     }
     CompositeTypes: {
@@ -529,7 +785,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "client"],
       contact_status: ["new", "contacted", "closed"],
     },
   },
