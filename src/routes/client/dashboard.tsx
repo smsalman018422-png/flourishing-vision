@@ -165,7 +165,7 @@ function ClientDashboardLayout() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[280px] flex-col border-r border-border/60 bg-[oklch(0.14_0.012_160)]/60 backdrop-blur z-30">
-        <SidebarBody pathname={pathname} client={client} onSignOut={onSignOut} />
+        <SidebarBody pathname={pathname} client={client} onSignOut={onSignOut} unreadCount={unreadCount} />
       </aside>
 
       <AnimatePresence>
@@ -194,7 +194,7 @@ function ClientDashboardLayout() {
               >
                 <X className="h-5 w-5" />
               </button>
-              <SidebarBody pathname={pathname} client={client} onSignOut={onSignOut} />
+              <SidebarBody pathname={pathname} client={client} onSignOut={onSignOut} unreadCount={unreadCount} />
             </motion.aside>
           </>
         )}
