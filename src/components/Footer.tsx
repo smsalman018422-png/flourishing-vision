@@ -6,8 +6,22 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const services = ["Social Media", "Paid Ads", "SEO", "Branding", "Design", "Analytics"];
-const company = ["About", "Team", "Portfolio", "Blog", "Careers", "Contact"];
+const services: { label: string; to: string }[] = [
+  { label: "Social Media", to: "/services" },
+  { label: "Paid Ads", to: "/services" },
+  { label: "SEO", to: "/services" },
+  { label: "Branding", to: "/services" },
+  { label: "Design", to: "/services" },
+  { label: "Analytics", to: "/services" },
+];
+const company: { label: string; to: string }[] = [
+  { label: "About", to: "/about" },
+  { label: "Team", to: "/team" },
+  { label: "Portfolio", to: "/portfolio" },
+  { label: "Blog", to: "/blog" },
+  { label: "Careers", to: "/contact" },
+  { label: "Contact", to: "/contact" },
+];
 
 type IconProps = { className?: string };
 const InstagramIcon = ({ className }: IconProps) => (
@@ -132,10 +146,10 @@ export function Footer() {
             </h4>
             <ul className="mt-4 space-y-2.5">
               {services.map((s) => (
-                <li key={s}>
-                  <a href="#" className="text-sm text-foreground/80 hover:text-primary transition-colors">
-                    {s}
-                  </a>
+                <li key={s.label}>
+                  <Link to={s.to} className="text-sm text-foreground/80 hover:text-primary transition-colors">
+                    {s.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -148,10 +162,10 @@ export function Footer() {
             </h4>
             <ul className="mt-4 space-y-2.5">
               {company.map((c) => (
-                <li key={c}>
-                  <a href="#" className="text-sm text-foreground/80 hover:text-primary transition-colors">
-                    {c}
-                  </a>
+                <li key={c.label}>
+                  <Link to={c.to} className="text-sm text-foreground/80 hover:text-primary transition-colors">
+                    {c.label}
+                  </Link>
                 </li>
               ))}
               <li>
@@ -214,11 +228,11 @@ export function Footer() {
         <div className="mt-14 pt-6 border-t border-border/60 flex flex-col items-center gap-4 text-center md:flex-row md:items-center md:justify-between md:text-left text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} Let Us Grow. All rights reserved.</p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
+            <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
             <span className="opacity-40">|</span>
-            <a href="#" className="hover:text-foreground transition-colors">Terms of Service</a>
+            <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
             <span className="opacity-40">|</span>
-            <a href="#" className="hover:text-foreground transition-colors">Cookie Policy</a>
+            <Link to="/cookies" className="hover:text-foreground transition-colors">Cookie Policy</Link>
           </div>
           <p>Made with <span className="text-primary">🌱</span> in Bangladesh</p>
         </div>
