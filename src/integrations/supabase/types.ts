@@ -180,32 +180,47 @@ export type Database = {
       }
       client_projects: {
         Row: {
+          assigned_team_ids: string[]
           client_id: string
           created_at: string
+          deliverables: Json
           description: string | null
           end_date: string | null
           id: string
           name: string
+          notes: string | null
+          progress: number
+          service_type: string | null
           start_date: string | null
           status: string
         }
         Insert: {
+          assigned_team_ids?: string[]
           client_id: string
           created_at?: string
+          deliverables?: Json
           description?: string | null
           end_date?: string | null
           id?: string
           name: string
+          notes?: string | null
+          progress?: number
+          service_type?: string | null
           start_date?: string | null
           status?: string
         }
         Update: {
+          assigned_team_ids?: string[]
           client_id?: string
           created_at?: string
+          deliverables?: Json
           description?: string | null
           end_date?: string | null
           id?: string
           name?: string
+          notes?: string | null
+          progress?: number
+          service_type?: string | null
           start_date?: string | null
           status?: string
         }
@@ -213,40 +228,67 @@ export type Database = {
       }
       client_reports: {
         Row: {
+          ai_summary: string | null
           client_id: string
           created_at: string
+          file_path: string | null
+          file_type: string | null
+          file_url: string | null
           id: string
+          is_published: boolean
           is_read: boolean
+          metrics: Json
           period_end: string | null
           period_start: string | null
           project_id: string | null
+          report_type: string
           report_url: string | null
           summary: string | null
           title: string
+          week_end: string | null
+          week_start: string | null
         }
         Insert: {
+          ai_summary?: string | null
           client_id: string
           created_at?: string
+          file_path?: string | null
+          file_type?: string | null
+          file_url?: string | null
           id?: string
+          is_published?: boolean
           is_read?: boolean
+          metrics?: Json
           period_end?: string | null
           period_start?: string | null
           project_id?: string | null
+          report_type?: string
           report_url?: string | null
           summary?: string | null
           title: string
+          week_end?: string | null
+          week_start?: string | null
         }
         Update: {
+          ai_summary?: string | null
           client_id?: string
           created_at?: string
+          file_path?: string | null
+          file_type?: string | null
+          file_url?: string | null
           id?: string
+          is_published?: boolean
           is_read?: boolean
+          metrics?: Json
           period_end?: string | null
           period_start?: string | null
           project_id?: string | null
+          report_type?: string
           report_url?: string | null
           summary?: string | null
           title?: string
+          week_end?: string | null
+          week_start?: string | null
         }
         Relationships: [
           {
