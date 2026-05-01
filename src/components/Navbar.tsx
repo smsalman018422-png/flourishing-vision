@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { Leaf, Moon, Sun, Menu, X, LayoutDashboard } from "lucide-react";
+import { Moon, Sun, Menu, X, LayoutDashboard } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { supabase } from "@/integrations/supabase/client";
+import logoSrc from "@/assets/logo.png";
 
 const links = [
   { label: "Home", href: "/" },
@@ -106,13 +107,14 @@ export function Navbar() {
               scrolled ? "glass-strong shadow-elegant" : "bg-transparent"
             }`}
           >
-            <Link to="/" className="flex items-center gap-2 group min-h-11">
-              <span className="relative grid place-items-center h-9 w-9 rounded-xl bg-gradient-primary shadow-glow">
-                <Leaf className="h-4 w-4 text-primary-foreground" strokeWidth={2.5} />
-              </span>
-              <span className="font-display font-semibold tracking-tight text-lg">
-                LetU<span className="text-gradient">Grow</span>
-              </span>
+            <Link to="/" className="flex items-center gap-2 group min-h-11" aria-label="Let Us Grow — Home">
+              <img
+                src={logoSrc}
+                alt="Let Us Grow"
+                className="h-9 w-auto object-contain"
+                loading="eager"
+                decoding="async"
+              />
             </Link>
 
             <nav className="hidden lg:flex items-center gap-1">
