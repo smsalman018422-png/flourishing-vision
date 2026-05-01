@@ -455,7 +455,17 @@ function PricingPage() {
   );
 }
 
-function PlanCard({ plan, yearly, index }: { plan: Pkg; yearly: boolean; index: number }) {
+function PlanCard({
+  plan,
+  yearly,
+  index,
+  onPurchase,
+}: {
+  plan: Pkg;
+  yearly: boolean;
+  index: number;
+  onPurchase: () => void;
+}) {
   const [expanded, setExpanded] = useState(false);
   const Icon = ICON_MAP[plan.icon_name] ?? Sparkles;
   const monthlyDisplay = yearly
