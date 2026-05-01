@@ -257,7 +257,7 @@ function SidebarBody({
             return (
               <li key={to}>
                 <Link
-                  to={to}
+                  to={to as "/client/dashboard"}
                   className={`min-h-[44px] flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
                     active
                       ? "bg-primary/15 text-primary font-medium"
