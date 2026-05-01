@@ -94,6 +94,28 @@ const NEXT_PLAN: Record<string, string> = {
   growth: "Enterprise",
 };
 
+const RETRY_DELAYS = [1000, 2000, 3000];
+
+type RetryableResult = {
+  error: { message?: string; code?: string } | null;
+};
+
+async function withQueryRetry<T extends RetryableResult>(
+  label: string,
+  run: () => Promise<T>,
+) {
+  let lastError: T["error"] = null;
+  for (let attempt = 0; attempt < RETRY_DELAYS.length; attempt += 1) {
+    const result = await run();
+    if (!result.error || result.error.code === "PGRST116") return result;
+    lastError = result.error;
+    if (attempt < RETRY_DELAYS.length - 1) {
+      await new Promise((resolve) => window.setTimeout(resolve, RETRY_DELAYS[attempt]));
+    }
+  }
+  throw new Error(lastError?.message || `Failed to load ${label}`);
+}
+
 function ClientDashboardOverview() {
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -138,31 +160,31 @@ function ClientDashboardOverview() {
         ticketsListRes,
         notifsRes,
       ] = await Promise.all([
-        supabase.from("client_profiles").select("*").eq("id", uid).maybeSingle(),
-        supabase
+        withQueryRetry("profile", async () => await supabase.from("client_profiles").select("*").eq("id", uid).maybeSingle()),
+        withQueryRetry("membership", async () => await supabase
           .from("client_memberships")
           .select("*, membership_plans(*)")
           .eq("client_id", uid)
           .eq("status", "active")
           .order("end_date", { ascending: false })
           .limit(1)
-          .maybeSingle(),
-        supabase
+          .maybeSingle()),
+        withQueryRetry("projects", async () => await supabase
           .from("client_projects")
           .select("id", { count: "exact", head: true })
           .eq("client_id", uid)
-          .eq("status", "active"),
-        supabase
+          .eq("status", "active")),
+        withQueryRetry("reports count", async () => await supabase
           .from("client_reports")
           .select("id", { count: "exact", head: true })
           .eq("client_id", uid)
-          .gte("created_at", monthStart.toISOString()),
-        supabase
+          .gte("created_at", monthStart.toISOString())),
+        withQueryRetry("tickets count", async () => await supabase
           .from("client_tickets")
           .select("id", { count: "exact", head: true })
           .eq("client_id", uid)
-          .in("status", ["open", "in_progress"]),
-        supabase
+          .in("status", ["open", "in_progress"])),
+        withQueryRetry("reports", async () => await supabase
           .from("client_reports")
           .select(
             "id,title,summary,is_read,created_at,file_path,file_url,file_type,period_start,period_end",
@@ -170,19 +192,19 @@ function ClientDashboardOverview() {
           .eq("client_id", uid)
           .eq("is_published", true)
           .order("created_at", { ascending: false })
-          .limit(3),
-        supabase
+          .limit(3)),
+        withQueryRetry("tickets", async () => await supabase
           .from("client_tickets")
           .select("id,subject,status,created_at,updated_at")
           .eq("client_id", uid)
           .order("updated_at", { ascending: false })
-          .limit(5),
-        supabase
+          .limit(5)),
+        withQueryRetry("notifications", async () => await supabase
           .from("client_notifications")
           .select("id,title,body,type,is_read,created_at")
           .eq("client_id", uid)
           .order("created_at", { ascending: false })
-          .limit(5),
+          .limit(5)),
       ]);
 
       const firstError =
@@ -207,6 +229,25 @@ function ClientDashboardOverview() {
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to load dashboard";
       setError(msg);
+      const { data } = await supabase.auth.getSession();
+      const sessionUser = data.session?.user;
+      setProfile({
+        id: uid,
+        full_name:
+          (sessionUser?.user_metadata?.full_name as string | undefined) ||
+          sessionUser?.email?.split("@")[0] ||
+          "Client",
+        company_name: null,
+        account_manager_name: null,
+        account_manager_whatsapp: null,
+      });
+      setMembership(null);
+      setActiveProjects(0);
+      setReportsThisMonth(0);
+      setOpenTickets(0);
+      setRecentReports([]);
+      setRecentTickets([]);
+      setNotifications([]);
     } finally {
       setLoading(false);
     }
