@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Leaf, Loader2, Check } from "lucide-react";
+import { Loader2, Check } from "lucide-react";
+import logoSrc from "@/assets/logo.png";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -101,13 +102,14 @@ export function Footer() {
         <div className="grid gap-12 text-center md:text-left md:grid-cols-2 lg:grid-cols-4">
           {/* COL 1 — Brand */}
           <div>
-            <div className="flex items-center gap-2">
-              <span className="grid place-items-center h-9 w-9 rounded-xl bg-gradient-primary shadow-glow">
-                <Leaf className="h-4 w-4 text-primary-foreground" strokeWidth={2.5} />
-              </span>
-              <span className="font-display font-semibold text-lg">
-                LetU<span className="text-gradient">Grow</span>
-              </span>
+            <div className="flex items-center justify-center md:justify-start gap-2">
+              <img
+                src={logoSrc}
+                alt="Let Us Grow"
+                className="h-10 w-auto object-contain"
+                loading="lazy"
+                decoding="async"
+              />
             </div>
             <p className="mt-4 text-sm text-muted-foreground max-w-xs">
               Growing brands globally since 2025.
@@ -213,7 +215,7 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-14 pt-6 border-t border-border/60 flex flex-col items-center gap-4 text-center md:flex-row md:items-center md:justify-between md:text-left text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} LetUGrow. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Let Us Grow. All rights reserved.</p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <a href="#" className="hover:text-foreground transition-colors">Privacy Policy</a>
             <span className="opacity-40">|</span>
