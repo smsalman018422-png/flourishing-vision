@@ -21,6 +21,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as PortfolioSlugRouteImport } from './routes/portfolio.$slug'
+import { Route as ClientDashboardRouteImport } from './routes/client/dashboard'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ApiSitemapDotxmlRouteImport } from './routes/api/sitemap[.]xml'
 import { Route as ApiAdminWriteRouteImport } from './routes/api/admin-write'
@@ -96,6 +97,11 @@ const PortfolioSlugRoute = PortfolioSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => PortfolioRoute,
+} as any)
+const ClientDashboardRoute = ClientDashboardRouteImport.update({
+  id: '/client/dashboard',
+  path: '/client/dashboard',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/$slug',
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/api/admin-write': typeof ApiAdminWriteRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/client/dashboard': typeof ClientDashboardRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -226,6 +233,7 @@ export interface FileRoutesByTo {
   '/api/admin-write': typeof ApiAdminWriteRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/client/dashboard': typeof ClientDashboardRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin': typeof AdminIndexRoute
@@ -256,6 +264,7 @@ export interface FileRoutesById {
   '/api/admin-write': typeof ApiAdminWriteRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/client/dashboard': typeof ClientDashboardRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
@@ -287,6 +296,7 @@ export interface FileRouteTypes {
     | '/api/admin-write'
     | '/api/sitemap.xml'
     | '/blog/$slug'
+    | '/client/dashboard'
     | '/portfolio/$slug'
     | '/services/$slug'
     | '/admin/'
@@ -316,6 +326,7 @@ export interface FileRouteTypes {
     | '/api/admin-write'
     | '/api/sitemap.xml'
     | '/blog/$slug'
+    | '/client/dashboard'
     | '/portfolio/$slug'
     | '/services/$slug'
     | '/admin'
@@ -345,6 +356,7 @@ export interface FileRouteTypes {
     | '/api/admin-write'
     | '/api/sitemap.xml'
     | '/blog/$slug'
+    | '/client/dashboard'
     | '/portfolio/$slug'
     | '/services/$slug'
     | '/admin/'
@@ -374,6 +386,7 @@ export interface RootRouteChildren {
   ApiAdminUploadRoute: typeof ApiAdminUploadRoute
   ApiAdminWriteRoute: typeof ApiAdminWriteRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
+  ClientDashboardRoute: typeof ClientDashboardRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ApiPublicBlogRoute: typeof ApiPublicBlogRoute
 }
@@ -463,6 +476,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/portfolio/$slug'
       preLoaderRoute: typeof PortfolioSlugRouteImport
       parentRoute: typeof PortfolioRoute
+    }
+    '/client/dashboard': {
+      id: '/client/dashboard'
+      path: '/client/dashboard'
+      fullPath: '/client/dashboard'
+      preLoaderRoute: typeof ClientDashboardRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/blog/$slug': {
       id: '/blog/$slug'
@@ -629,6 +649,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminUploadRoute: ApiAdminUploadRoute,
   ApiAdminWriteRoute: ApiAdminWriteRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
+  ClientDashboardRoute: ClientDashboardRoute,
   AdminIndexRoute: AdminIndexRoute,
   ApiPublicBlogRoute: ApiPublicBlogRoute,
 }
