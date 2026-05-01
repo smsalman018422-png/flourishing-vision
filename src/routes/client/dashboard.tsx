@@ -18,7 +18,7 @@ import {
   ChevronDown,
   User as UserIcon,
 } from "lucide-react";
-import logoSrc from "@/assets/logo.png";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
