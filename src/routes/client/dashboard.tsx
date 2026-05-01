@@ -83,6 +83,20 @@ function ClientDashboardLayout() {
 
   useEffect(() => {
     let mounted = true;
+    const fetchProfileWithRetry = async (uid: string, retries = 4) => {
+      for (let i = 0; i < retries; i++) {
+        const { data, error } = await sb
+          .from("client_profiles")
+          .select("id,full_name,company_name,avatar_url,is_active")
+          .eq("id", uid)
+          .maybeSingle();
+        if (!error) return { data: data as ClientProfile | null, error: null };
+        // 503 / network — retry with backoff
+        await new Promise((r) => setTimeout(r, 600 * (i + 1)));
+      }
+      return { data: null, error: new Error("Profile fetch failed after retries") };
+    };
+
     const check = async () => {
       const { data } = await supabase.auth.getSession();
       if (!mounted) return;
@@ -91,21 +105,17 @@ function ClientDashboardLayout() {
         navigate({ to: "/client/login" });
         return;
       }
-      const { data: profile } = await sb
-        .from("client_profiles")
-        .select("id,full_name,company_name,avatar_url,is_active")
-        .eq("id", uid)
-        .maybeSingle();
+      const { data: profile, error: fetchErr } = await fetchProfileWithRetry(uid);
       if (!mounted) return;
-      let resolved = profile as ClientProfile | null;
-      if (!resolved) {
+      let resolved = profile;
+      if (!resolved && !fetchErr) {
         // Auto-create profile for self-signed-up users on first dashboard visit
         const sessionUser = data.session?.user;
         const fullName =
           (sessionUser?.user_metadata?.full_name as string | undefined) ||
           sessionUser?.email?.split("@")[0] ||
           "Client";
-        const { data: created, error: createErr } = await sb
+        const { data: created } = await sb
           .from("client_profiles")
           .insert({
             id: uid,
@@ -118,12 +128,21 @@ function ClientDashboardLayout() {
           })
           .select("id,full_name,company_name,avatar_url,is_active")
           .maybeSingle();
-        if (createErr || !created) {
-          await supabase.auth.signOut();
-          navigate({ to: "/client/login" });
-          return;
-        }
-        resolved = created as ClientProfile;
+        resolved = (created as ClientProfile | null) ?? null;
+      }
+      if (!resolved) {
+        // Backend temporarily unavailable — show a placeholder so the user is not signed out.
+        const sessionUser = data.session?.user;
+        resolved = {
+          id: uid,
+          full_name:
+            (sessionUser?.user_metadata?.full_name as string | undefined) ||
+            sessionUser?.email?.split("@")[0] ||
+            "Client",
+          company_name: null,
+          avatar_url: null,
+          is_active: true,
+        };
       }
       if (resolved.is_active === false) {
         await supabase.auth.signOut();

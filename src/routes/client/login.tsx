@@ -39,14 +39,19 @@ function ClientAuthPage() {
       const { data } = await supabase.auth.getSession();
       const uid = data.session?.user.id;
       if (!uid || cancelled) return;
-      const [{ data: roles }, { data: profile }] = await Promise.all([
-        sb.from("user_roles").select("role").eq("user_id", uid),
-        sb.from("client_profiles").select("id").eq("id", uid).maybeSingle(),
-      ]);
+      // Best-effort role check; if PostgREST is slow/down, default to client dashboard.
+      let isAdmin = false;
+      try {
+        const rolesPromise = sb.from("user_roles").select("role").eq("user_id", uid);
+        const timeout = new Promise((resolve) => setTimeout(() => resolve({ data: null }), 1500));
+        const result = (await Promise.race([rolesPromise, timeout])) as { data: { role: string }[] | null };
+        isAdmin = (result?.data ?? []).some((r) => r.role === "admin");
+      } catch {
+        // ignore
+      }
       if (cancelled) return;
-      const isAdmin = (roles ?? []).some((r: { role: string }) => r.role === "admin");
       if (isAdmin) navigate({ to: "/admin", replace: true });
-      else if (profile) navigate({ to: "/client/dashboard", replace: true });
+      else navigate({ to: "/client/dashboard", replace: true });
     };
     void route();
     return () => {
@@ -144,13 +149,19 @@ function LoginForm() {
         return;
       }
 
-      // Fast path: check admin in parallel, but don't block navigation on profile fetch.
-      // Dashboard layout will create/verify the profile if missing.
-      const { data: roles } = await sb
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", authData.user.id);
-      const isAdmin = (roles ?? []).some((r: { role: string }) => r.role === "admin");
+      // Try admin role check, but don't block login on transient API errors.
+      let isAdmin = false;
+      try {
+        const rolesPromise = sb
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", authData.user.id);
+        const timeout = new Promise((resolve) => setTimeout(() => resolve({ data: null }), 1500));
+        const result = (await Promise.race([rolesPromise, timeout])) as { data: { role: string }[] | null };
+        isAdmin = (result?.data ?? []).some((r) => r.role === "admin");
+      } catch {
+        // ignore — default to client dashboard
+      }
 
       toast.success("Welcome back");
       if (isAdmin) {
