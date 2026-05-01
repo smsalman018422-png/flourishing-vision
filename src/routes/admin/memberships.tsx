@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, Crown, CalendarPlus, RefreshCw, X as XIcon, ArrowRightLeft } from "lucide-react";
+import { LoadingState } from "@/components/admin/States";
+import { applyRealtimeChange, fetchWithCache, invalidateAdminCache } from "@/lib/admin-data";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const sb = supabase as any;
@@ -54,12 +56,16 @@ function MembershipsPage() {
   const [filter, setFilter] = useState<Filter>("all");
   const [editing, setEditing] = useState<{ kind: "extend" | "change" | "renew"; row: Membership } | null>(null);
 
-  const fetchData = async () => {
-    setLoading(true);
-    const { data } = await sb
+  const fetchData = async (force = false) => {
+    if (force) invalidateAdminCache("admin-memberships");
+    if (items.length === 0) setLoading(true);
+    const data = await fetchWithCache("admin-memberships", async () => {
+      const { data } = await sb
       .from("client_memberships")
-      .select("*, plan:membership_plans(name), client:client_profiles(full_name,email)")
+      .select("id,client_id,plan_id,status,start_date,end_date,amount,billing_cycle,auto_renew,cancelled_at,created_at, plan:membership_plans(name), client:client_profiles(full_name,email)")
       .order("created_at", { ascending: false });
+      return data ?? [];
+    });
     setItems(data ?? []);
     setLoading(false);
   };
@@ -69,6 +75,14 @@ function MembershipsPage() {
     sb.from("membership_plans").select("id,name,price_monthly,price_yearly").order("sort_order").then(
       ({ data }: { data: Plan[] | null }) => setPlans(data ?? []),
     );
+    const ch = sb
+      .channel("admin-memberships")
+      .on("postgres_changes", { event: "*", schema: "public", table: "client_memberships" }, (payload: { eventType: "INSERT" | "UPDATE" | "DELETE"; new: Partial<Membership>; old: Partial<Membership> }) => {
+        setItems((prev) => applyRealtimeChange(prev, payload));
+      })
+      .subscribe();
+    return () => { sb.removeChannel(ch); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = useMemo(
@@ -78,12 +92,14 @@ function MembershipsPage() {
 
   const cancel = async (m: Membership) => {
     if (!confirm("Cancel this membership?")) return;
+    const previous = items;
+    setItems((prev) => prev.map((x) => x.id === m.id ? { ...x, status: "cancelled", cancelled_at: new Date().toISOString() } : x));
     const { error } = await sb
       .from("client_memberships")
       .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
       .eq("id", m.id);
-    if (error) toast.error(error.message);
-    else { toast.success("Cancelled"); fetchData(); }
+    if (error) { setItems(previous); toast.error(error.message); }
+    else toast.success("Cancelled");
   };
 
   return (
@@ -105,7 +121,7 @@ function MembershipsPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center p-12"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+        <Card className="p-0"><LoadingState rows={8} /></Card>
       ) : filtered.length === 0 ? (
         <Card className="text-center py-12">
           <Crown className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
@@ -169,7 +185,7 @@ function MembershipsPage() {
           action={editing}
           plans={plans}
           onClose={() => setEditing(null)}
-          onSaved={() => { setEditing(null); fetchData(); }}
+          onSaved={() => { setEditing(null); fetchData(true); }}
         />
       )}
     </>
