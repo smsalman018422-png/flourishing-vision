@@ -123,7 +123,7 @@ export function Footer() {
               </span>
             </div>
             <p className="mt-4 text-sm text-muted-foreground max-w-xs">
-              Growing brands globally since 2025.
+              Growing brands globally since 2019.
             </p>
             <div className="mt-6 flex items-center justify-center md:justify-start gap-2">
               {socials.map(({ Icon, label, href }) => (
