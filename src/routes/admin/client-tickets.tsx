@@ -91,7 +91,7 @@ function TicketsPage() {
     return (
       <ChatView
         ticket={selected}
-        onBack={() => navigate({ to: "/admin/client-tickets" })}
+        onBack={() => navigate({ to: "/admin/client-tickets", search: { id: undefined } })}
         onChanged={fetchTickets}
       />
     );

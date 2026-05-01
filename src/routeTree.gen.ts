@@ -38,6 +38,7 @@ import { Route as AdminMembershipsRouteImport } from './routes/admin/memberships
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
 import { Route as AdminClientsRouteImport } from './routes/admin/clients'
+import { Route as AdminClientTicketsRouteImport } from './routes/admin/client-tickets'
 import { Route as AdminClientReportsRouteImport } from './routes/admin/client-reports'
 import { Route as AdminBlogRouteImport } from './routes/admin/blog'
 import { Route as ClientDashboardIndexRouteImport } from './routes/client/dashboard.index'
@@ -195,6 +196,11 @@ const AdminClientsRoute = AdminClientsRouteImport.update({
   path: '/admin/clients',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminClientTicketsRoute = AdminClientTicketsRouteImport.update({
+  id: '/admin/client-tickets',
+  path: '/admin/client-tickets',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminClientReportsRoute = AdminClientReportsRouteImport.update({
   id: '/admin/client-reports',
   path: '/admin/client-reports',
@@ -265,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/team': typeof TeamRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/client-reports': typeof AdminClientReportsRoute
+  '/admin/client-tickets': typeof AdminClientTicketsRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -307,6 +314,7 @@ export interface FileRoutesByTo {
   '/team': typeof TeamRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/client-reports': typeof AdminClientReportsRoute
+  '/admin/client-tickets': typeof AdminClientTicketsRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -349,6 +357,7 @@ export interface FileRoutesById {
   '/team': typeof TeamRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/client-reports': typeof AdminClientReportsRoute
+  '/admin/client-tickets': typeof AdminClientTicketsRoute
   '/admin/clients': typeof AdminClientsRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/login': typeof AdminLoginRoute
@@ -393,6 +402,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/admin/blog'
     | '/admin/client-reports'
+    | '/admin/client-tickets'
     | '/admin/clients'
     | '/admin/contacts'
     | '/admin/login'
@@ -435,6 +445,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/admin/blog'
     | '/admin/client-reports'
+    | '/admin/client-tickets'
     | '/admin/clients'
     | '/admin/contacts'
     | '/admin/login'
@@ -476,6 +487,7 @@ export interface FileRouteTypes {
     | '/team'
     | '/admin/blog'
     | '/admin/client-reports'
+    | '/admin/client-tickets'
     | '/admin/clients'
     | '/admin/contacts'
     | '/admin/login'
@@ -519,6 +531,7 @@ export interface RootRouteChildren {
   TeamRoute: typeof TeamRoute
   AdminBlogRoute: typeof AdminBlogRoute
   AdminClientReportsRoute: typeof AdminClientReportsRoute
+  AdminClientTicketsRoute: typeof AdminClientTicketsRoute
   AdminClientsRoute: typeof AdminClientsRoute
   AdminContactsRoute: typeof AdminContactsRoute
   AdminLoginRoute: typeof AdminLoginRoute
@@ -744,6 +757,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClientsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/client-tickets': {
+      id: '/admin/client-tickets'
+      path: '/admin/client-tickets'
+      fullPath: '/admin/client-tickets'
+      preLoaderRoute: typeof AdminClientTicketsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/client-reports': {
       id: '/admin/client-reports'
       path: '/admin/client-reports'
@@ -896,6 +916,7 @@ const rootRouteChildren: RootRouteChildren = {
   TeamRoute: TeamRoute,
   AdminBlogRoute: AdminBlogRoute,
   AdminClientReportsRoute: AdminClientReportsRoute,
+  AdminClientTicketsRoute: AdminClientTicketsRoute,
   AdminClientsRoute: AdminClientsRoute,
   AdminContactsRoute: AdminContactsRoute,
   AdminLoginRoute: AdminLoginRoute,
