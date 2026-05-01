@@ -1,6 +1,9 @@
-import { createLazyFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createLazyFileRoute, Link, useNavigate, getRouteApi } from "@tanstack/react-router";
 import { PageShell } from "@/components/layout/PageShell";
 import { useEffect, useMemo, useState } from "react";
+import type { PublicPackage } from "@/server/packages.functions";
+
+const pricingRouteApi = getRouteApi("/pricing");
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
@@ -140,9 +143,14 @@ const COMING_SOON_LABELS: Record<string, string> = {
 };
 
 function PricingPage() {
+  const initial = pricingRouteApi.useLoaderData() as PublicPackage[];
+  const initialPkgs = useMemo<Pkg[]>(
+    () => (initial ?? []).map((d) => ({ ...d, features: normalizeFeatures(d.features) })) as Pkg[],
+    [initial],
+  );
   const [yearly, setYearly] = useState(false);
-  const [packages, setPackages] = useState<Pkg[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [packages, setPackages] = useState<Pkg[]>(initialPkgs);
+  const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>("social_media");
   const [purchaseTarget, setPurchaseTarget] = useState<Pkg | null>(null);
 
@@ -161,9 +169,7 @@ function PricingPage() {
           data.map((d) => ({ ...d, features: normalizeFeatures(d.features) })) as Pkg[],
         );
       }
-      setLoading(false);
     };
-    load();
 
     const channel = supabase
       .channel("packages-public")

@@ -537,7 +537,7 @@ function ClientDashboardOverview() {
                 )}
               </div>
               <Button asChild variant="outline" size="sm">
-                <Link to="/client/dashboard/membership">View Full Plan Details</Link>
+                <Link to="/client/dashboard/packages">View Full Plan Details</Link>
               </Button>
             </div>
 
