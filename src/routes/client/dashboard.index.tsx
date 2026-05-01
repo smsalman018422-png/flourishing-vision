@@ -1,20 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import {
   AlertTriangle,
   Bell,
   CheckCircle2,
+  Crown,
+  Download,
   FileText,
+  FileBarChart,
   FolderKanban,
-  Loader2,
   LifeBuoy,
   MessageCircle,
+  RefreshCw,
   Sparkles,
   TrendingUp,
 } from "lucide-react";
@@ -55,13 +59,46 @@ type Membership = {
   membership_plans: Plan | null;
 };
 
-type Report = { id: string; title: string; summary: string | null; is_read: boolean; created_at: string };
-type Ticket = { id: string; subject: string; status: string; created_at: string };
-type Notification = { id: string; title: string; body: string | null; type: string; is_read: boolean; created_at: string };
+type Report = {
+  id: string;
+  title: string;
+  summary: string | null;
+  is_read: boolean;
+  created_at: string;
+  file_path: string | null;
+  file_url: string | null;
+  file_type: string | null;
+  period_start: string | null;
+  period_end: string | null;
+};
+
+type Ticket = {
+  id: string;
+  subject: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type Notification = {
+  id: string;
+  title: string;
+  body: string | null;
+  type: string;
+  is_read: boolean;
+  created_at: string;
+};
+
+const NEXT_PLAN: Record<string, string> = {
+  starter: "Growth",
+  growth: "Enterprise",
+};
 
 function ClientDashboardOverview() {
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [now, setNow] = useState(() => new Date());
   const [profile, setProfile] = useState<ClientProfile | null>(null);
   const [membership, setMembership] = useState<Membership | null>(null);
   const [activeProjects, setActiveProjects] = useState(0);
@@ -71,57 +108,109 @@ function ClientDashboardOverview() {
   const [recentTickets, setRecentTickets] = useState<Ticket[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
+  // Live clock — minute resolution
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(t);
+  }, []);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      const uid = data.session?.user.id ?? null;
-      setUserId(uid);
+      setUserId(data.session?.user.id ?? null);
     });
   }, []);
 
-  const loadAll = async (uid: string) => {
+  const loadAll = useCallback(async (uid: string) => {
     setLoading(true);
+    setError(null);
     const monthStart = new Date();
     monthStart.setDate(1);
     monthStart.setHours(0, 0, 0, 0);
 
-    const [
-      profileRes,
-      membershipRes,
-      projectsRes,
-      reportsCountRes,
-      ticketsCountRes,
-      reportsListRes,
-      ticketsListRes,
-      notifsRes,
-    ] = await Promise.all([
-      supabase.from("client_profiles").select("*").eq("id", uid).maybeSingle(),
-      supabase
-        .from("client_memberships")
-        .select("*, membership_plans(*)")
-        .eq("client_id", uid)
-        .eq("status", "active")
-        .order("end_date", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-      supabase.from("client_projects").select("id", { count: "exact", head: true }).eq("client_id", uid).eq("status", "active"),
-      supabase.from("client_reports").select("id", { count: "exact", head: true }).eq("client_id", uid).gte("created_at", monthStart.toISOString()),
-      supabase.from("client_tickets").select("id", { count: "exact", head: true }).eq("client_id", uid).in("status", ["open", "in_progress"]),
-      supabase.from("client_reports").select("id,title,summary,is_read,created_at").eq("client_id", uid).order("created_at", { ascending: false }).limit(5),
-      supabase.from("client_tickets").select("id,subject,status,created_at").eq("client_id", uid).order("created_at", { ascending: false }).limit(5),
-      supabase.from("client_notifications").select("id,title,body,type,is_read,created_at").eq("client_id", uid).order("created_at", { ascending: false }).limit(5),
-    ]);
+    try {
+      const [
+        profileRes,
+        membershipRes,
+        projectsRes,
+        reportsCountRes,
+        ticketsCountRes,
+        reportsListRes,
+        ticketsListRes,
+        notifsRes,
+      ] = await Promise.all([
+        supabase.from("client_profiles").select("*").eq("id", uid).maybeSingle(),
+        supabase
+          .from("client_memberships")
+          .select("*, membership_plans(*)")
+          .eq("client_id", uid)
+          .eq("status", "active")
+          .order("end_date", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from("client_projects")
+          .select("id", { count: "exact", head: true })
+          .eq("client_id", uid)
+          .eq("status", "active"),
+        supabase
+          .from("client_reports")
+          .select("id", { count: "exact", head: true })
+          .eq("client_id", uid)
+          .gte("created_at", monthStart.toISOString()),
+        supabase
+          .from("client_tickets")
+          .select("id", { count: "exact", head: true })
+          .eq("client_id", uid)
+          .in("status", ["open", "in_progress"]),
+        supabase
+          .from("client_reports")
+          .select(
+            "id,title,summary,is_read,created_at,file_path,file_url,file_type,period_start,period_end",
+          )
+          .eq("client_id", uid)
+          .eq("is_published", true)
+          .order("created_at", { ascending: false })
+          .limit(3),
+        supabase
+          .from("client_tickets")
+          .select("id,subject,status,created_at,updated_at")
+          .eq("client_id", uid)
+          .order("updated_at", { ascending: false })
+          .limit(5),
+        supabase
+          .from("client_notifications")
+          .select("id,title,body,type,is_read,created_at")
+          .eq("client_id", uid)
+          .order("created_at", { ascending: false })
+          .limit(5),
+      ]);
 
-    if (profileRes.error && profileRes.error.code !== "PGRST116") toast.error(profileRes.error.message);
-    setProfile((profileRes.data as ClientProfile) ?? null);
-    setMembership((membershipRes.data as unknown as Membership) ?? null);
-    setActiveProjects(projectsRes.count ?? 0);
-    setReportsThisMonth(reportsCountRes.count ?? 0);
-    setOpenTickets(ticketsCountRes.count ?? 0);
-    setRecentReports((reportsListRes.data as Report[]) ?? []);
-    setRecentTickets((ticketsListRes.data as Ticket[]) ?? []);
-    setNotifications((notifsRes.data as Notification[]) ?? []);
-    setLoading(false);
-  };
+      const firstError =
+        profileRes.error ||
+        membershipRes.error ||
+        projectsRes.error ||
+        reportsCountRes.error ||
+        ticketsCountRes.error ||
+        reportsListRes.error ||
+        ticketsListRes.error ||
+        notifsRes.error;
+      if (firstError && firstError.code !== "PGRST116") throw firstError;
+
+      setProfile((profileRes.data as ClientProfile) ?? null);
+      setMembership((membershipRes.data as unknown as Membership) ?? null);
+      setActiveProjects(projectsRes.count ?? 0);
+      setReportsThisMonth(reportsCountRes.count ?? 0);
+      setOpenTickets(ticketsCountRes.count ?? 0);
+      setRecentReports((reportsListRes.data as Report[]) ?? []);
+      setRecentTickets((ticketsListRes.data as Ticket[]) ?? []);
+      setNotifications((notifsRes.data as Notification[]) ?? []);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Failed to load dashboard";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!userId) return;
@@ -131,7 +220,12 @@ function ClientDashboardOverview() {
       .channel(`client-notifs-${userId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "client_notifications", filter: `client_id=eq.${userId}` },
+        {
+          event: "*",
+          schema: "public",
+          table: "client_notifications",
+          filter: `client_id=eq.${userId}`,
+        },
         () => {
           supabase
             .from("client_notifications")
@@ -147,158 +241,212 @@ function ClientDashboardOverview() {
     return () => {
       void supabase.removeChannel(channel);
     };
-  }, [userId]);
+  }, [userId, loadAll]);
 
-  const { daysRemaining, totalDays, daysUsed, expired } = useMemo(() => {
-    if (!membership) return { daysRemaining: 0, totalDays: 0, daysUsed: 0, expired: false };
-    const now = Date.now();
+  const { daysRemaining, totalDays, daysUsed, expired, pctUsed } = useMemo(() => {
+    if (!membership)
+      return { daysRemaining: 0, totalDays: 0, daysUsed: 0, expired: false, pctUsed: 0 };
+    const t = Date.now();
     const start = new Date(membership.start_date).getTime();
     const end = new Date(membership.end_date).getTime();
-    const total = Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)));
-    const remaining = Math.round((end - now) / (1000 * 60 * 60 * 24));
+    const total = Math.max(1, Math.round((end - start) / 86_400_000));
+    const remaining = Math.round((end - t) / 86_400_000);
     const used = Math.max(0, total - Math.max(0, remaining));
-    return { daysRemaining: Math.max(0, remaining), totalDays: total, daysUsed: used, expired: end < now };
+    return {
+      daysRemaining: Math.max(0, remaining),
+      totalDays: total,
+      daysUsed: used,
+      expired: end < t,
+      pctUsed: Math.min(100, Math.max(0, (used / total) * 100)),
+    };
   }, [membership]);
 
   const recentActivity = useMemo(() => {
-    type Item = { id: string; kind: "report" | "ticket" | "notification"; title: string; date: string; status?: string };
+    type Item = {
+      id: string;
+      kind: "report" | "ticket" | "notification";
+      title: string;
+      date: string;
+      status?: string;
+    };
     const items: Item[] = [
-      ...recentReports.map((r) => ({ id: `r-${r.id}`, kind: "report" as const, title: r.title, date: r.created_at, status: r.is_read ? "read" : "new" })),
-      ...recentTickets.map((t) => ({ id: `t-${t.id}`, kind: "ticket" as const, title: t.subject, date: t.created_at, status: t.status })),
-      ...notifications.map((n) => ({ id: `n-${n.id}`, kind: "notification" as const, title: n.title, date: n.created_at, status: n.type })),
+      ...recentReports.map((r) => ({
+        id: `r-${r.id}`,
+        kind: "report" as const,
+        title: `New report: ${r.title}`,
+        date: r.created_at,
+      })),
+      ...recentTickets.map((t) => ({
+        id: `t-${t.id}`,
+        kind: "ticket" as const,
+        title: `Ticket ${t.status.replace("_", " ")}: ${t.subject}`,
+        date: t.updated_at,
+        status: t.status,
+      })),
+      ...notifications.map((n) => ({
+        id: `n-${n.id}`,
+        kind: "notification" as const,
+        title: n.title,
+        date: n.created_at,
+        status: n.type,
+      })),
     ];
     items.sort((a, b) => +new Date(b.date) - +new Date(a.date));
     return items.slice(0, 5);
   }, [recentReports, recentTickets, notifications]);
 
-  if (loading) {
+  if (loading) return <DashboardSkeleton />;
+
+  if (error) {
     return (
-      <div className="grid place-items-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
+      <Card>
+        <CardContent className="py-16 text-center space-y-4">
+          <AlertTriangle className="h-8 w-8 mx-auto text-destructive" />
+          <div>
+            <p className="font-medium">Couldn't load your dashboard</p>
+            <p className="text-sm text-muted-foreground mt-1">{error}</p>
+          </div>
+          <Button onClick={() => userId && loadAll(userId)} variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" /> Retry
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
   const clientName = profile?.full_name?.split(" ")[0] ?? "there";
   const planName = membership?.membership_plans?.name ?? "No plan";
   const planSlug = membership?.membership_plans?.slug;
-  const canUpgrade = planSlug === "starter" || planSlug === "growth";
+  const nextPlan = planSlug ? NEXT_PLAN[planSlug] : undefined;
   const features = (membership?.membership_plans?.features ?? []) as string[];
 
-  const waNumber = profile?.account_manager_whatsapp?.replace(/\D/g, "") || "15550000000";
-  const waHref = `https://wa.me/${waNumber}?text=${encodeURIComponent(`Hi, this is ${profile?.full_name ?? "a client"} — I'd like to chat.`)}`;
+  const waNumber =
+    profile?.account_manager_whatsapp?.replace(/\D/g, "") || "15550000000";
+  const waHref = `https://wa.me/${waNumber}?text=${encodeURIComponent(
+    `Hi, this is ${profile?.full_name ?? "a client"} — I'd like to chat.`,
+  )}`;
 
   return (
     <div className="space-y-8">
+      {/* Welcome */}
       <section className="glass rounded-2xl p-6 sm:p-8 border border-border/40">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
+          <div className="min-w-0">
             <h1 className="text-2xl sm:text-3xl font-display font-semibold tracking-tight">
-              Welcome back, {clientName}!
+              Welcome back, {profile?.full_name ?? clientName}!
             </h1>
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-              <Badge variant={expired ? "destructive" : "default"}>{planName}</Badge>
-              {membership && (
-                <span className="text-muted-foreground">
-                  Valid until{" "}
-                  {new Date(membership.end_date).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })}
-                  {" · "}
-                  {expired ? "expired" : `${daysRemaining} day${daysRemaining === 1 ? "" : "s"} left`}
-                </span>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {now.toLocaleDateString(undefined, {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })}{" "}
+              ·{" "}
+              {now.toLocaleTimeString(undefined, {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </p>
+            <div className="mt-3">
+              {membership && !expired && (
+                <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/20">
+                  ✅ {planName} Plan — Active
+                </Badge>
               )}
-              {!membership && <span className="text-muted-foreground">No active membership.</span>}
+              {membership && expired && (
+                <Badge variant="destructive">
+                  ❌ Plan Expired — Contact us to renew
+                </Badge>
+              )}
+              {!membership && (
+                <Badge variant="secondary">No active membership</Badge>
+              )}
             </div>
-          </div>
-          <div className="flex gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link to="/client/dashboard/membership">Manage plan</Link>
-            </Button>
           </div>
         </div>
-
-        {expired && (
-          <div className="mt-4 flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm text-destructive">
-            <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium">Your plan has expired.</p>
-              <p className="text-destructive/80 mt-1">Contact us to renew and restore full access to your projects and reports.</p>
-            </div>
-          </div>
-        )}
       </section>
 
+      {/* Stat cards */}
       <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={<FolderKanban className="h-4 w-4" />} label="Active Projects" value={activeProjects} />
-        <StatCard icon={<FileText className="h-4 w-4" />} label="Reports This Month" value={reportsThisMonth} />
-        <StatCard icon={<LifeBuoy className="h-4 w-4" />} label="Open Tickets" value={openTickets} />
-        <StatCard icon={<TrendingUp className="h-4 w-4" />} label="Days Until Renewal" value={membership ? daysRemaining : "—"} tone={expired ? "danger" : "default"} />
+        <StatCard
+          icon={<FolderKanban className="h-4 w-4" />}
+          label="Active Projects"
+          value={activeProjects}
+        />
+        <StatCard
+          icon={<FileText className="h-4 w-4" />}
+          label="Reports This Month"
+          value={reportsThisMonth}
+        />
+        <StatCard
+          icon={<LifeBuoy className="h-4 w-4" />}
+          label="Open Tickets"
+          value={openTickets}
+        />
+        <StatCard
+          icon={<TrendingUp className="h-4 w-4" />}
+          label="Days Remaining"
+          value={
+            !membership ? "—" : expired ? "Expired" : daysRemaining
+          }
+          tone={
+            !membership
+              ? "default"
+              : expired
+                ? "danger"
+                : daysRemaining < 7
+                  ? "warning"
+                  : "default"
+          }
+        />
       </section>
 
       <div className="grid lg:grid-cols-3 gap-6">
+        {/* Membership */}
         <Card className="lg:col-span-2">
           <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-base">Recent Activity</CardTitle>
-            <Bell className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {recentActivity.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-8 text-center">No activity yet.</p>
-            ) : (
-              <ul className="divide-y divide-border/40">
-                {recentActivity.map((item) => (
-                  <li key={item.id} className="flex items-center gap-3 py-3">
-                    <ActivityIcon kind={item.kind} />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{item.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(item.date).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                      </p>
-                    </div>
-                    {item.status && (
-                      <Badge variant="secondary" className="capitalize">
-                        {item.status.replace("_", " ")}
-                      </Badge>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-            <div className="mt-4 flex flex-wrap gap-3 text-xs">
-              <Link to="/client/dashboard/reports" className="text-primary hover:underline">All reports →</Link>
-              <Link to="/client/dashboard/tickets" className="text-primary hover:underline">All tickets →</Link>
-              <Link to="/client/dashboard/notifications" className="text-primary hover:underline">All notifications →</Link>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-base">Membership</CardTitle>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Crown className="h-4 w-4 text-primary" /> Membership
+            </CardTitle>
             <Sparkles className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-2xl font-semibold">{planName}</p>
-              {membership?.membership_plans && (
-                <p className="text-sm text-muted-foreground">
-                  {membership.membership_plans.currency} {membership.membership_plans.price_monthly}/mo
-                </p>
-              )}
+          <CardContent className="space-y-5">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-2xl font-semibold">{planName}</p>
+                {membership?.membership_plans && (
+                  <p className="text-sm text-muted-foreground">
+                    {membership.membership_plans.currency}{" "}
+                    {membership.membership_plans.price_monthly}/mo
+                  </p>
+                )}
+              </div>
+              <Button asChild variant="outline" size="sm">
+                <Link to="/client/dashboard/membership">View Full Plan Details</Link>
+              </Button>
             </div>
 
             {membership && (
               <div className="space-y-2">
-                <Progress value={totalDays ? (daysUsed / totalDays) * 100 : 0} />
+                <Progress value={pctUsed} />
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{daysUsed} days used</span>
-                  <span>{totalDays} days total</span>
+                  <span>
+                    Started {new Date(membership.start_date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                  </span>
+                  <span>
+                    Expires {new Date(membership.end_date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                  </span>
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  {daysUsed} of {totalDays} days used
+                </p>
               </div>
             )}
 
             {features.length > 0 && (
-              <ul className="space-y-1.5 text-sm">
-                {features.map((f) => (
+              <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                {features.slice(0, 4).map((f) => (
                   <li key={f} className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 mt-0.5 text-primary shrink-0" />
                     <span>{f}</span>
@@ -307,26 +455,86 @@ function ClientDashboardOverview() {
               </ul>
             )}
 
-            {canUpgrade && (
-              <Button asChild className="w-full">
-                <Link to="/pricing">Upgrade Plan</Link>
+            {nextPlan && !expired && (
+              <Button asChild variant="ghost" size="sm" className="text-primary">
+                <Link to="/pricing">↑ Upgrade to {nextPlan}</Link>
               </Button>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Recent activity */}
+        <Card>
+          <CardHeader className="flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-base">Recent Activity</CardTitle>
+            <Bell className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {recentActivity.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-8 text-center">
+                No activity yet.
+              </p>
+            ) : (
+              <ul className="divide-y divide-border/40">
+                {recentActivity.map((item) => (
+                  <li key={item.id} className="flex items-start gap-3 py-3">
+                    <ActivityIcon kind={item.kind} />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium leading-snug">
+                        {item.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {timeAgo(item.date, now)}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             )}
           </CardContent>
         </Card>
       </div>
 
-      <section className="grid sm:grid-cols-3 gap-4">
-        <Button asChild variant="outline" className="h-auto py-4 justify-start">
-          <Link to="/client/dashboard/tickets">
-            <LifeBuoy className="h-4 w-4 mr-2" />
-            Create Support Ticket
+      {/* Recent Reports */}
+      <Card>
+        <CardHeader className="flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-base flex items-center gap-2">
+            <FileBarChart className="h-4 w-4 text-primary" /> Recent Reports
+          </CardTitle>
+          <Link
+            to="/client/dashboard/reports"
+            className="text-xs text-primary hover:underline"
+          >
+            View All Reports →
           </Link>
-        </Button>
+        </CardHeader>
+        <CardContent>
+          {recentReports.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-8 text-center">
+              No reports yet. Your first report will appear here soon.
+            </p>
+          ) : (
+            <ul className="grid md:grid-cols-3 gap-3">
+              {recentReports.map((r) => (
+                <ReportCard key={r.id} report={r} />
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Quick Actions */}
+      <section className="grid sm:grid-cols-3 gap-4">
         <Button asChild variant="outline" className="h-auto py-4 justify-start">
           <Link to="/client/dashboard/reports">
             <FileText className="h-4 w-4 mr-2" />
             View Latest Report
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-auto py-4 justify-start">
+          <Link to="/client/dashboard/tickets">
+            <LifeBuoy className="h-4 w-4 mr-2" />
+            Create Support Ticket
           </Link>
         </Button>
         <a
@@ -336,7 +544,7 @@ function ClientDashboardOverview() {
           className="inline-flex items-center justify-start gap-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground px-4 py-4 text-sm font-medium shadow-sm transition-colors"
         >
           <MessageCircle className="h-4 w-4" />
-          Contact Account Manager
+          WhatsApp Support
         </a>
       </section>
     </div>
@@ -352,26 +560,142 @@ function StatCard({
   icon: React.ReactNode;
   label: string;
   value: number | string;
-  tone?: "default" | "danger";
+  tone?: "default" | "danger" | "warning";
 }) {
+  const toneText =
+    tone === "danger"
+      ? "text-destructive"
+      : tone === "warning"
+        ? "text-amber-600 dark:text-amber-400"
+        : "";
   return (
-    <Card>
-      <CardContent className="p-5">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{label}</span>
-          <span className="text-muted-foreground">{icon}</span>
-        </div>
-        <p className={`mt-2 text-3xl font-semibold ${tone === "danger" ? "text-destructive" : ""}`}>{value}</p>
-      </CardContent>
-    </Card>
+    <div className="group glass rounded-2xl border border-border/40 p-5 transition-all hover:border-primary/40 hover:shadow-glow">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          {label}
+        </span>
+        <span className="grid place-items-center h-8 w-8 rounded-lg bg-primary/10 text-primary group-hover:bg-primary/15 transition-colors">
+          {icon}
+        </span>
+      </div>
+      <p className={`mt-3 text-3xl font-semibold ${toneText}`}>{value}</p>
+    </div>
   );
 }
 
-function ActivityIcon({ kind }: { kind: "report" | "ticket" | "notification" }) {
+function ActivityIcon({
+  kind,
+}: {
+  kind: "report" | "ticket" | "notification";
+}) {
   const Icon = kind === "report" ? FileText : kind === "ticket" ? LifeBuoy : Bell;
   return (
     <span className="grid place-items-center h-8 w-8 rounded-full bg-primary/10 text-primary shrink-0">
       <Icon className="h-4 w-4" />
     </span>
   );
+}
+
+function ReportCard({ report }: { report: Report }) {
+  const [busy, setBusy] = useState(false);
+  const handleDownload = async () => {
+    if (!report.file_path && !report.file_url) {
+      toast.error("No file attached to this report");
+      return;
+    }
+    setBusy(true);
+    try {
+      if (report.file_path) {
+        const { data, error } = await supabase.storage
+          .from("client-reports")
+          .download(report.file_path);
+        if (error) throw error;
+        const url = URL.createObjectURL(data);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = report.file_path.split("/").pop() || `${report.title}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      } else if (report.file_url) {
+        window.open(report.file_url, "_blank", "noopener,noreferrer");
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Download failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const range =
+    report.period_start && report.period_end
+      ? `${new Date(report.period_start).toLocaleDateString(undefined, { month: "short", day: "numeric" })} – ${new Date(report.period_end).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
+      : new Date(report.created_at).toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+
+  return (
+    <li className="rounded-xl border border-border/60 p-4 flex flex-col gap-3 hover:border-primary/40 transition-colors">
+      <div className="flex items-start gap-3">
+        <span className="grid place-items-center h-9 w-9 rounded-lg bg-primary/10 text-primary shrink-0">
+          <FileText className="h-4 w-4" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-medium truncate">{report.title}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{range}</p>
+        </div>
+      </div>
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={handleDownload}
+        disabled={busy}
+        className="w-full"
+      >
+        <Download className="h-3.5 w-3.5 mr-1.5" />
+        Download
+      </Button>
+    </li>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-8">
+      <Skeleton className="h-32 rounded-2xl" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Skeleton key={i} className="h-28 rounded-2xl" />
+        ))}
+      </div>
+      <div className="grid lg:grid-cols-3 gap-6">
+        <Skeleton className="h-72 rounded-xl lg:col-span-2" />
+        <Skeleton className="h-72 rounded-xl" />
+      </div>
+      <Skeleton className="h-48 rounded-xl" />
+      <div className="grid sm:grid-cols-3 gap-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-16 rounded-md" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function timeAgo(iso: string, now: Date) {
+  const diff = now.getTime() - new Date(iso).getTime();
+  const m = Math.round(diff / 60_000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.round(h / 24);
+  if (d < 7) return `${d}d ago`;
+  return new Date(iso).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
 }
