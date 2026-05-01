@@ -275,8 +275,13 @@ function PackagesAdmin() {
         <ErrorState message={loadError} onRetry={load} />
       ) : filtered.length === 0 ? (
         <EmptyState
-          title="No packages yet"
-          description="Click Add Package to create your first one."
+          title="No packages yet — click Add Package to create your first one."
+          actionLabel="Add Package"
+          onAction={() => {
+            const next = empty();
+            next.order_index = (rows[rows.length - 1]?.order_index ?? 0) + 1;
+            setEditing(next);
+          }}
         />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
