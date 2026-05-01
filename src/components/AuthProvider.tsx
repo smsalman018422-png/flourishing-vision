@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     supabase.auth.getSession().then(({ data }) => {
       if (cancelled) return;
-      void applySession(data.session);
+      void applySession(data.session, true);
     }).catch(() => {
       if (cancelled) return;
       setSession(null);
