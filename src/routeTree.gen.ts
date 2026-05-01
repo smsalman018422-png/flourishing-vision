@@ -36,6 +36,7 @@ import { Route as AdminServicesRouteImport } from './routes/admin/services'
 import { Route as AdminPortfolioRouteImport } from './routes/admin/portfolio'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
+import { Route as AdminClientsRouteImport } from './routes/admin/clients'
 import { Route as AdminBlogRouteImport } from './routes/admin/blog'
 import { Route as ClientDashboardIndexRouteImport } from './routes/client/dashboard.index'
 import { Route as ClientDashboardTicketsRouteImport } from './routes/client/dashboard.tickets'
@@ -182,6 +183,11 @@ const AdminContactsRoute = AdminContactsRouteImport.update({
   path: '/admin/contacts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminClientsRoute = AdminClientsRouteImport.update({
+  id: '/admin/clients',
+  path: '/admin/clients',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminBlogRoute = AdminBlogRouteImport.update({
   id: '/admin/blog',
   path: '/admin/blog',
@@ -246,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRouteWithChildren
   '/team': typeof TeamRoute
   '/admin/blog': typeof AdminBlogRoute
+  '/admin/clients': typeof AdminClientsRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
@@ -285,6 +292,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRouteWithChildren
   '/team': typeof TeamRoute
   '/admin/blog': typeof AdminBlogRoute
+  '/admin/clients': typeof AdminClientsRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
@@ -324,6 +332,7 @@ export interface FileRoutesById {
   '/services': typeof ServicesRouteWithChildren
   '/team': typeof TeamRoute
   '/admin/blog': typeof AdminBlogRoute
+  '/admin/clients': typeof AdminClientsRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/portfolio': typeof AdminPortfolioRoute
@@ -365,6 +374,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/team'
     | '/admin/blog'
+    | '/admin/clients'
     | '/admin/contacts'
     | '/admin/login'
     | '/admin/portfolio'
@@ -404,6 +414,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/team'
     | '/admin/blog'
+    | '/admin/clients'
     | '/admin/contacts'
     | '/admin/login'
     | '/admin/portfolio'
@@ -442,6 +453,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/team'
     | '/admin/blog'
+    | '/admin/clients'
     | '/admin/contacts'
     | '/admin/login'
     | '/admin/portfolio'
@@ -482,6 +494,7 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRouteWithChildren
   TeamRoute: typeof TeamRoute
   AdminBlogRoute: typeof AdminBlogRoute
+  AdminClientsRoute: typeof AdminClientsRoute
   AdminContactsRoute: typeof AdminContactsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminPortfolioRoute: typeof AdminPortfolioRoute
@@ -691,6 +704,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminContactsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/clients': {
+      id: '/admin/clients'
+      path: '/admin/clients'
+      fullPath: '/admin/clients'
+      preLoaderRoute: typeof AdminClientsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/blog': {
       id: '/admin/blog'
       path: '/admin/blog'
@@ -835,6 +855,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute: ServicesRouteWithChildren,
   TeamRoute: TeamRoute,
   AdminBlogRoute: AdminBlogRoute,
+  AdminClientsRoute: AdminClientsRoute,
   AdminContactsRoute: AdminContactsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminPortfolioRoute: AdminPortfolioRoute,
