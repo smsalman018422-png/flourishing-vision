@@ -618,9 +618,10 @@ function PackagesAdmin() {
         description={`This will permanently delete "${confirmDelete?.name}".`}
         confirmLabel="Delete"
         destructive
-        onConfirm={remove}
+        onConfirm={async () => {
+          await remove();
+        }}
         onCancel={() => setConfirmDelete(null)}
-        busy={busy}
       />
     </div>
   );
