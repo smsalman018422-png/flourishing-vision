@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Loader2, Check } from "lucide-react";
-import logoSrc from "@/assets/logo.png";
+
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -103,13 +103,10 @@ export function Footer() {
           {/* COL 1 — Brand */}
           <div>
             <div className="flex items-center justify-center md:justify-start">
-              <img
-                src={logoSrc}
-                alt="Let Us Grow"
-                className="h-9 w-auto object-contain"
-                loading="lazy"
-                decoding="async"
-              />
+              <span className="font-display font-bold tracking-tight text-2xl leading-none whitespace-nowrap">
+                <span className="text-foreground">Let Us </span>
+                <span className="text-gradient">Grow</span>
+              </span>
             </div>
             <p className="mt-4 text-sm text-muted-foreground max-w-xs">
               Growing brands globally since 2025.

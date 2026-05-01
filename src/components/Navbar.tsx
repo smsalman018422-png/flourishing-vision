@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Moon, Sun, Menu, X, LayoutDashboard } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { supabase } from "@/integrations/supabase/client";
-import logoSrc from "@/assets/logo.png";
+
 
 const links = [
   { label: "Home", href: "/" },
@@ -108,13 +108,10 @@ export function Navbar() {
             }`}
           >
             <Link to="/" className="flex items-center group min-h-11" aria-label="Let Us Grow — Home">
-              <img
-                src={logoSrc}
-                alt="Let Us Grow"
-                className="h-9 w-auto object-contain"
-                loading="eager"
-                decoding="async"
-              />
+              <span className="font-display font-bold tracking-tight text-xl sm:text-2xl leading-none whitespace-nowrap">
+                <span className="text-foreground">Let Us </span>
+                <span className="text-gradient">Grow</span>
+              </span>
             </Link>
 
             <nav className="hidden lg:flex items-center gap-1">

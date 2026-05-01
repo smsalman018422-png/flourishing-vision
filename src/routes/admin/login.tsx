@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "@/components/AuthProvider";
 import { Button, Field, TextInput } from "@/components/admin/ui";
 import { Loader2 } from "lucide-react";
-import logoSrc from "@/assets/logo.png";
+
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/login")({
@@ -79,8 +79,11 @@ function AdminLogin() {
   return (
     <div className="min-h-screen grid place-items-center bg-background px-4 py-12">
       <div className="w-full max-w-md">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <img src={logoSrc} alt="Let Us Grow" className="h-10 w-auto object-contain" />
+        <Link to="/" className="flex items-center justify-center gap-2 mb-8" aria-label="Let Us Grow — Home">
+          <span className="font-display font-bold tracking-tight text-3xl leading-none whitespace-nowrap">
+            <span className="text-foreground">Let Us </span>
+            <span className="text-gradient">Grow</span>
+          </span>
         </Link>
         <div className="glass rounded-2xl p-6 sm:p-8">
           <h1 className="text-xl sm:text-2xl font-display font-semibold text-center">

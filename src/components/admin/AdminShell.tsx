@@ -23,7 +23,7 @@ import {
   MessageCircle,
   Package,
 } from "lucide-react";
-import logoSrc from "@/assets/logo.png";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -219,7 +219,10 @@ function SidebarBody({
     <>
       <div className="p-5 flex items-center gap-2">
         <Link to="/" className="flex items-center">
-          <img src={logoSrc} alt="Let Us Grow" className="h-8 w-auto object-contain" />
+          <span className="font-display font-bold tracking-tight text-lg leading-none whitespace-nowrap">
+            <span className="text-foreground">Let Us </span>
+            <span className="text-gradient">Grow</span>
+          </span>
         </Link>
         <span className="ml-1 text-[10px] uppercase tracking-wider rounded bg-primary/15 text-primary px-1.5 py-0.5">
           admin
