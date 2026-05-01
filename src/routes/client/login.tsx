@@ -144,13 +144,19 @@ function LoginForm() {
         return;
       }
 
-      // Fast path: check admin in parallel, but don't block navigation on profile fetch.
-      // Dashboard layout will create/verify the profile if missing.
-      const { data: roles } = await sb
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", authData.user.id);
-      const isAdmin = (roles ?? []).some((r: { role: string }) => r.role === "admin");
+      // Try admin role check, but don't block login on transient API errors.
+      let isAdmin = false;
+      try {
+        const rolesPromise = sb
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", authData.user.id);
+        const timeout = new Promise((resolve) => setTimeout(() => resolve({ data: null }), 1500));
+        const result = (await Promise.race([rolesPromise, timeout])) as { data: { role: string }[] | null };
+        isAdmin = (result?.data ?? []).some((r) => r.role === "admin");
+      } catch {
+        // ignore — default to client dashboard
+      }
 
       toast.success("Welcome back");
       if (isAdmin) {
