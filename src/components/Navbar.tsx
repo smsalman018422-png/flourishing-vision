@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Moon, Sun, Menu, X, LayoutDashboard } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { supabase } from "@/integrations/supabase/client";
-import logoSrc from "@/assets/logo.png";
+
 
 const links = [
   { label: "Home", href: "/" },
