@@ -53,7 +53,6 @@ import { Route as ClientDashboardReportsRouteImport } from './routes/client/dash
 import { Route as ClientDashboardProjectsRouteImport } from './routes/client/dashboard.projects'
 import { Route as ClientDashboardPackagesRouteImport } from './routes/client/dashboard.packages'
 import { Route as ClientDashboardNotificationsRouteImport } from './routes/client/dashboard.notifications'
-import { Route as ClientDashboardMembershipRouteImport } from './routes/client/dashboard.membership'
 import { Route as ClientDashboardBillingRouteImport } from './routes/client/dashboard.billing'
 import { Route as ApiPublicBlogRouteImport } from './routes/api/public/blog'
 
@@ -278,12 +277,6 @@ const ClientDashboardNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => ClientDashboardRoute,
   } as any)
-const ClientDashboardMembershipRoute =
-  ClientDashboardMembershipRouteImport.update({
-    id: '/membership',
-    path: '/membership',
-    getParentRoute: () => ClientDashboardRoute,
-  } as any)
 const ClientDashboardBillingRoute = ClientDashboardBillingRouteImport.update({
   id: '/billing',
   path: '/billing',
@@ -335,7 +328,6 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/api/public/blog': typeof ApiPublicBlogRoute
   '/client/dashboard/billing': typeof ClientDashboardBillingRoute
-  '/client/dashboard/membership': typeof ClientDashboardMembershipRoute
   '/client/dashboard/notifications': typeof ClientDashboardNotificationsRoute
   '/client/dashboard/packages': typeof ClientDashboardPackagesRoute
   '/client/dashboard/projects': typeof ClientDashboardProjectsRoute
@@ -383,7 +375,6 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/api/public/blog': typeof ApiPublicBlogRoute
   '/client/dashboard/billing': typeof ClientDashboardBillingRoute
-  '/client/dashboard/membership': typeof ClientDashboardMembershipRoute
   '/client/dashboard/notifications': typeof ClientDashboardNotificationsRoute
   '/client/dashboard/packages': typeof ClientDashboardPackagesRoute
   '/client/dashboard/projects': typeof ClientDashboardProjectsRoute
@@ -433,7 +424,6 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/api/public/blog': typeof ApiPublicBlogRoute
   '/client/dashboard/billing': typeof ClientDashboardBillingRoute
-  '/client/dashboard/membership': typeof ClientDashboardMembershipRoute
   '/client/dashboard/notifications': typeof ClientDashboardNotificationsRoute
   '/client/dashboard/packages': typeof ClientDashboardPackagesRoute
   '/client/dashboard/projects': typeof ClientDashboardProjectsRoute
@@ -484,7 +474,6 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/api/public/blog'
     | '/client/dashboard/billing'
-    | '/client/dashboard/membership'
     | '/client/dashboard/notifications'
     | '/client/dashboard/packages'
     | '/client/dashboard/projects'
@@ -532,7 +521,6 @@ export interface FileRouteTypes {
     | '/admin'
     | '/api/public/blog'
     | '/client/dashboard/billing'
-    | '/client/dashboard/membership'
     | '/client/dashboard/notifications'
     | '/client/dashboard/packages'
     | '/client/dashboard/projects'
@@ -581,7 +569,6 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/api/public/blog'
     | '/client/dashboard/billing'
-    | '/client/dashboard/membership'
     | '/client/dashboard/notifications'
     | '/client/dashboard/packages'
     | '/client/dashboard/projects'
@@ -939,13 +926,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientDashboardNotificationsRouteImport
       parentRoute: typeof ClientDashboardRoute
     }
-    '/client/dashboard/membership': {
-      id: '/client/dashboard/membership'
-      path: '/membership'
-      fullPath: '/client/dashboard/membership'
-      preLoaderRoute: typeof ClientDashboardMembershipRouteImport
-      parentRoute: typeof ClientDashboardRoute
-    }
     '/client/dashboard/billing': {
       id: '/client/dashboard/billing'
       path: '/billing'
@@ -999,7 +979,6 @@ const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
 
 interface ClientDashboardRouteChildren {
   ClientDashboardBillingRoute: typeof ClientDashboardBillingRoute
-  ClientDashboardMembershipRoute: typeof ClientDashboardMembershipRoute
   ClientDashboardNotificationsRoute: typeof ClientDashboardNotificationsRoute
   ClientDashboardPackagesRoute: typeof ClientDashboardPackagesRoute
   ClientDashboardProjectsRoute: typeof ClientDashboardProjectsRoute
@@ -1011,7 +990,6 @@ interface ClientDashboardRouteChildren {
 
 const ClientDashboardRouteChildren: ClientDashboardRouteChildren = {
   ClientDashboardBillingRoute: ClientDashboardBillingRoute,
-  ClientDashboardMembershipRoute: ClientDashboardMembershipRoute,
   ClientDashboardNotificationsRoute: ClientDashboardNotificationsRoute,
   ClientDashboardPackagesRoute: ClientDashboardPackagesRoute,
   ClientDashboardProjectsRoute: ClientDashboardProjectsRoute,
