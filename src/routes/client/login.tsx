@@ -33,26 +33,15 @@ function ClientAuthPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.tab]);
 
-  // Auto-redirect already-logged-in users
+  // Auto-redirect already-logged-in users to client dashboard.
+  // Admin panel is private — never linked from public pages.
   useEffect(() => {
     let cancelled = false;
     const route = async () => {
       const { data } = await supabase.auth.getSession();
       const uid = data.session?.user.id;
       if (!uid || cancelled) return;
-      // Best-effort role check; if PostgREST is slow/down, default to client dashboard.
-      let isAdmin = false;
-      try {
-        const rolesPromise = sb.from("user_roles").select("role").eq("user_id", uid);
-        const timeout = new Promise((resolve) => setTimeout(() => resolve({ data: null }), 1500));
-        const result = (await Promise.race([rolesPromise, timeout])) as { data: { role: string }[] | null };
-        isAdmin = (result?.data ?? []).some((r) => r.role === "admin");
-      } catch {
-        // ignore
-      }
-      if (cancelled) return;
-      if (isAdmin) navigate({ to: "/admin", replace: true });
-      else navigate({ to: "/client/dashboard", replace: true });
+      navigate({ to: "/client/dashboard", replace: true });
     };
     void route();
     return () => {
@@ -148,26 +137,8 @@ function LoginForm() {
         return;
       }
 
-      // Try admin role check, but don't block login on transient API errors.
-      let isAdmin = false;
-      try {
-        const rolesPromise = sb
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", authData.user.id);
-        const timeout = new Promise((resolve) => setTimeout(() => resolve({ data: null }), 1500));
-        const result = (await Promise.race([rolesPromise, timeout])) as { data: { role: string }[] | null };
-        isAdmin = (result?.data ?? []).some((r) => r.role === "admin");
-      } catch {
-        // ignore — default to client dashboard
-      }
-
       toast.success("Welcome back");
-      if (isAdmin) {
-        await navigate({ to: "/admin", replace: true });
-      } else {
-        await navigate({ to: "/client/dashboard", replace: true });
-      }
+      await navigate({ to: "/client/dashboard", replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setBusy(false);
