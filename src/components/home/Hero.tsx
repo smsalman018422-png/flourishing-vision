@@ -254,8 +254,27 @@ export function Hero() {
   const pinRef = useRef<HTMLDivElement | null>(null);
   const [progress, setProgress] = useState(0);
 
+  const [isDesktop, setIsDesktop] = useState(false);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // On mobile/small screens: skip the GSAP scroll-pin animation entirely.
+    // Show the KPIs/chart in their final state so the section still looks complete.
+    if (!isDesktop) {
+      setProgress(1);
+      return;
+    }
+
     let ctx: { revert: () => void } | null = null;
     let cancelled = false;
 
@@ -276,13 +295,11 @@ export function Hero() {
           pinSpacing: true,
           scrub: true,
           onUpdate: (self) => {
-            // requestAnimationFrame-coalesced via React's batched state
             setProgress(self.progress);
           },
         });
       }, sectionRef);
 
-      // recalc once fonts/images settle
       setTimeout(() => ScrollTrigger.refresh(), 200);
     })();
 
@@ -290,17 +307,17 @@ export function Hero() {
       cancelled = true;
       ctx?.revert();
     };
-  }, []);
+  }, [isDesktop]);
 
   return (
     <section
       ref={sectionRef}
       className="relative"
-      style={{ minHeight: "220vh" }}
+      style={{ minHeight: isDesktop ? "220vh" : undefined }}
     >
       <div
         ref={pinRef}
-        className="relative h-screen w-full overflow-hidden bg-background"
+        className="relative w-full overflow-hidden bg-background min-h-screen md:h-screen"
       >
         {/* ambient backdrop */}
         <div className="absolute inset-0 bg-hero-radial" />
