@@ -289,10 +289,11 @@ function AddClientDialog({
     }
     setSubmitting(true);
     try {
+      const normalizedEmail = form.email.trim().toLowerCase();
       const { data: authData, error: authError } = await sb.auth.signUp({
-        email: form.email.trim(),
+        email: normalizedEmail,
         password: form.password,
-        options: { data: { full_name: form.full_name } },
+        options: { data: { full_name: form.full_name, phone: form.phone || null, company_name: form.company_name || null } },
       });
       if (authError) throw authError;
       const userId = authData.user?.id;
@@ -300,12 +301,13 @@ function AddClientDialog({
 
       await sb.from("client_profiles").upsert({
         id: userId,
-        email: form.email.trim(),
+        email: normalizedEmail,
         full_name: form.full_name.trim(),
         company_name: form.company_name || null,
         phone: form.phone || null,
         whatsapp_number: form.whatsapp || null,
         country: form.country || null,
+        is_active: true,
       });
 
       const plan = plans.find((p) => p.id === form.plan_id);
@@ -328,12 +330,12 @@ function AddClientDialog({
       await sb.from("client_notifications").insert({
         client_id: userId,
         title: "Welcome to LetUsGrow!",
-        message: `Your ${plan?.name ?? "plan"} is now active. Explore your dashboard to get started.`,
+        body: `Your ${plan?.name ?? "plan"} is now active. Explore your dashboard to get started.`,
         type: "success",
         link: "/client/dashboard",
       });
 
-      toast.success(`Client created! Login: ${form.email}`);
+      toast.success(`Client created! Login: ${normalizedEmail}`);
       reset();
       onOpenChange(false);
       onCreated();
