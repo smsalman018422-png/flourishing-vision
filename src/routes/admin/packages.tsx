@@ -248,6 +248,7 @@ function PackagesAdmin() {
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [bulkPaste, setBulkPaste] = useState("");
   const [bulkType, setBulkType] = useState<"feature" | "bonus">("feature");
+  const [assignOpen, setAssignOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -388,16 +389,27 @@ function PackagesAdmin() {
       <PageTitle
         title="Packages"
         action={
-          <Button
-            onClick={() => {
-              const next = empty();
-              next.order_index = (rows[rows.length - 1]?.order_index ?? 0) + 1;
-              setEditing(next);
-            }}
-          >
-            <Plus className="h-4 w-4" /> Add Package
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="ghost" onClick={() => setAssignOpen(true)}>
+              <Gift className="h-4 w-4" /> Assign Custom Package
+            </Button>
+            <Button
+              onClick={() => {
+                const next = empty();
+                next.order_index = (rows[rows.length - 1]?.order_index ?? 0) + 1;
+                setEditing(next);
+              }}
+            >
+              <Plus className="h-4 w-4" /> Add Package
+            </Button>
+          </div>
         }
+      />
+
+      <AssignPackageDialog
+        open={assignOpen}
+        onOpenChange={setAssignOpen}
+        packages={rows}
       />
 
       <PendingApprovals />
