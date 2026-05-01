@@ -306,10 +306,21 @@ function PricingPage() {
             ))}
           </div>
         ) : visiblePackages.length === 0 ? (
-          <div className="relative text-center py-16">
-            <p className="text-muted-foreground">
-              No packages available in this category yet.
+          <div className="relative max-w-2xl mx-auto text-center py-16 px-6 rounded-3xl border border-border/60 bg-card/60 backdrop-blur-xl">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase bg-primary/15 text-primary">
+              <Sparkles className="h-3 w-3" /> Coming Soon
+            </span>
+            <h3 className="mt-4 text-2xl font-display font-semibold">
+              {CATEGORY_LABELS[activeCategory] ?? activeCategory} packages are on the way
+            </h3>
+            <p className="mt-3 text-muted-foreground">
+              {isComingSoon
+                ? COMING_SOON_LABELS[activeCategory]
+                : "No packages available in this category yet."}
             </p>
+            <Button asChild className="mt-6">
+              <Link to="/contact">Talk to our team</Link>
+            </Button>
           </div>
         ) : (
           <div
@@ -322,7 +333,13 @@ function PricingPage() {
             } gap-6 lg:gap-5 xl:items-stretch`}
           >
             {visiblePackages.map((plan, i) => (
-              <PlanCard key={plan.id} plan={plan} yearly={yearly} index={i} />
+              <PlanCard
+                key={plan.id}
+                plan={plan}
+                yearly={yearly}
+                index={i}
+                onPurchase={() => setPurchaseTarget(plan)}
+              />
             ))}
           </div>
         )}
