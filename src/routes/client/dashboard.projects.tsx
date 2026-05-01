@@ -16,7 +16,6 @@ import {
   ChevronDown,
   FolderOpen,
 } from "lucide-react";
-import { toast } from "sonner";
 
 const RETRY_DELAYS = [1000, 2000, 3000];
 
@@ -77,6 +76,7 @@ function ProjectsPage() {
   const [filter, setFilter] = useState<StatusKey>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
 
   useEffect(() => {
     if (!userId) return;
@@ -115,7 +115,7 @@ function ProjectsPage() {
       }
       setLoading(false);
     })();
-  }, [userId]);
+  }, [userId, retryNonce]);
 
   const filtered = useMemo(
     () =>
@@ -184,7 +184,7 @@ function ProjectsPage() {
             <CardContent className="py-12 text-center space-y-4">
               <p className="font-medium">Couldn't load your projects</p>
               <p className="text-sm text-muted-foreground">{error}</p>
-              <Button onClick={() => window.location.reload()} variant="outline">Try Again</Button>
+              <Button onClick={() => setRetryNonce((n) => n + 1)} variant="outline">Try Again</Button>
             </CardContent>
           </Card>
         )}
