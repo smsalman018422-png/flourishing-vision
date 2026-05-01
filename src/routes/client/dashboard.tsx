@@ -46,6 +46,29 @@ type ClientProfile = {
   is_active?: boolean;
 };
 
+type CachedUser = {
+  id: string;
+  email?: string;
+  user_metadata?: Record<string, unknown>;
+};
+
+function getCachedUser(): CachedUser | null {
+  if (typeof window === "undefined") return null;
+  for (let i = 0; i < window.localStorage.length; i += 1) {
+    const key = window.localStorage.key(i);
+    if (!key?.startsWith("sb-") || !key.endsWith("-auth-token")) continue;
+    try {
+      const raw = window.localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : null;
+      const user = parsed?.user ?? parsed?.currentSession?.user;
+      if (user?.id) return user as CachedUser;
+    } catch {
+      // Ignore malformed auth cache entries.
+    }
+  }
+  return null;
+}
+
 const nav: Array<{ to: string; label: string; Icon: typeof LayoutDashboard; exact?: boolean }> = [
   { to: "/client/dashboard", label: "Overview", Icon: LayoutDashboard, exact: true },
   { to: "/client/dashboard/projects", label: "Projects", Icon: FolderKanban },
@@ -110,7 +133,15 @@ function ClientDashboardLayout() {
     };
 
     const check = async () => {
-      const { data } = await supabase.auth.getSession();
+      const { data } = await Promise.race([
+        supabase.auth.getSession(),
+        new Promise<{ data: { session: { user: CachedUser } | null } }>((resolve) =>
+          window.setTimeout(() => {
+            const user = getCachedUser();
+            resolve({ data: { session: user ? { user } : null } });
+          }, 1500),
+        ),
+      ]);
       if (!mounted) return;
       const uid = data.session?.user.id;
       if (!uid) {
