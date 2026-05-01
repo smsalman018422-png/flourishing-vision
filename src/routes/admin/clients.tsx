@@ -219,6 +219,11 @@ function ClientsPage() {
         plans={plans}
         onCreated={() => fetchClients(true)}
       />
+
+      <ClientDetailsDialog
+        client={selectedClient}
+        onOpenChange={(open) => { if (!open) setSelectedClient(null); }}
+      />
     </>
   );
 }
