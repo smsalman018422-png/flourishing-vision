@@ -404,35 +404,88 @@ export type Database = {
           },
         ]
       }
+      client_ticket_messages: {
+        Row: {
+          created_at: string
+          file_name: string | null
+          file_url: string | null
+          id: string
+          is_read: boolean
+          message: string | null
+          sender_id: string
+          sender_type: string
+          ticket_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          sender_id: string
+          sender_type: string
+          ticket_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          sender_id?: string
+          sender_type?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "client_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_tickets: {
         Row: {
           client_id: string
           created_at: string
           id: string
+          last_message_at: string
           message: string
           priority: string
+          project_id: string | null
           status: string
           subject: string
+          ticket_number: string
           updated_at: string
         }
         Insert: {
           client_id: string
           created_at?: string
           id?: string
+          last_message_at?: string
           message: string
           priority?: string
+          project_id?: string | null
           status?: string
           subject: string
+          ticket_number: string
           updated_at?: string
         }
         Update: {
           client_id?: string
           created_at?: string
           id?: string
+          last_message_at?: string
           message?: string
           priority?: string
+          project_id?: string | null
           status?: string
           subject?: string
+          ticket_number?: string
           updated_at?: string
         }
         Relationships: []
@@ -798,6 +851,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_ticket_owner: {
+        Args: { _ticket_id: string; _user_id: string }
         Returns: boolean
       }
     }
