@@ -55,6 +55,7 @@ function ClientsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [openAdd, setOpenAdd] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   const fetchClients = async (force = false) => {
     if (force) invalidateAdminCache("admin-clients");
@@ -169,7 +170,7 @@ function ClientsPage() {
               </thead>
               <tbody>
                 {filtered.map((c) => (
-                  <tr key={c.id} className="border-b border-border/40 hover:bg-muted/20">
+                  <tr key={c.id} onClick={() => setSelectedClient(c)} className="border-b border-border/40 hover:bg-muted/20 cursor-pointer">
                     <td className="p-3">
                       <div className="flex items-center gap-3">
                         <Avatar name={c.full_name} url={c.avatar_url} />
@@ -191,7 +192,8 @@ function ClientsPage() {
           {/* Mobile cards */}
           <div className="md:hidden space-y-3">
             {filtered.map((c) => (
-              <Card key={c.id}>
+              <div key={c.id} onClick={() => setSelectedClient(c)} className="cursor-pointer">
+              <Card>
                 <div className="flex items-center gap-3">
                   <Avatar name={c.full_name} url={c.avatar_url} />
                   <div className="flex-1 min-w-0">
@@ -205,6 +207,7 @@ function ClientsPage() {
                   </div>
                 </div>
               </Card>
+              </div>
             ))}
           </div>
         </>
@@ -215,6 +218,11 @@ function ClientsPage() {
         onOpenChange={setOpenAdd}
         plans={plans}
         onCreated={() => fetchClients(true)}
+      />
+
+      <ClientDetailsDialog
+        client={selectedClient}
+        onOpenChange={(open) => { if (!open) setSelectedClient(null); }}
       />
     </>
   );
@@ -436,5 +444,189 @@ function AddClientDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ClientDetailsDialog({
+  client, onOpenChange,
+}: {
+  client: Client | null;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [tab, setTab] = useState<"overview" | "memberships" | "projects" | "invoices" | "tickets" | "reports">("overview");
+  const [memberships, setMemberships] = useState<{ id: string; status: string; billing_cycle: string; amount: number; start_date: string; end_date: string; plan?: { name: string } | null }[]>([]);
+  const [projects, setProjects] = useState<{ id: string; name: string; status: string; progress: number; service_type: string | null }[]>([]);
+  const [invoices, setInvoices] = useState<{ id: string; invoice_number: string; amount: number; currency: string; status: string; issue_date: string }[]>([]);
+  const [tickets, setTickets] = useState<{ id: string; ticket_number: string; subject: string; status: string; priority: string; created_at: string }[]>([]);
+  const [reports, setReports] = useState<{ id: string; title: string; report_type: string; created_at: string; file_url: string | null }[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!client) return;
+    setLoading(true);
+    (async () => {
+      const [m, p, i, t, r] = await Promise.all([
+        sb.from("client_memberships").select("id,status,billing_cycle,amount,start_date,end_date,plan:membership_plans(name)").eq("client_id", client.id).order("start_date", { ascending: false }),
+        sb.from("client_projects").select("id,name,status,progress,service_type").eq("client_id", client.id).order("created_at", { ascending: false }),
+        sb.from("client_invoices").select("id,invoice_number,amount,currency,status,issue_date").eq("client_id", client.id).order("issue_date", { ascending: false }),
+        sb.from("client_tickets").select("id,ticket_number,subject,status,priority,created_at").eq("client_id", client.id).order("created_at", { ascending: false }),
+        sb.from("client_reports").select("id,title,report_type,created_at,file_url").eq("client_id", client.id).order("created_at", { ascending: false }),
+      ]);
+      setMemberships(m.data ?? []);
+      setProjects(p.data ?? []);
+      setInvoices(i.data ?? []);
+      setTickets(t.data ?? []);
+      setReports(r.data ?? []);
+      setLoading(false);
+    })();
+  }, [client]);
+
+  if (!client) return null;
+
+  const tabs: { key: typeof tab; label: string; count?: number }[] = [
+    { key: "overview", label: "Overview" },
+    { key: "memberships", label: "Memberships", count: memberships.length },
+    { key: "projects", label: "Projects", count: projects.length },
+    { key: "invoices", label: "Invoices", count: invoices.length },
+    { key: "tickets", label: "Tickets", count: tickets.length },
+    { key: "reports", label: "Reports", count: reports.length },
+  ];
+
+  return (
+    <Dialog open={!!client} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-3">
+            <Avatar name={client.full_name} url={client.avatar_url} />
+            <div>
+              <div>{client.full_name}</div>
+              <div className="text-xs text-muted-foreground font-normal">{client.email ?? "—"}</div>
+            </div>
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="flex gap-1 flex-wrap border-b border-border/60 mb-3">
+          {tabs.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`px-3 py-2 text-sm border-b-2 -mb-px transition-colors ${tab === t.key ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            >
+              {t.label}{typeof t.count === "number" && <span className="ml-1 text-xs opacity-60">({t.count})</span>}
+            </button>
+          ))}
+        </div>
+
+        {loading && <div className="text-sm text-muted-foreground py-4">Loading…</div>}
+
+        {tab === "overview" && (
+          <div className="grid sm:grid-cols-2 gap-3 text-sm">
+            <Field label="Company" value={client.company_name} />
+            <Field label="Country" value={client.country} />
+            <Field label="Phone" value={client.phone} />
+            <Field label="WhatsApp" value={client.whatsapp_number} />
+            <Field label="Status" value={client.is_active ? "Active" : "Inactive"} />
+            <Field label="Joined" value={new Date(client.created_at).toLocaleDateString()} />
+          </div>
+        )}
+
+        {tab === "memberships" && (
+          <SimpleList
+            empty="No memberships"
+            items={memberships.map((m) => ({
+              key: m.id,
+              title: m.plan?.name ?? "Custom plan",
+              meta: `${m.billing_cycle} · $${m.amount} · ${m.status}`,
+              sub: `${new Date(m.start_date).toLocaleDateString()} → ${new Date(m.end_date).toLocaleDateString()}`,
+            }))}
+          />
+        )}
+
+        {tab === "projects" && (
+          <SimpleList
+            empty="No projects"
+            items={projects.map((p) => ({
+              key: p.id,
+              title: p.name,
+              meta: `${p.status} · ${p.progress}%`,
+              sub: p.service_type ?? undefined,
+            }))}
+          />
+        )}
+
+        {tab === "invoices" && (
+          <SimpleList
+            empty="No invoices"
+            items={invoices.map((i) => ({
+              key: i.id,
+              title: i.invoice_number,
+              meta: `${i.currency} ${i.amount} · ${i.status}`,
+              sub: new Date(i.issue_date).toLocaleDateString(),
+            }))}
+          />
+        )}
+
+        {tab === "tickets" && (
+          <SimpleList
+            empty="No tickets"
+            items={tickets.map((t) => ({
+              key: t.id,
+              title: `${t.ticket_number} — ${t.subject}`,
+              meta: `${t.status} · ${t.priority}`,
+              sub: new Date(t.created_at).toLocaleDateString(),
+            }))}
+          />
+        )}
+
+        {tab === "reports" && (
+          <SimpleList
+            empty="No reports"
+            items={reports.map((r) => ({
+              key: r.id,
+              title: r.title,
+              meta: r.report_type,
+              sub: new Date(r.created_at).toLocaleDateString(),
+              href: r.file_url ?? undefined,
+            }))}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string | null | undefined }) {
+  return (
+    <div className="rounded-md border border-border/60 p-3">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="font-medium">{value || "—"}</div>
+    </div>
+  );
+}
+
+function SimpleList({
+  items, empty,
+}: {
+  items: { key: string; title: string; meta?: string; sub?: string; href?: string }[];
+  empty: string;
+}) {
+  if (items.length === 0) return <div className="text-sm text-muted-foreground py-4 text-center">{empty}</div>;
+  return (
+    <div className="space-y-2">
+      {items.map((it) => {
+        const inner = (
+          <>
+            <div className="font-medium text-sm">{it.title}</div>
+            {it.meta && <div className="text-xs text-muted-foreground">{it.meta}</div>}
+            {it.sub && <div className="text-xs text-muted-foreground">{it.sub}</div>}
+          </>
+        );
+        return (
+          <div key={it.key} className="rounded-md border border-border/60 p-3">
+            {it.href ? <a href={it.href} target="_blank" rel="noreferrer" className="hover:underline">{inner}</a> : inner}
+          </div>
+        );
+      })}
+    </div>
   );
 }
