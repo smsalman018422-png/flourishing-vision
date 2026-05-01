@@ -161,7 +161,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/client/signup" className="text-sm text-foreground/80 hover:text-primary transition-colors">
+                <Link
+                  to="/client/login"
+                  search={{ tab: "signup" } as never}
+                  className="text-sm text-foreground/80 hover:text-primary transition-colors"
+                >
                   Create Account
                 </Link>
               </li>

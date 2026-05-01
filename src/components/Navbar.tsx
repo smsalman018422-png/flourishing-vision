@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { Leaf, Moon, Sun, Menu, X, LogIn, LayoutDashboard } from "lucide-react";
+import { Leaf, Moon, Sun, Menu, X, LayoutDashboard } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -161,21 +161,12 @@ export function Navbar() {
               </button>
 
               {authState.kind === "anon" ? (
-                <>
-                  <Link
-                    to="/client/login"
-                    className="hidden lg:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                  >
-                    <LogIn className="h-3.5 w-3.5" />
-                    Login
-                  </Link>
-                  <Link
-                    to="/client/signup"
-                    className="hidden lg:inline-flex items-center h-9 px-3 rounded-xl text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
-                  >
-                    Sign Up
-                  </Link>
-                </>
+                <Link
+                  to="/client/login"
+                  className="hidden lg:inline-flex items-center h-9 px-4 rounded-xl text-sm font-semibold bg-gradient-primary text-primary-foreground shadow-glow hover:shadow-elegant hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                >
+                  Get Started
+                </Link>
               ) : (
                 <Link
                   to={authState.kind === "admin" ? "/admin" : "/client/dashboard"}
@@ -184,7 +175,7 @@ export function Navbar() {
                   <span className="h-7 w-7 rounded-full bg-gradient-primary text-primary-foreground grid place-items-center text-[11px] font-semibold">
                     {initials}
                   </span>
-                  {authState.kind === "admin" ? "Admin" : "Dashboard"}
+                  {authState.kind === "admin" ? "Admin Panel" : "Dashboard"}
                 </Link>
               )}
 
@@ -271,32 +262,14 @@ export function Navbar() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.08 + links.length * 0.05, duration: 0.3, ease: "easeOut" }}
                 >
-                  {authState.kind === "anon" ? (
-                    <>
-                      <Link
-                        to="/client/login"
-                        onClick={() => setOpen(false)}
-                        className="flex items-center gap-2 min-h-12 px-4 rounded-xl text-base text-foreground hover:bg-muted transition-colors"
-                      >
-                        <LogIn className="h-4 w-4" />
-                        Login
-                      </Link>
-                      <Link
-                        to="/client/signup"
-                        onClick={() => setOpen(false)}
-                        className="flex items-center gap-2 min-h-12 px-4 rounded-xl text-base text-primary hover:bg-primary/10 transition-colors font-medium"
-                      >
-                        Sign Up
-                      </Link>
-                    </>
-                  ) : (
+                  {authState.kind !== "anon" && (
                     <Link
                       to={authState.kind === "admin" ? "/admin" : "/client/dashboard"}
                       onClick={() => setOpen(false)}
                       className="flex items-center gap-2 min-h-12 px-4 rounded-xl text-base text-foreground hover:bg-muted transition-colors"
                     >
                       <LayoutDashboard className="h-4 w-4" />
-                      {authState.kind === "admin" ? "Admin" : "Dashboard"}
+                      {authState.kind === "admin" ? "Admin Panel" : "Dashboard"}
                     </Link>
                   )}
                 </motion.div>
@@ -306,12 +279,25 @@ export function Navbar() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.08 + links.length * 0.05, duration: 0.3 }}
-                className="mt-6"
+                className="mt-6 space-y-3"
               >
+                {authState.kind === "anon" && (
+                  <Link
+                    to="/client/login"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center justify-center min-h-12 px-4 rounded-xl text-sm font-semibold bg-gradient-primary text-primary-foreground shadow-glow"
+                  >
+                    Get Started
+                  </Link>
+                )}
                 <Link
                   to="/contact"
                   onClick={() => setOpen(false)}
-                  className="flex items-center justify-center min-h-12 px-4 rounded-xl text-sm font-semibold bg-gradient-primary text-primary-foreground shadow-glow"
+                  className={`flex items-center justify-center min-h-12 px-4 rounded-xl text-sm font-semibold ${
+                    authState.kind === "anon"
+                      ? "border border-border/60 text-foreground hover:bg-muted"
+                      : "bg-gradient-primary text-primary-foreground shadow-glow"
+                  }`}
                 >
                   Book a Call
                 </Link>
