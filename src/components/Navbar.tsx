@@ -168,13 +168,13 @@ export function Navbar() {
                 </Link>
               ) : (
                 <Link
-                  to={authState.kind === "admin" ? "/admin" : "/client/dashboard"}
+                  to="/client/dashboard"
                   className="hidden lg:inline-flex items-center gap-2 h-9 pl-2 pr-3 rounded-xl text-sm font-medium text-foreground hover:bg-muted/50 transition-colors"
                 >
                   <span className="h-7 w-7 rounded-full bg-gradient-primary text-primary-foreground grid place-items-center text-[11px] font-semibold">
                     {initials}
                   </span>
-                  {authState.kind === "admin" ? "Admin Panel" : "Dashboard"}
+                  Dashboard
                 </Link>
               )}
 
@@ -263,12 +263,12 @@ export function Navbar() {
                 >
                   {authState.kind !== "anon" && (
                     <Link
-                      to={authState.kind === "admin" ? "/admin" : "/client/dashboard"}
+                      to="/client/dashboard"
                       onClick={() => setOpen(false)}
                       className="flex items-center gap-2 min-h-12 px-4 rounded-xl text-base text-foreground hover:bg-muted transition-colors"
                     >
                       <LayoutDashboard className="h-4 w-4" />
-                      {authState.kind === "admin" ? "Admin Panel" : "Dashboard"}
+                      Dashboard
                     </Link>
                   )}
                 </motion.div>
