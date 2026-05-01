@@ -64,6 +64,8 @@ function ClientDashboardLayout() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
   const [client, setClient] = useState<ClientProfile | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -83,18 +85,31 @@ function ClientDashboardLayout() {
 
   useEffect(() => {
     let mounted = true;
-    const fetchProfileWithRetry = async (uid: string, retries = 4) => {
-      for (let i = 0; i < retries; i++) {
+    setLoading(true);
+    setLoadError(null);
+
+    // Hard ceiling so the spinner can never hang forever (e.g. PostgREST 503 storm).
+    const hardTimeout = window.setTimeout(() => {
+      if (!mounted) return;
+      setLoadError("The dashboard is taking longer than expected to load. Please try again.");
+      setLoading(false);
+    }, 12000);
+
+    const fetchProfileWithRetry = async (uid: string) => {
+      // 3 attempts with 1s, 2s, 3s backoff per spec.
+      const delays = [1000, 2000, 3000];
+      let lastError: unknown = null;
+      for (let i = 0; i < 3; i++) {
         const { data, error } = await sb
           .from("client_profiles")
           .select("id,full_name,company_name,avatar_url,is_active")
           .eq("id", uid)
           .maybeSingle();
         if (!error) return { data: data as ClientProfile | null, error: null };
-        // 503 / network — retry with backoff
-        await new Promise((r) => setTimeout(r, 600 * (i + 1)));
+        lastError = error;
+        await new Promise((r) => setTimeout(r, delays[i]));
       }
-      return { data: null, error: new Error("Profile fetch failed after retries") };
+      return { data: null, error: lastError as Error };
     };
 
     const check = async () => {
@@ -151,6 +166,7 @@ function ClientDashboardLayout() {
       }
       setClient(resolved);
       setLoading(false);
+      window.clearTimeout(hardTimeout);
     };
     void check();
 
@@ -159,9 +175,10 @@ function ClientDashboardLayout() {
     });
     return () => {
       mounted = false;
+      window.clearTimeout(hardTimeout);
       sub.subscription.unsubscribe();
     };
-  }, [navigate]);
+  }, [navigate, retryNonce]);
 
   // Track unread notifications for the sidebar bell
   useEffect(() => {
@@ -193,10 +210,48 @@ function ClientDashboardLayout() {
     };
   }, [client?.id]);
 
+  if (loadError && !client) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-background px-6">
+        <div className="max-w-md w-full text-center space-y-4">
+          <div className="mx-auto h-12 w-12 rounded-full bg-destructive/15 grid place-items-center">
+            <X className="h-6 w-6 text-destructive" />
+          </div>
+          <h2 className="text-lg font-display font-semibold">Couldn't load your dashboard</h2>
+          <p className="text-sm text-muted-foreground">{loadError}</p>
+          <div className="flex gap-2 justify-center">
+            <button
+              onClick={() => {
+                setLoadError(null);
+                setLoading(true);
+                setRetryNonce((n) => n + 1);
+              }}
+              className="inline-flex items-center h-10 px-4 rounded-xl text-sm font-semibold bg-gradient-primary text-primary-foreground shadow-glow"
+            >
+              Try Again
+            </button>
+            <button
+              onClick={async () => {
+                await supabase.auth.signOut();
+                navigate({ to: "/client/login" });
+              }}
+              className="inline-flex items-center h-10 px-4 rounded-xl text-sm border border-border/60 hover:bg-muted/40"
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (loading || !client) {
     return (
       <div className="min-h-screen grid place-items-center bg-background">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <p className="text-xs text-muted-foreground">Loading your dashboard…</p>
+        </div>
       </div>
     );
   }
