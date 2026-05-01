@@ -117,12 +117,26 @@ function ClientDashboardLayout() {
         navigate({ to: "/client/login" });
         return;
       }
+      const sessionUser = data.session?.user;
+      const fallbackClient: ClientProfile = {
+        id: uid,
+        full_name:
+          (sessionUser?.user_metadata?.full_name as string | undefined) ||
+          sessionUser?.email?.split("@")[0] ||
+          "Client",
+        company_name: null,
+        avatar_url: null,
+        is_active: true,
+      };
+      setClient(fallbackClient);
+      setLoading(false);
+      window.clearTimeout(hardTimeout);
+
       const { data: profile, error: fetchErr } = await fetchProfileWithRetry(uid);
       if (!mounted) return;
       let resolved = profile;
       if (!resolved && !fetchErr) {
         // Auto-create profile for self-signed-up users on first dashboard visit
-        const sessionUser = data.session?.user;
         const fullName =
           (sessionUser?.user_metadata?.full_name as string | undefined) ||
           sessionUser?.email?.split("@")[0] ||
@@ -143,18 +157,9 @@ function ClientDashboardLayout() {
         resolved = (created as ClientProfile | null) ?? null;
       }
       if (!resolved) {
-        // Backend temporarily unavailable — show a placeholder so the user is not signed out.
-        const sessionUser = data.session?.user;
-        resolved = {
-          id: uid,
-          full_name:
-            (sessionUser?.user_metadata?.full_name as string | undefined) ||
-            sessionUser?.email?.split("@")[0] ||
-            "Client",
-          company_name: null,
-          avatar_url: null,
-          is_active: true,
-        };
+        // Backend temporarily unavailable — keep the fallback profile visible.
+        setLoadError("Some dashboard data is temporarily unavailable. Please try again.");
+        return;
       }
       if (resolved.is_active === false) {
         await supabase.auth.signOut();
