@@ -13,14 +13,14 @@ export function useClientAuth() {
       if (!mounted) return;
       const uid = data.session?.user.id;
       if (!uid) {
-        navigate({ to: "/admin/login" });
+        navigate({ to: "/client/login" });
         return;
       }
       setUserId(uid);
       setReady(true);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
-      if (!s?.user) navigate({ to: "/admin/login" });
+      if (!s?.user) navigate({ to: "/client/login" });
     });
     return () => {
       mounted = false;
