@@ -96,7 +96,7 @@ function PortfolioAdmin() {
     setLoadError(null);
     const { data, error } = await adminData<Project>({
       table: "portfolio",
-      select: "*",
+      select: "id,project_title,client_name,category,service_type,slug,cover_image_url,gallery_images,challenge,solution,results,roi_pct,growth_pct,revenue_label,testimonial_quote,testimonial_author,testimonial_role,is_visible,is_featured,sort_order,created_at",
       orders: [{ column: "sort_order", ascending: true }, { column: "created_at", ascending: false }],
     });
     if (error) {

@@ -87,7 +87,7 @@ function BlogAdmin() {
     setLoadError(null);
     const { data, error } = await adminData<Post>({
       table: "blog_posts",
-      select: "*",
+      select: "id,slug,title,excerpt,content,cover_image_url,author_name,author_role,author_avatar_url,category,read_time_minutes,is_featured,published,published_at,created_at",
       orders: [
         { column: "published_at", ascending: false, nullsFirst: false },
         { column: "created_at", ascending: false },
