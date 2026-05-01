@@ -22,6 +22,7 @@ import {
   Crown,
   FileBarChart,
   MessageCircle,
+  Package,
 } from "lucide-react";
 import {
   DropdownMenu,
