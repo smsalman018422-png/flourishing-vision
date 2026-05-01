@@ -674,3 +674,169 @@ function ctaClass(plan: Pkg) {
         : "border border-primary/40 text-primary hover:bg-primary/10"
   }`;
 }
+
+function PurchaseModal({
+  plan,
+  yearly: initialYearly,
+  onClose,
+}: {
+  plan: Pkg | null;
+  yearly: boolean;
+  onClose: () => void;
+}) {
+  const navigate = useNavigate();
+  const [authState, setAuthState] = useState<"loading" | "in" | "out">("loading");
+  const [yearly, setYearly] = useState(initialYearly);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!plan) return;
+    setYearly(initialYearly);
+    setAuthState("loading");
+    supabase.auth.getSession().then(({ data }) => {
+      setAuthState(data.session?.user ? "in" : "out");
+    });
+  }, [plan, initialYearly]);
+
+  if (!plan) return null;
+
+  const price = yearly ? plan.price_yearly : plan.price_monthly;
+  const cycle = yearly ? "yearly" : "monthly";
+
+  const handlePay = async () => {
+    setSubmitting(true);
+    try {
+      const { data: sess } = await supabase.auth.getSession();
+      const token = sess.session?.access_token;
+      if (!token) {
+        toast.error("Please sign in first");
+        return;
+      }
+      const res = await fetch("/api/purchase-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ package_id: plan.id, billing_cycle: cycle }),
+      });
+      const body = (await res.json().catch(() => null)) as
+        | { ok: boolean; redirect_url?: string; error?: string }
+        | null;
+      if (!res.ok || !body?.ok) {
+        toast.error(body?.error || "Could not start checkout");
+        return;
+      }
+      toast.success("Request submitted! An admin will activate your package shortly.");
+      onClose();
+      navigate({ to: body.redirect_url ?? "/client/dashboard/membership" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const waMessage = encodeURIComponent(
+    `Hi! I'd like to purchase the ${plan.name} package (${cycle}, $${price}).`,
+  );
+  const waHref = `https://wa.me/15550000000?text=${waMessage}`;
+  const contactHref = `/contact?subject=${encodeURIComponent("Package: " + plan.name)}`;
+
+  return (
+    <Dialog open={!!plan} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-md">
+        {authState === "out" ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Sign in to purchase</DialogTitle>
+              <DialogDescription>
+                Create an account or sign in to purchase the {plan.name} package.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-3 mt-2">
+              <Button
+                onClick={() => {
+                  onClose();
+                  navigate({
+                    to: "/client/login",
+                    search: { redirect: "/pricing", pkg: plan.slug } as never,
+                  });
+                }}
+              >
+                <LogIn className="h-4 w-4 mr-2" /> Sign In
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  onClose();
+                  navigate({
+                    to: "/client/login",
+                    search: { signup: "1", redirect: "/pricing", pkg: plan.slug } as never,
+                  });
+                }}
+              >
+                <UserPlus className="h-4 w-4 mr-2" /> Create Account
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>{plan.name}</DialogTitle>
+              <DialogDescription>
+                {plan.tagline ?? "Choose your billing cycle and continue to checkout."}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="rounded-xl border border-border/60 bg-muted/30 p-1 grid grid-cols-2 text-sm font-medium">
+              <button
+                onClick={() => setYearly(false)}
+                className={`py-2 rounded-lg transition ${!yearly ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setYearly(true)}
+                className={`py-2 rounded-lg transition ${yearly ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+              >
+                Yearly · save 20%
+              </button>
+            </div>
+
+            <div className="text-center py-3">
+              <p className="text-4xl font-black">${price.toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Billed {yearly ? "yearly" : "monthly"}
+              </p>
+            </div>
+
+            <DialogFooter className="flex-col gap-2 sm:flex-col">
+              <Button
+                onClick={handlePay}
+                disabled={submitting || authState === "loading"}
+                className="w-full"
+                size="lg"
+              >
+                {submitting ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <CreditCard className="h-4 w-4 mr-2" />
+                )}
+                Pay with Stripe
+              </Button>
+              <div className="grid grid-cols-2 gap-2 w-full">
+                <Button asChild variant="outline">
+                  <a href={waHref} target="_blank" rel="noreferrer">
+                    <MessageCircle className="h-4 w-4 mr-2" /> WhatsApp
+                  </a>
+                </Button>
+                <Button asChild variant="ghost">
+                  <Link to={contactHref}>Custom Quote</Link>
+                </Button>
+              </div>
+              <p className="text-[11px] text-center text-muted-foreground pt-1">
+                Stripe checkout is being finalised — your request goes to our team for instant activation.
+              </p>
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
