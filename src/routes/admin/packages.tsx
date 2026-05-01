@@ -243,8 +243,7 @@ function PackagesAdmin() {
     <div>
       <PageTitle
         title="Packages"
-        subtitle="Manage pricing packages shown on the public pricing page."
-        actions={
+        action={
           <Button
             onClick={() => {
               const next = empty();
