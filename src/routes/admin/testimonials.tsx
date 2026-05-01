@@ -59,7 +59,7 @@ function TestimonialsAdmin() {
     setLoadError(null);
     const { data, error } = await adminData<Testimonial>({
       table: "testimonials",
-      select: "*",
+      select: "id,author_name,author_role,company,quote,rating,photo_url,video_url,video_thumbnail_url,sort_order",
       orders: [{ column: "sort_order", ascending: true }],
     });
     if (error) {

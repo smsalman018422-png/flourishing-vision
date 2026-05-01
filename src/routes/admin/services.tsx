@@ -80,7 +80,7 @@ function ServicesAdmin() {
     setLoadError(null);
     const { data, error } = await adminData<Service>({
       table: "services",
-      select: "*",
+      select: "id,slug,title,short_description,long_description,icon_name,features,starts_at_price,service_type,order_index,is_visible",
       orders: [{ column: "order_index", ascending: true }],
     });
     if (error) {

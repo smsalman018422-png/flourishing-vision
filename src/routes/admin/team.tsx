@@ -61,7 +61,7 @@ function TeamAdmin() {
     setLoadError(null);
     const { data, error } = await adminData<Member>({
       table: "team_members",
-      select: "*",
+      select: "id,name,role,category,bio,photo_url,linkedin_url,is_founder,is_visible,sort_order,created_at",
       orders: [{ column: "sort_order", ascending: true }, { column: "created_at", ascending: true }],
     });
     if (error) {
