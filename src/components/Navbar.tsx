@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { Leaf, Moon, Sun, Menu, X } from "lucide-react";
+import { Leaf, Moon, Sun, Menu, X, LogIn, LayoutDashboard } from "lucide-react";
 import { useTheme } from "./ThemeProvider";
+import { supabase } from "@/integrations/supabase/client";
 
 const links = [
   { label: "Home", href: "/" },
