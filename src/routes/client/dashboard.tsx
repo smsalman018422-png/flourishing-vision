@@ -62,6 +62,7 @@ function ClientDashboardLayout() {
   const [loading, setLoading] = useState(true);
   const [client, setClient] = useState<ClientProfile | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     setDrawerOpen(false);
@@ -110,6 +111,36 @@ function ClientDashboardLayout() {
       sub.subscription.unsubscribe();
     };
   }, [navigate]);
+
+  // Track unread notifications for the sidebar bell
+  useEffect(() => {
+    if (!client?.id) return;
+    const refresh = async () => {
+      const { count } = await supabase
+        .from("client_notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("client_id", client.id)
+        .eq("is_read", false);
+      setUnreadCount(count ?? 0);
+    };
+    void refresh();
+    const channel = supabase
+      .channel(`sidebar-notif-${client.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "client_notifications",
+          filter: `client_id=eq.${client.id}`,
+        },
+        () => void refresh(),
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [client?.id]);
 
   if (loading || !client) {
     return (
