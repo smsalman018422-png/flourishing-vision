@@ -249,10 +249,12 @@ export type Database = {
           account_manager_whatsapp: string | null
           avatar_url: string | null
           company_name: string | null
+          country: string | null
           created_at: string
           full_name: string
           id: string
           phone: string | null
+          timezone: string | null
           updated_at: string
           whatsapp_number: string | null
         }
@@ -261,10 +263,12 @@ export type Database = {
           account_manager_whatsapp?: string | null
           avatar_url?: string | null
           company_name?: string | null
+          country?: string | null
           created_at?: string
           full_name: string
           id: string
           phone?: string | null
+          timezone?: string | null
           updated_at?: string
           whatsapp_number?: string | null
         }
@@ -273,10 +277,12 @@ export type Database = {
           account_manager_whatsapp?: string | null
           avatar_url?: string | null
           company_name?: string | null
+          country?: string | null
           created_at?: string
           full_name?: string
           id?: string
           phone?: string | null
+          timezone?: string | null
           updated_at?: string
           whatsapp_number?: string | null
         }
