@@ -20,12 +20,31 @@ import {
   Edit2,
   Eye,
   EyeOff,
+  Gift,
   Plus,
   Sparkles,
   Trash2,
+  UserPlus,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button as ShadButton } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select as ShadSelect,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type FeatureItem = { text: string; type: "feature" | "bonus" };
 
