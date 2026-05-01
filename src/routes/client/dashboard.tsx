@@ -255,10 +255,12 @@ function SidebarBody({
   pathname,
   client,
   onSignOut,
+  unreadCount,
 }: {
   pathname: string;
   client: ClientProfile;
   onSignOut: () => void;
+  unreadCount: number;
 }) {
   const initials = client.full_name
     .split(" ")
@@ -285,6 +287,8 @@ function SidebarBody({
             const active = exact
               ? pathname === to
               : pathname === to || pathname.startsWith(to + "/");
+            const showBadge =
+              to === "/client/dashboard/notifications" && unreadCount > 0;
             return (
               <li key={to}>
                 <Link
@@ -296,7 +300,12 @@ function SidebarBody({
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{label}</span>
+                  <span className="truncate flex-1">{label}</span>
+                  {showBadge && (
+                    <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-5 rounded-full bg-emerald-500 text-white text-[10px] font-semibold px-1.5">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
                 </Link>
               </li>
             );
