@@ -40,7 +40,11 @@ const nav = [
   { to: "/admin/testimonials", label: "Testimonials", Icon: Quote },
   { to: "/admin/blog", label: "Blog", Icon: FileText },
   { to: "/admin/contacts", label: "Contacts", Icon: Mail },
-  { to: "/admin/settings", label: "Settings", Icon: Settings },
+  { to: "/admin/clients", label: "Clients", Icon: Users, group: "Clients" },
+  { to: "/admin/memberships", label: "Memberships", Icon: Crown },
+  { to: "/admin/client-reports", label: "Client Reports", Icon: FileBarChart },
+  { to: "/admin/client-tickets", label: "Client Tickets", Icon: MessageCircle },
+  { to: "/admin/settings", label: "Settings", Icon: Settings, group: "System" },
 ] as const;
 
 export function AdminShell({ children }: { children?: ReactNode }) {
