@@ -482,7 +482,7 @@ function PlanCard({
   const visibleFeatures = expanded ? regularFeatures : regularFeatures.slice(0, visibleCount);
   const hasMore = regularFeatures.length > visibleCount || bonuses.length > 0;
 
-  const ctaIsExternal = /^https?:\/\//.test(plan.cta_link);
+  void 0;
 
   return (
     <motion.div
