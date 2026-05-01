@@ -1,5 +1,5 @@
 import { createLazyFileRoute, Link } from "@tanstack/react-router";
-import { PageShell, PageHeader } from "@/components/layout/PageShell";
+import { PageShell } from "@/components/layout/PageShell";
 import { useState } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { Button } from "@/components/ui/button";
