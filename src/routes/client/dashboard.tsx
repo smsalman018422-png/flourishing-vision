@@ -184,12 +184,20 @@ function ClientDashboardLayout() {
   useEffect(() => {
     if (!client?.id) return;
     const refresh = async () => {
-      const { count } = await supabase
-        .from("client_notifications")
-        .select("id", { count: "exact", head: true })
-        .eq("client_id", client.id)
-        .eq("is_read", false);
-      setUnreadCount(count ?? 0);
+      const delays = [1000, 2000, 3000];
+      for (let i = 0; i < delays.length; i += 1) {
+        const { count, error } = await supabase
+          .from("client_notifications")
+          .select("id", { count: "exact", head: true })
+          .eq("client_id", client.id)
+          .eq("is_read", false);
+        if (!error) {
+          setUnreadCount(count ?? 0);
+          return;
+        }
+        if (i < delays.length - 1) await new Promise((r) => setTimeout(r, delays[i]));
+      }
+      setUnreadCount(0);
     };
     void refresh();
     const channel = supabase
