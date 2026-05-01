@@ -19,6 +19,9 @@ import {
   ChevronDown,
   User as UserIcon,
   Leaf,
+  Crown,
+  FileBarChart,
+  MessageCircle,
 } from "lucide-react";
 import {
   DropdownMenu,
