@@ -8,14 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Loader2,
-  CheckCircle2,
-  Circle,
-  ArrowLeft,
-  ChevronDown,
-  FolderOpen,
-} from "lucide-react";
+import { Loader2, CheckCircle2, Circle, ArrowLeft, ChevronDown, FolderOpen } from "lucide-react";
 
 const RETRY_DELAYS = [1000, 2000, 3000];
 
@@ -24,7 +17,8 @@ async function withRetry<T extends { error: { message?: string } | null }>(run: 
   for (let i = 0; i < RETRY_DELAYS.length; i += 1) {
     result = await run();
     if (!result.error) return result;
-    if (i < RETRY_DELAYS.length - 1) await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[i]));
+    if (i < RETRY_DELAYS.length - 1)
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[i]));
   }
   return result!;
 }
@@ -60,10 +54,7 @@ type StatusKey = (typeof STATUS_FILTERS)[number]["key"];
 
 export const Route = createFileRoute("/client/dashboard/projects")({
   head: () => ({
-    meta: [
-      { title: "My Projects — LetUsGrow" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "My Projects — LetUsGrow" }, { name: "robots", content: "noindex" }],
   }),
   component: ProjectsPage,
 });
@@ -83,11 +74,14 @@ function ProjectsPage() {
     void (async () => {
       setLoading(true);
       setError(null);
-      const { data, error } = await withRetry(async () => await supabase
-        .from("client_projects")
-        .select("*")
-        .eq("client_id", userId)
-        .order("created_at", { ascending: false }));
+      const { data, error } = await withRetry(
+        async () =>
+          await supabase
+            .from("client_projects")
+            .select("*")
+            .eq("client_id", userId)
+            .order("created_at", { ascending: false }),
+      );
 
       if (error) {
         setError(error.message || "Failed to load projects");
@@ -99,14 +93,11 @@ function ProjectsPage() {
       const list = (data ?? []) as unknown as Project[];
       setProjects(list);
 
-      const ids = Array.from(
-        new Set(list.flatMap((p) => p.assigned_team_ids ?? [])),
-      );
+      const ids = Array.from(new Set(list.flatMap((p) => p.assigned_team_ids ?? [])));
       if (ids.length) {
-        const { data: members } = await withRetry(async () => await supabase
-          .from("team_members")
-          .select("id,name,photo_url")
-          .in("id", ids));
+        const { data: members } = await withRetry(
+          async () => await supabase.from("team_members").select("id,name,photo_url").in("id", ids),
+        );
         const map: Record<string, TeamMember> = {};
         for (const m of (members ?? []) as TeamMember[]) map[m.id] = m;
         setTeam(map);
@@ -118,10 +109,7 @@ function ProjectsPage() {
   }, [userId, retryNonce]);
 
   const filtered = useMemo(
-    () =>
-      filter === "all"
-        ? projects
-        : projects.filter((p) => p.status === filter),
+    () => (filter === "all" ? projects : projects.filter((p) => p.status === filter)),
     [filter, projects],
   );
 
@@ -184,7 +172,9 @@ function ProjectsPage() {
             <CardContent className="py-12 text-center space-y-4">
               <p className="font-medium">Couldn't load your projects</p>
               <p className="text-sm text-muted-foreground">{error}</p>
-              <Button onClick={() => setRetryNonce((n) => n + 1)} variant="outline">Try Again</Button>
+              <Button onClick={() => setRetryNonce((n) => n + 1)} variant="outline">
+                Try Again
+              </Button>
             </CardContent>
           </Card>
         )}
@@ -195,12 +185,8 @@ function ProjectsPage() {
               <div className="mx-auto h-12 w-12 rounded-full bg-muted grid place-items-center mb-4">
                 <FolderOpen className="h-6 w-6 text-muted-foreground" />
               </div>
-              <p className="text-base font-medium">
-                You don't have any projects yet.
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Contact us to get started!
-              </p>
+              <p className="text-base font-medium">You don't have any projects yet.</p>
+              <p className="text-sm text-muted-foreground mt-1">Contact us to get started!</p>
             </CardContent>
           </Card>
         ) : !error ? (
@@ -219,9 +205,7 @@ function ProjectsPage() {
                     project={p}
                     team={team}
                     expanded={expandedId === p.id}
-                    onToggle={() =>
-                      setExpandedId(expandedId === p.id ? null : p.id)
-                    }
+                    onToggle={() => setExpandedId(expandedId === p.id ? null : p.id)}
                   />
                 </motion.div>
               ))}
@@ -242,10 +226,7 @@ const SERVICE_COLORS: Record<string, string> = {
 
 function serviceClass(type: string | null) {
   if (!type) return "bg-muted text-muted-foreground border-border";
-  return (
-    SERVICE_COLORS[type] ??
-    "bg-muted text-muted-foreground border-border"
-  );
+  return SERVICE_COLORS[type] ?? "bg-muted text-muted-foreground border-border";
 }
 
 function statusClass(status: string) {
@@ -283,17 +264,11 @@ function ProjectCard({
             <h3 className="text-lg sm:text-xl font-semibold">{project.name}</h3>
             <div className="mt-2 flex flex-wrap gap-2">
               {project.service_type && (
-                <Badge
-                  variant="outline"
-                  className={serviceClass(project.service_type)}
-                >
+                <Badge variant="outline" className={serviceClass(project.service_type)}>
                   {project.service_type}
                 </Badge>
               )}
-              <Badge
-                variant="outline"
-                className={`capitalize ${statusClass(project.status)}`}
-              >
+              <Badge variant="outline" className={`capitalize ${statusClass(project.status)}`}>
                 {project.status}
               </Badge>
             </div>
@@ -348,17 +323,9 @@ function ProjectCard({
   );
 }
 
-function TeamAvatars({
-  ids,
-  team,
-}: {
-  ids: string[];
-  team: Record<string, TeamMember>;
-}) {
+function TeamAvatars({ ids, team }: { ids: string[]; team: Record<string, TeamMember> }) {
   if (!ids?.length) {
-    return (
-      <span className="text-xs text-muted-foreground">No team assigned</span>
-    );
+    return <span className="text-xs text-muted-foreground">No team assigned</span>;
   }
   const visible = ids.slice(0, 3);
   const extra = ids.length - visible.length;
@@ -388,21 +355,13 @@ function TeamAvatars({
   );
 }
 
-function ProjectDetail({
-  project,
-  team,
-}: {
-  project: Project;
-  team: Record<string, TeamMember>;
-}) {
+function ProjectDetail({ project, team }: { project: Project; team: Record<string, TeamMember> }) {
   return (
     <div className="pt-6 mt-2 border-t border-border space-y-6">
       {project.description && (
         <section>
           <h4 className="text-sm font-semibold mb-2">Description</h4>
-          <p className="text-sm text-muted-foreground whitespace-pre-line">
-            {project.description}
-          </p>
+          <p className="text-sm text-muted-foreground whitespace-pre-line">{project.description}</p>
         </section>
       )}
 
@@ -417,11 +376,7 @@ function ProjectDetail({
                 ) : (
                   <Circle className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                 )}
-                <span
-                  className={
-                    d.done ? "line-through text-muted-foreground" : ""
-                  }
-                >
+                <span className={d.done ? "line-through text-muted-foreground" : ""}>
                   {d.label}
                 </span>
               </li>
@@ -434,11 +389,7 @@ function ProjectDetail({
 
       <section>
         <h4 className="text-sm font-semibold mb-3">Timeline</h4>
-        <Timeline
-          start={project.start_date}
-          end={project.end_date}
-          progress={project.progress}
-        />
+        <Timeline start={project.start_date} end={project.end_date} progress={project.progress} />
       </section>
 
       {project.notes && (
@@ -476,10 +427,7 @@ function Timeline({
   return (
     <div>
       <div className="relative h-2 rounded-full bg-muted overflow-hidden">
-        <div
-          className="absolute inset-y-0 left-0 bg-primary"
-          style={{ width: `${pct}%` }}
-        />
+        <div className="absolute inset-y-0 left-0 bg-primary" style={{ width: `${pct}%` }} />
       </div>
       <div className="mt-2 flex justify-between text-xs text-muted-foreground">
         <span>{start ? fmtDate(start) : "—"}</span>

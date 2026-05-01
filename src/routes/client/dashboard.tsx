@@ -33,10 +33,7 @@ const sb = supabase as any;
 
 export const Route = createFileRoute("/client/dashboard")({
   head: () => ({
-    meta: [
-      { title: "Client Dashboard — LetUsGrow" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Client Dashboard — LetUsGrow" }, { name: "robots", content: "noindex" }],
   }),
   component: ClientDashboardLayout,
 });
@@ -279,7 +276,12 @@ function ClientDashboardLayout() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[280px] flex-col border-r border-border/60 bg-[oklch(0.14_0.012_160)]/60 backdrop-blur z-30">
-        <SidebarBody pathname={pathname} client={client} onSignOut={onSignOut} unreadCount={unreadCount} />
+        <SidebarBody
+          pathname={pathname}
+          client={client}
+          onSignOut={onSignOut}
+          unreadCount={unreadCount}
+        />
       </aside>
 
       <AnimatePresence>
@@ -308,7 +310,12 @@ function ClientDashboardLayout() {
               >
                 <X className="h-5 w-5" />
               </button>
-              <SidebarBody pathname={pathname} client={client} onSignOut={onSignOut} unreadCount={unreadCount} />
+              <SidebarBody
+                pathname={pathname}
+                client={client}
+                onSignOut={onSignOut}
+                unreadCount={unreadCount}
+              />
             </motion.aside>
           </>
         )}
@@ -401,8 +408,7 @@ function SidebarBody({
             const active = exact
               ? pathname === to
               : pathname === to || pathname.startsWith(to + "/");
-            const showBadge =
-              to === "/client/dashboard/notifications" && unreadCount > 0;
+            const showBadge = to === "/client/dashboard/notifications" && unreadCount > 0;
             return (
               <li key={to}>
                 <Link

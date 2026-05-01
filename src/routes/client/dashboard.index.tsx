@@ -25,10 +25,7 @@ import {
 
 export const Route = createFileRoute("/client/dashboard/")({
   head: () => ({
-    meta: [
-      { title: "Overview — Client Dashboard" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Overview — Client Dashboard" }, { name: "robots", content: "noindex" }],
   }),
   component: ClientDashboardOverview,
 });
@@ -100,10 +97,7 @@ type RetryableResult = {
   error: { message?: string; code?: string } | null;
 };
 
-async function withQueryRetry<T extends RetryableResult>(
-  label: string,
-  run: () => Promise<T>,
-) {
+async function withQueryRetry<T extends RetryableResult>(label: string, run: () => Promise<T>) {
   let lastError: T["error"] = null;
   for (let attempt = 0; attempt < RETRY_DELAYS.length; attempt += 1) {
     const result = await run();
@@ -160,51 +154,83 @@ function ClientDashboardOverview() {
         ticketsListRes,
         notifsRes,
       ] = await Promise.all([
-        withQueryRetry("profile", async () => await supabase.from("client_profiles").select("*").eq("id", uid).maybeSingle()),
-        withQueryRetry("membership", async () => await supabase
-          .from("client_memberships")
-          .select("*, membership_plans(*)")
-          .eq("client_id", uid)
-          .eq("status", "active")
-          .order("end_date", { ascending: false })
-          .limit(1)
-          .maybeSingle()),
-        withQueryRetry("projects", async () => await supabase
-          .from("client_projects")
-          .select("id", { count: "exact", head: true })
-          .eq("client_id", uid)
-          .eq("status", "active")),
-        withQueryRetry("reports count", async () => await supabase
-          .from("client_reports")
-          .select("id", { count: "exact", head: true })
-          .eq("client_id", uid)
-          .gte("created_at", monthStart.toISOString())),
-        withQueryRetry("tickets count", async () => await supabase
-          .from("client_tickets")
-          .select("id", { count: "exact", head: true })
-          .eq("client_id", uid)
-          .in("status", ["open", "in_progress"])),
-        withQueryRetry("reports", async () => await supabase
-          .from("client_reports")
-          .select(
-            "id,title,summary,is_read,created_at,file_path,file_url,file_type,period_start,period_end",
-          )
-          .eq("client_id", uid)
-          .eq("is_published", true)
-          .order("created_at", { ascending: false })
-          .limit(3)),
-        withQueryRetry("tickets", async () => await supabase
-          .from("client_tickets")
-          .select("id,subject,status,created_at,updated_at")
-          .eq("client_id", uid)
-          .order("updated_at", { ascending: false })
-          .limit(5)),
-        withQueryRetry("notifications", async () => await supabase
-          .from("client_notifications")
-          .select("id,title,body,type,is_read,created_at")
-          .eq("client_id", uid)
-          .order("created_at", { ascending: false })
-          .limit(5)),
+        withQueryRetry(
+          "profile",
+          async () =>
+            await supabase.from("client_profiles").select("*").eq("id", uid).maybeSingle(),
+        ),
+        withQueryRetry(
+          "membership",
+          async () =>
+            await supabase
+              .from("client_memberships")
+              .select("*, membership_plans(*)")
+              .eq("client_id", uid)
+              .eq("status", "active")
+              .order("end_date", { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+        ),
+        withQueryRetry(
+          "projects",
+          async () =>
+            await supabase
+              .from("client_projects")
+              .select("id", { count: "exact", head: true })
+              .eq("client_id", uid)
+              .eq("status", "active"),
+        ),
+        withQueryRetry(
+          "reports count",
+          async () =>
+            await supabase
+              .from("client_reports")
+              .select("id", { count: "exact", head: true })
+              .eq("client_id", uid)
+              .gte("created_at", monthStart.toISOString()),
+        ),
+        withQueryRetry(
+          "tickets count",
+          async () =>
+            await supabase
+              .from("client_tickets")
+              .select("id", { count: "exact", head: true })
+              .eq("client_id", uid)
+              .in("status", ["open", "in_progress"]),
+        ),
+        withQueryRetry(
+          "reports",
+          async () =>
+            await supabase
+              .from("client_reports")
+              .select(
+                "id,title,summary,is_read,created_at,file_path,file_url,file_type,period_start,period_end",
+              )
+              .eq("client_id", uid)
+              .eq("is_published", true)
+              .order("created_at", { ascending: false })
+              .limit(3),
+        ),
+        withQueryRetry(
+          "tickets",
+          async () =>
+            await supabase
+              .from("client_tickets")
+              .select("id,subject,status,created_at,updated_at")
+              .eq("client_id", uid)
+              .order("updated_at", { ascending: false })
+              .limit(5),
+        ),
+        withQueryRetry(
+          "notifications",
+          async () =>
+            await supabase
+              .from("client_notifications")
+              .select("id,title,body,type,is_read,created_at")
+              .eq("client_id", uid)
+              .order("created_at", { ascending: false })
+              .limit(5),
+        ),
       ]);
 
       const firstError =
@@ -361,8 +387,7 @@ function ClientDashboardOverview() {
   const nextPlan = planSlug ? NEXT_PLAN[planSlug] : undefined;
   const features = (membership?.membership_plans?.features ?? []) as string[];
 
-  const waNumber =
-    profile?.account_manager_whatsapp?.replace(/\D/g, "") || "15550000000";
+  const waNumber = profile?.account_manager_whatsapp?.replace(/\D/g, "") || "15550000000";
   const waHref = `https://wa.me/${waNumber}?text=${encodeURIComponent(
     `Hi, this is ${profile?.full_name ?? "a client"} — I'd like to chat.`,
   )}`;
@@ -376,10 +401,17 @@ function ClientDashboardOverview() {
               <AlertTriangle className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
               <div>
                 <p className="text-sm font-medium">Some dashboard data couldn't load.</p>
-                <p className="text-xs text-muted-foreground">You can keep using the dashboard, or try loading the latest data again.</p>
+                <p className="text-xs text-muted-foreground">
+                  You can keep using the dashboard, or try loading the latest data again.
+                </p>
               </div>
             </div>
-            <Button onClick={() => userId && loadAll(userId)} variant="outline" size="sm" className="shrink-0">
+            <Button
+              onClick={() => userId && loadAll(userId)}
+              variant="outline"
+              size="sm"
+              className="shrink-0"
+            >
               <RefreshCw className="h-4 w-4 mr-2" /> Try Again
             </Button>
           </CardContent>
@@ -413,13 +445,9 @@ function ClientDashboardOverview() {
                 </Badge>
               )}
               {membership && expired && (
-                <Badge variant="destructive">
-                  ❌ Plan Expired — Contact us to renew
-                </Badge>
+                <Badge variant="destructive">❌ Plan Expired — Contact us to renew</Badge>
               )}
-              {!membership && (
-                <Badge variant="secondary">No active membership</Badge>
-              )}
+              {!membership && <Badge variant="secondary">No active membership</Badge>}
             </div>
           </div>
         </div>
@@ -462,17 +490,9 @@ function ClientDashboardOverview() {
         <StatCard
           icon={<TrendingUp className="h-4 w-4" />}
           label="Days Remaining"
-          value={
-            !membership ? "—" : expired ? "Expired" : daysRemaining
-          }
+          value={!membership ? "—" : expired ? "Expired" : daysRemaining}
           tone={
-            !membership
-              ? "default"
-              : expired
-                ? "danger"
-                : daysRemaining < 7
-                  ? "warning"
-                  : "default"
+            !membership ? "default" : expired ? "danger" : daysRemaining < 7 ? "warning" : "default"
           }
         />
       </section>
@@ -507,10 +527,20 @@ function ClientDashboardOverview() {
                 <Progress value={pctUsed} />
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>
-                    Started {new Date(membership.start_date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                    Started{" "}
+                    {new Date(membership.start_date).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
                   </span>
                   <span>
-                    Expires {new Date(membership.end_date).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
+                    Expires{" "}
+                    {new Date(membership.end_date).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -546,18 +576,14 @@ function ClientDashboardOverview() {
           </CardHeader>
           <CardContent>
             {recentActivity.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-8 text-center">
-                No activity yet.
-              </p>
+              <p className="text-sm text-muted-foreground py-8 text-center">No activity yet.</p>
             ) : (
               <ul className="divide-y divide-border/40">
                 {recentActivity.map((item) => (
                   <li key={item.id} className="flex items-start gap-3 py-3">
                     <ActivityIcon kind={item.kind} />
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium leading-snug">
-                        {item.title}
-                      </p>
+                      <p className="text-sm font-medium leading-snug">{item.title}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {timeAgo(item.date, now)}
                       </p>
@@ -576,10 +602,7 @@ function ClientDashboardOverview() {
           <CardTitle className="text-base flex items-center gap-2">
             <FileBarChart className="h-4 w-4 text-primary" /> Recent Reports
           </CardTitle>
-          <Link
-            to="/client/dashboard/reports"
-            className="text-xs text-primary hover:underline"
-          >
+          <Link to="/client/dashboard/reports" className="text-xs text-primary hover:underline">
             View All Reports →
           </Link>
         </CardHeader>
@@ -658,11 +681,7 @@ function StatCard({
   );
 }
 
-function ActivityIcon({
-  kind,
-}: {
-  kind: "report" | "ticket" | "notification";
-}) {
+function ActivityIcon({ kind }: { kind: "report" | "ticket" | "notification" }) {
   const Icon = kind === "report" ? FileText : kind === "ticket" ? LifeBuoy : Bell;
   return (
     <span className="grid place-items-center h-8 w-8 rounded-full bg-primary/10 text-primary shrink-0">
