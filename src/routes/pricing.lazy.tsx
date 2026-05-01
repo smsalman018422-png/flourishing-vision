@@ -275,19 +275,37 @@ function PricingPage() {
   return (
     <PageShell>
       {/* HERO */}
-      <PageHeader
-        eyebrow={
-          <span className="inline-flex items-center gap-2">
+      <section className="relative pt-20 sm:pt-28 pb-10 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[500px] w-[900px] rounded-full bg-primary/15 blur-[140px]" />
+        </div>
+        <div className="relative mx-auto max-w-4xl px-4 sm:px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary"
+          >
             <TrendingUp className="h-3.5 w-3.5" /> Social Media Management
-          </span>
-        }
-        title={
-          <>
+          </motion.div>
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.05 }}
+            className="mt-5 text-4xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight"
+          >
             Packages Built to <span className="text-primary">Scale Your Brand</span>
-          </>
-        }
-        subtitle="From startups to enterprise — choose the plan that matches your growth goals."
-      />
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="mt-5 text-lg text-muted-foreground max-w-2xl mx-auto"
+          >
+            From startups to enterprise — choose the plan that matches your growth goals.
+          </motion.p>
+        </div>
+      </section>
 
       {/* Billing toggle */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 flex justify-center">
