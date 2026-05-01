@@ -26,6 +26,7 @@ import { Route as ClientLoginRouteImport } from './routes/client/login'
 import { Route as ClientDashboardRouteImport } from './routes/client/dashboard'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ApiSitemapDotxmlRouteImport } from './routes/api/sitemap[.]xml'
+import { Route as ApiPurchaseCheckoutRouteImport } from './routes/api/purchase-checkout'
 import { Route as ApiAdminWriteRouteImport } from './routes/api/admin-write'
 import { Route as ApiAdminUploadRouteImport } from './routes/api/admin-upload'
 import { Route as ApiAdminDataRouteImport } from './routes/api/admin-data'
@@ -136,6 +137,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
 const ApiSitemapDotxmlRoute = ApiSitemapDotxmlRouteImport.update({
   id: '/api/sitemap.xml',
   path: '/api/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPurchaseCheckoutRoute = ApiPurchaseCheckoutRouteImport.update({
+  id: '/api/purchase-checkout',
+  path: '/api/purchase-checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAdminWriteRoute = ApiAdminWriteRouteImport.update({
@@ -298,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/api/admin-data': typeof ApiAdminDataRoute
   '/api/admin-upload': typeof ApiAdminUploadRoute
   '/api/admin-write': typeof ApiAdminWriteRoute
+  '/api/purchase-checkout': typeof ApiPurchaseCheckoutRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/client/dashboard': typeof ClientDashboardRouteWithChildren
@@ -343,6 +350,7 @@ export interface FileRoutesByTo {
   '/api/admin-data': typeof ApiAdminDataRoute
   '/api/admin-upload': typeof ApiAdminUploadRoute
   '/api/admin-write': typeof ApiAdminWriteRoute
+  '/api/purchase-checkout': typeof ApiPurchaseCheckoutRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/client/login': typeof ClientLoginRoute
@@ -388,6 +396,7 @@ export interface FileRoutesById {
   '/api/admin-data': typeof ApiAdminDataRoute
   '/api/admin-upload': typeof ApiAdminUploadRoute
   '/api/admin-write': typeof ApiAdminWriteRoute
+  '/api/purchase-checkout': typeof ApiPurchaseCheckoutRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/client/dashboard': typeof ClientDashboardRouteWithChildren
@@ -435,6 +444,7 @@ export interface FileRouteTypes {
     | '/api/admin-data'
     | '/api/admin-upload'
     | '/api/admin-write'
+    | '/api/purchase-checkout'
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/client/dashboard'
@@ -480,6 +490,7 @@ export interface FileRouteTypes {
     | '/api/admin-data'
     | '/api/admin-upload'
     | '/api/admin-write'
+    | '/api/purchase-checkout'
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/client/login'
@@ -524,6 +535,7 @@ export interface FileRouteTypes {
     | '/api/admin-data'
     | '/api/admin-upload'
     | '/api/admin-write'
+    | '/api/purchase-checkout'
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/client/dashboard'
@@ -570,6 +582,7 @@ export interface RootRouteChildren {
   ApiAdminDataRoute: typeof ApiAdminDataRoute
   ApiAdminUploadRoute: typeof ApiAdminUploadRoute
   ApiAdminWriteRoute: typeof ApiAdminWriteRoute
+  ApiPurchaseCheckoutRoute: typeof ApiPurchaseCheckoutRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   ClientDashboardRoute: typeof ClientDashboardRouteWithChildren
   ClientLoginRoute: typeof ClientLoginRoute
@@ -697,6 +710,13 @@ declare module '@tanstack/react-router' {
       path: '/api/sitemap.xml'
       fullPath: '/api/sitemap.xml'
       preLoaderRoute: typeof ApiSitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/purchase-checkout': {
+      id: '/api/purchase-checkout'
+      path: '/api/purchase-checkout'
+      fullPath: '/api/purchase-checkout'
+      preLoaderRoute: typeof ApiPurchaseCheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/admin-write': {
@@ -971,6 +991,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminDataRoute: ApiAdminDataRoute,
   ApiAdminUploadRoute: ApiAdminUploadRoute,
   ApiAdminWriteRoute: ApiAdminWriteRoute,
+  ApiPurchaseCheckoutRoute: ApiPurchaseCheckoutRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   ClientDashboardRoute: ClientDashboardRouteWithChildren,
   ClientLoginRoute: ClientLoginRoute,
