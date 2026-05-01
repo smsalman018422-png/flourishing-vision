@@ -33,10 +33,7 @@ const sb = supabase as any;
 
 export const Route = createFileRoute("/client/dashboard")({
   head: () => ({
-    meta: [
-      { title: "Client Dashboard — LetUsGrow" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Client Dashboard — LetUsGrow" }, { name: "robots", content: "noindex" }],
   }),
   component: ClientDashboardLayout,
 });
@@ -48,6 +45,29 @@ type ClientProfile = {
   avatar_url: string | null;
   is_active?: boolean;
 };
+
+type CachedUser = {
+  id: string;
+  email?: string;
+  user_metadata?: Record<string, unknown>;
+};
+
+function getCachedUser(): CachedUser | null {
+  if (typeof window === "undefined") return null;
+  for (let i = 0; i < window.localStorage.length; i += 1) {
+    const key = window.localStorage.key(i);
+    if (!key?.startsWith("sb-") || !key.endsWith("-auth-token")) continue;
+    try {
+      const raw = window.localStorage.getItem(key);
+      const parsed = raw ? JSON.parse(raw) : null;
+      const user = parsed?.user ?? parsed?.currentSession?.user;
+      if (user?.id) return user as CachedUser;
+    } catch {
+      // Ignore malformed auth cache entries.
+    }
+  }
+  return null;
+}
 
 const nav: Array<{ to: string; label: string; Icon: typeof LayoutDashboard; exact?: boolean }> = [
   { to: "/client/dashboard", label: "Overview", Icon: LayoutDashboard, exact: true },
@@ -113,19 +133,41 @@ function ClientDashboardLayout() {
     };
 
     const check = async () => {
-      const { data } = await supabase.auth.getSession();
+      const { data } = await Promise.race([
+        supabase.auth.getSession(),
+        new Promise<{ data: { session: { user: CachedUser } | null } }>((resolve) =>
+          window.setTimeout(() => {
+            const user = getCachedUser();
+            resolve({ data: { session: user ? { user } : null } });
+          }, 1500),
+        ),
+      ]);
       if (!mounted) return;
       const uid = data.session?.user.id;
       if (!uid) {
         navigate({ to: "/client/login" });
         return;
       }
+      const sessionUser = data.session?.user;
+      const fallbackClient: ClientProfile = {
+        id: uid,
+        full_name:
+          (sessionUser?.user_metadata?.full_name as string | undefined) ||
+          sessionUser?.email?.split("@")[0] ||
+          "Client",
+        company_name: null,
+        avatar_url: null,
+        is_active: true,
+      };
+      setClient(fallbackClient);
+      setLoading(false);
+      window.clearTimeout(hardTimeout);
+
       const { data: profile, error: fetchErr } = await fetchProfileWithRetry(uid);
       if (!mounted) return;
       let resolved = profile;
       if (!resolved && !fetchErr) {
         // Auto-create profile for self-signed-up users on first dashboard visit
-        const sessionUser = data.session?.user;
         const fullName =
           (sessionUser?.user_metadata?.full_name as string | undefined) ||
           sessionUser?.email?.split("@")[0] ||
@@ -146,18 +188,9 @@ function ClientDashboardLayout() {
         resolved = (created as ClientProfile | null) ?? null;
       }
       if (!resolved) {
-        // Backend temporarily unavailable — show a placeholder so the user is not signed out.
-        const sessionUser = data.session?.user;
-        resolved = {
-          id: uid,
-          full_name:
-            (sessionUser?.user_metadata?.full_name as string | undefined) ||
-            sessionUser?.email?.split("@")[0] ||
-            "Client",
-          company_name: null,
-          avatar_url: null,
-          is_active: true,
-        };
+        // Backend temporarily unavailable — keep the fallback profile visible.
+        setLoadError("Some dashboard data is temporarily unavailable. Please try again.");
+        return;
       }
       if (resolved.is_active === false) {
         await supabase.auth.signOut();
@@ -184,12 +217,20 @@ function ClientDashboardLayout() {
   useEffect(() => {
     if (!client?.id) return;
     const refresh = async () => {
-      const { count } = await supabase
-        .from("client_notifications")
-        .select("id", { count: "exact", head: true })
-        .eq("client_id", client.id)
-        .eq("is_read", false);
-      setUnreadCount(count ?? 0);
+      const delays = [1000, 2000, 3000];
+      for (let i = 0; i < delays.length; i += 1) {
+        const { count, error } = await supabase
+          .from("client_notifications")
+          .select("id", { count: "exact", head: true })
+          .eq("client_id", client.id)
+          .eq("is_read", false);
+        if (!error) {
+          setUnreadCount(count ?? 0);
+          return;
+        }
+        if (i < delays.length - 1) await new Promise((r) => setTimeout(r, delays[i]));
+      }
+      setUnreadCount(0);
     };
     void refresh();
     const channel = supabase
@@ -271,7 +312,12 @@ function ClientDashboardLayout() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[280px] flex-col border-r border-border/60 bg-[oklch(0.14_0.012_160)]/60 backdrop-blur z-30">
-        <SidebarBody pathname={pathname} client={client} onSignOut={onSignOut} unreadCount={unreadCount} />
+        <SidebarBody
+          pathname={pathname}
+          client={client}
+          onSignOut={onSignOut}
+          unreadCount={unreadCount}
+        />
       </aside>
 
       <AnimatePresence>
@@ -300,7 +346,12 @@ function ClientDashboardLayout() {
               >
                 <X className="h-5 w-5" />
               </button>
-              <SidebarBody pathname={pathname} client={client} onSignOut={onSignOut} unreadCount={unreadCount} />
+              <SidebarBody
+                pathname={pathname}
+                client={client}
+                onSignOut={onSignOut}
+                unreadCount={unreadCount}
+              />
             </motion.aside>
           </>
         )}
@@ -393,8 +444,7 @@ function SidebarBody({
             const active = exact
               ? pathname === to
               : pathname === to || pathname.startsWith(to + "/");
-            const showBadge =
-              to === "/client/dashboard/notifications" && unreadCount > 0;
+            const showBadge = to === "/client/dashboard/notifications" && unreadCount > 0;
             return (
               <li key={to}>
                 <Link
