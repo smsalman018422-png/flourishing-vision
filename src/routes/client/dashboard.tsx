@@ -62,6 +62,7 @@ function ClientDashboardLayout() {
   const [loading, setLoading] = useState(true);
   const [client, setClient] = useState<ClientProfile | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     setDrawerOpen(false);
@@ -111,6 +112,36 @@ function ClientDashboardLayout() {
     };
   }, [navigate]);
 
+  // Track unread notifications for the sidebar bell
+  useEffect(() => {
+    if (!client?.id) return;
+    const refresh = async () => {
+      const { count } = await supabase
+        .from("client_notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("client_id", client.id)
+        .eq("is_read", false);
+      setUnreadCount(count ?? 0);
+    };
+    void refresh();
+    const channel = supabase
+      .channel(`sidebar-notif-${client.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "client_notifications",
+          filter: `client_id=eq.${client.id}`,
+        },
+        () => void refresh(),
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [client?.id]);
+
   if (loading || !client) {
     return (
       <div className="min-h-screen grid place-items-center bg-background">
@@ -134,7 +165,7 @@ function ClientDashboardLayout() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[280px] flex-col border-r border-border/60 bg-[oklch(0.14_0.012_160)]/60 backdrop-blur z-30">
-        <SidebarBody pathname={pathname} client={client} onSignOut={onSignOut} />
+        <SidebarBody pathname={pathname} client={client} onSignOut={onSignOut} unreadCount={unreadCount} />
       </aside>
 
       <AnimatePresence>
@@ -163,7 +194,7 @@ function ClientDashboardLayout() {
               >
                 <X className="h-5 w-5" />
               </button>
-              <SidebarBody pathname={pathname} client={client} onSignOut={onSignOut} />
+              <SidebarBody pathname={pathname} client={client} onSignOut={onSignOut} unreadCount={unreadCount} />
             </motion.aside>
           </>
         )}
@@ -224,10 +255,12 @@ function SidebarBody({
   pathname,
   client,
   onSignOut,
+  unreadCount,
 }: {
   pathname: string;
   client: ClientProfile;
   onSignOut: () => void;
+  unreadCount: number;
 }) {
   const initials = client.full_name
     .split(" ")
@@ -254,6 +287,8 @@ function SidebarBody({
             const active = exact
               ? pathname === to
               : pathname === to || pathname.startsWith(to + "/");
+            const showBadge =
+              to === "/client/dashboard/notifications" && unreadCount > 0;
             return (
               <li key={to}>
                 <Link
@@ -265,7 +300,12 @@ function SidebarBody({
                   }`}
                 >
                   <Icon className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{label}</span>
+                  <span className="truncate flex-1">{label}</span>
+                  {showBadge && (
+                    <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-5 rounded-full bg-emerald-500 text-white text-[10px] font-semibold px-1.5">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
                 </Link>
               </li>
             );
