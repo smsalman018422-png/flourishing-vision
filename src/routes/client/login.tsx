@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Leaf, Loader2, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { Leaf, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button, Field, TextInput } from "@/components/admin/ui";
@@ -277,7 +277,7 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -299,84 +299,88 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
     }
 
     setBusy(true);
-    try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: parsed.data.email,
-        password: parsed.data.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/client/login`,
-          data: {
-            full_name: parsed.data.fullName,
-            phone: parsed.data.phone || null,
-            company_name: parsed.data.companyName || null,
-          },
-        },
-      });
-
-      if (authError) {
-        if (authError.message.includes("already registered")) {
-          setError("This email is already registered. Try signing in instead.");
-          onSwitchToLogin();
-        } else {
-          setError(authError.message);
-        }
-        return;
-      }
-      if (!authData.user) {
-        setError("Signup failed. Please try again.");
-        return;
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const { error: profileError } = await sb.from("client_profiles").insert({
-        id: authData.user.id,
-        email: parsed.data.email,
-        full_name: parsed.data.fullName || "",
-        phone: phone || null,
-        whatsapp_number: phone || null,
-        company_name: companyName || null,
-        is_active: true,
-      });
-      if (profileError) console.error("Profile insert error:", profileError);
-
-      if (authData.session) {
+    const createProfile = async (uid: string) => {
+      try {
+        await sb.from("client_profiles").insert({
+          id: uid,
+          email: parsed.data.email,
+          full_name: parsed.data.fullName || "",
+          phone: phone?.trim() || null,
+          whatsapp_number: phone?.trim() || null,
+          company_name: companyName?.trim() || null,
+          is_active: true,
+        });
         await sb.from("client_notifications").insert({
-          client_id: authData.user.id,
+          client_id: uid,
           title: "Welcome to LetUsGrow! 🎉",
           body: "Your account is ready. Explore your dashboard to get started.",
           type: "success",
         });
-        toast.success("Account created!");
-        navigate({ to: "/client/dashboard" });
-      } else {
-        setSuccess(true);
+      } catch (e) {
+        console.error("Profile insert error:", e);
       }
+    };
+
+    try {
+      console.log("Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
+      console.log("Signing up:", parsed.data.email);
+
+      // SIMPLE signUp — no emailRedirectTo (which can force email confirmation)
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: parsed.data.email,
+        password: parsed.data.password,
+      });
+      console.log("Signup response:", { authData, authError });
+
+      if (authError) {
+        const msg = authError.message || "";
+        if (msg.includes("already registered") || msg.includes("already exists") || msg.includes("User already")) {
+          setError("This email is already registered. Please sign in instead.");
+          onSwitchToLogin();
+        } else if (msg.includes("signup_disabled")) {
+          setError("Signup is currently disabled. Please contact support.");
+        } else {
+          setError(msg);
+        }
+        return;
+      }
+      if (!authData?.user) {
+        setError("Failed to create account. Please try again.");
+        return;
+      }
+
+      // Auto-confirmed: session present
+      if (authData.session) {
+        await createProfile(authData.user.id);
+        toast.success("Account created! Welcome!");
+        navigate({ to: "/client/dashboard" });
+        return;
+      }
+
+      // No session — try immediate sign-in (auto-confirm should be on)
+      await new Promise((r) => setTimeout(r, 1500));
+      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+        email: parsed.data.email,
+        password: parsed.data.password,
+      });
+
+      if (!loginError && loginData?.session) {
+        await createProfile(loginData.user.id);
+        toast.success("Account created! Welcome!");
+        navigate({ to: "/client/dashboard" });
+        return;
+      }
+
+      console.error("Auto-login after signup failed:", loginError);
+      toast.success("Account created! Please check your email to confirm, then sign in.");
+      onSwitchToLogin();
     } catch (err) {
+      console.error("Signup catch:", err);
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setBusy(false);
     }
   };
-
-  if (success) {
-    return (
-      <div className="text-center space-y-4 py-4">
-        <div className="mx-auto h-14 w-14 rounded-full bg-emerald-500/15 grid place-items-center">
-          <CheckCircle2 className="h-7 w-7 text-emerald-500" />
-        </div>
-        <h1 className="text-xl sm:text-2xl font-display font-semibold">Check your email!</h1>
-        <p className="text-sm text-muted-foreground">
-          We've sent a confirmation link to{" "}
-          <span className="text-foreground font-medium">{email}</span>. After confirming, you can
-          sign in to your dashboard.
-        </p>
-        <Button type="button" onClick={onSwitchToLogin} className="w-full">
-          Go to Sign In →
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <>
