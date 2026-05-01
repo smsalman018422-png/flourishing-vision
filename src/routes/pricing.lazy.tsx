@@ -575,20 +575,9 @@ function PlanCard({
           )}
         </div>
 
-        {ctaIsExternal ? (
-          <a
-            href={plan.cta_link}
-            target="_blank"
-            rel="noreferrer"
-            className={ctaClass(plan)}
-          >
-            {plan.cta_text}
-          </a>
-        ) : (
-          <Link to={plan.cta_link} className={ctaClass(plan)}>
-            {plan.cta_text}
-          </Link>
-        )}
+        <button onClick={onPurchase} className={ctaClass(plan)} type="button">
+          {plan.cta_text}
+        </button>
 
         <ul className="mt-6 space-y-2.5 flex-1">
           {visibleFeatures.map((f, idx) => (
