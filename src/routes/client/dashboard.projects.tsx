@@ -18,6 +18,18 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+const RETRY_DELAYS = [1000, 2000, 3000];
+
+async function withRetry<T extends { error: { message?: string } | null }>(run: () => Promise<T>) {
+  let result: T | null = null;
+  for (let i = 0; i < RETRY_DELAYS.length; i += 1) {
+    result = await run();
+    if (!result.error) return result;
+    if (i < RETRY_DELAYS.length - 1) await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[i]));
+  }
+  return result!;
+}
+
 type Project = {
   id: string;
   name: string;
@@ -64,19 +76,21 @@ function ProjectsPage() {
   const [team, setTeam] = useState<Record<string, TeamMember>>({});
   const [filter, setFilter] = useState<StatusKey>("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!userId) return;
     void (async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      setError(null);
+      const { data, error } = await withRetry(async () => await supabase
         .from("client_projects")
         .select("*")
         .eq("client_id", userId)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false }));
 
       if (error) {
-        toast.error(error.message);
+        setError(error.message || "Failed to load projects");
         setProjects([]);
         setLoading(false);
         return;
@@ -89,10 +103,10 @@ function ProjectsPage() {
         new Set(list.flatMap((p) => p.assigned_team_ids ?? [])),
       );
       if (ids.length) {
-        const { data: members } = await supabase
+        const { data: members } = await withRetry(async () => await supabase
           .from("team_members")
           .select("id,name,photo_url")
-          .in("id", ids);
+          .in("id", ids));
         const map: Record<string, TeamMember> = {};
         for (const m of (members ?? []) as TeamMember[]) map[m.id] = m;
         setTeam(map);
@@ -165,7 +179,17 @@ function ProjectsPage() {
           </div>
         </div>
 
-        {filtered.length === 0 ? (
+        {error && (
+          <Card className="border-destructive/30">
+            <CardContent className="py-12 text-center space-y-4">
+              <p className="font-medium">Couldn't load your projects</p>
+              <p className="text-sm text-muted-foreground">{error}</p>
+              <Button onClick={() => window.location.reload()} variant="outline">Try Again</Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {!error && filtered.length === 0 ? (
           <Card>
             <CardContent className="py-20 text-center">
               <div className="mx-auto h-12 w-12 rounded-full bg-muted grid place-items-center mb-4">
@@ -179,7 +203,7 @@ function ProjectsPage() {
               </p>
             </CardContent>
           </Card>
-        ) : (
+        ) : !error ? (
           <motion.div layout className="grid gap-4">
             <AnimatePresence mode="popLayout">
               {filtered.map((p) => (
@@ -203,7 +227,7 @@ function ProjectsPage() {
               ))}
             </AnimatePresence>
           </motion.div>
-        )}
+        ) : null}
       </div>
     </div>
   );
