@@ -696,6 +696,8 @@ function NewTicketDialog({
     }
     setSubmitting(true);
     try {
+      // ticket_number is auto-set by DB trigger; pass placeholder to satisfy types
+      const placeholderNumber = `TKT-PENDING-${Date.now()}`;
       const { data: ticket, error: tErr } = await supabase
         .from("client_tickets")
         .insert({
@@ -705,6 +707,7 @@ function NewTicketDialog({
           message: parsed.data.message, // legacy column
           project_id: parsed.data.project_id,
           status: "open",
+          ticket_number: placeholderNumber,
         })
         .select("id")
         .single();
