@@ -316,6 +316,7 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
       if (authError) {
         if (authError.message.includes("already registered")) {
           setError("This email is already registered. Try signing in instead.");
+          onSwitchToLogin();
         } else {
           setError(authError.message);
         }
