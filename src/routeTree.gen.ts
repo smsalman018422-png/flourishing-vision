@@ -21,6 +21,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as PortfolioSlugRouteImport } from './routes/portfolio.$slug'
+import { Route as ClientLoginRouteImport } from './routes/client/login'
 import { Route as ClientDashboardRouteImport } from './routes/client/dashboard'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ApiSitemapDotxmlRouteImport } from './routes/api/sitemap[.]xml'
@@ -36,8 +37,14 @@ import { Route as AdminPortfolioRouteImport } from './routes/admin/portfolio'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
 import { Route as AdminBlogRouteImport } from './routes/admin/blog'
+import { Route as ClientDashboardIndexRouteImport } from './routes/client/dashboard.index'
+import { Route as ClientDashboardTicketsRouteImport } from './routes/client/dashboard.tickets'
+import { Route as ClientDashboardSettingsRouteImport } from './routes/client/dashboard.settings'
 import { Route as ClientDashboardReportsRouteImport } from './routes/client/dashboard.reports'
 import { Route as ClientDashboardProjectsRouteImport } from './routes/client/dashboard.projects'
+import { Route as ClientDashboardNotificationsRouteImport } from './routes/client/dashboard.notifications'
+import { Route as ClientDashboardMembershipRouteImport } from './routes/client/dashboard.membership'
+import { Route as ClientDashboardBillingRouteImport } from './routes/client/dashboard.billing'
 import { Route as ApiPublicBlogRouteImport } from './routes/api/public/blog'
 
 const TeamRoute = TeamRouteImport.update({
@@ -99,6 +106,11 @@ const PortfolioSlugRoute = PortfolioSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => PortfolioRoute,
+} as any)
+const ClientLoginRoute = ClientLoginRouteImport.update({
+  id: '/client/login',
+  path: '/client/login',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ClientDashboardRoute = ClientDashboardRouteImport.update({
   id: '/client/dashboard',
@@ -175,6 +187,21 @@ const AdminBlogRoute = AdminBlogRouteImport.update({
   path: '/admin/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientDashboardIndexRoute = ClientDashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClientDashboardRoute,
+} as any)
+const ClientDashboardTicketsRoute = ClientDashboardTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => ClientDashboardRoute,
+} as any)
+const ClientDashboardSettingsRoute = ClientDashboardSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => ClientDashboardRoute,
+} as any)
 const ClientDashboardReportsRoute = ClientDashboardReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -183,6 +210,23 @@ const ClientDashboardReportsRoute = ClientDashboardReportsRouteImport.update({
 const ClientDashboardProjectsRoute = ClientDashboardProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
+  getParentRoute: () => ClientDashboardRoute,
+} as any)
+const ClientDashboardNotificationsRoute =
+  ClientDashboardNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => ClientDashboardRoute,
+  } as any)
+const ClientDashboardMembershipRoute =
+  ClientDashboardMembershipRouteImport.update({
+    id: '/membership',
+    path: '/membership',
+    getParentRoute: () => ClientDashboardRoute,
+  } as any)
+const ClientDashboardBillingRoute = ClientDashboardBillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
   getParentRoute: () => ClientDashboardRoute,
 } as any)
 const ApiPublicBlogRoute = ApiPublicBlogRouteImport.update({
@@ -216,12 +260,19 @@ export interface FileRoutesByFullPath {
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/client/dashboard': typeof ClientDashboardRouteWithChildren
+  '/client/login': typeof ClientLoginRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/blog': typeof ApiPublicBlogRoute
+  '/client/dashboard/billing': typeof ClientDashboardBillingRoute
+  '/client/dashboard/membership': typeof ClientDashboardMembershipRoute
+  '/client/dashboard/notifications': typeof ClientDashboardNotificationsRoute
   '/client/dashboard/projects': typeof ClientDashboardProjectsRoute
   '/client/dashboard/reports': typeof ClientDashboardReportsRoute
+  '/client/dashboard/settings': typeof ClientDashboardSettingsRoute
+  '/client/dashboard/tickets': typeof ClientDashboardTicketsRoute
+  '/client/dashboard/': typeof ClientDashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -247,13 +298,19 @@ export interface FileRoutesByTo {
   '/api/admin-write': typeof ApiAdminWriteRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/client/dashboard': typeof ClientDashboardRouteWithChildren
+  '/client/login': typeof ClientLoginRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin': typeof AdminIndexRoute
   '/api/public/blog': typeof ApiPublicBlogRoute
+  '/client/dashboard/billing': typeof ClientDashboardBillingRoute
+  '/client/dashboard/membership': typeof ClientDashboardMembershipRoute
+  '/client/dashboard/notifications': typeof ClientDashboardNotificationsRoute
   '/client/dashboard/projects': typeof ClientDashboardProjectsRoute
   '/client/dashboard/reports': typeof ClientDashboardReportsRoute
+  '/client/dashboard/settings': typeof ClientDashboardSettingsRoute
+  '/client/dashboard/tickets': typeof ClientDashboardTicketsRoute
+  '/client/dashboard': typeof ClientDashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -281,12 +338,19 @@ export interface FileRoutesById {
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/client/dashboard': typeof ClientDashboardRouteWithChildren
+  '/client/login': typeof ClientLoginRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/blog': typeof ApiPublicBlogRoute
+  '/client/dashboard/billing': typeof ClientDashboardBillingRoute
+  '/client/dashboard/membership': typeof ClientDashboardMembershipRoute
+  '/client/dashboard/notifications': typeof ClientDashboardNotificationsRoute
   '/client/dashboard/projects': typeof ClientDashboardProjectsRoute
   '/client/dashboard/reports': typeof ClientDashboardReportsRoute
+  '/client/dashboard/settings': typeof ClientDashboardSettingsRoute
+  '/client/dashboard/tickets': typeof ClientDashboardTicketsRoute
+  '/client/dashboard/': typeof ClientDashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -315,12 +379,19 @@ export interface FileRouteTypes {
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/client/dashboard'
+    | '/client/login'
     | '/portfolio/$slug'
     | '/services/$slug'
     | '/admin/'
     | '/api/public/blog'
+    | '/client/dashboard/billing'
+    | '/client/dashboard/membership'
+    | '/client/dashboard/notifications'
     | '/client/dashboard/projects'
     | '/client/dashboard/reports'
+    | '/client/dashboard/settings'
+    | '/client/dashboard/tickets'
+    | '/client/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -346,13 +417,19 @@ export interface FileRouteTypes {
     | '/api/admin-write'
     | '/api/sitemap.xml'
     | '/blog/$slug'
-    | '/client/dashboard'
+    | '/client/login'
     | '/portfolio/$slug'
     | '/services/$slug'
     | '/admin'
     | '/api/public/blog'
+    | '/client/dashboard/billing'
+    | '/client/dashboard/membership'
+    | '/client/dashboard/notifications'
     | '/client/dashboard/projects'
     | '/client/dashboard/reports'
+    | '/client/dashboard/settings'
+    | '/client/dashboard/tickets'
+    | '/client/dashboard'
   id:
     | '__root__'
     | '/'
@@ -379,12 +456,19 @@ export interface FileRouteTypes {
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/client/dashboard'
+    | '/client/login'
     | '/portfolio/$slug'
     | '/services/$slug'
     | '/admin/'
     | '/api/public/blog'
+    | '/client/dashboard/billing'
+    | '/client/dashboard/membership'
+    | '/client/dashboard/notifications'
     | '/client/dashboard/projects'
     | '/client/dashboard/reports'
+    | '/client/dashboard/settings'
+    | '/client/dashboard/tickets'
+    | '/client/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -411,6 +495,7 @@ export interface RootRouteChildren {
   ApiAdminWriteRoute: typeof ApiAdminWriteRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   ClientDashboardRoute: typeof ClientDashboardRouteWithChildren
+  ClientLoginRoute: typeof ClientLoginRoute
   AdminIndexRoute: typeof AdminIndexRoute
   ApiPublicBlogRoute: typeof ApiPublicBlogRoute
 }
@@ -500,6 +585,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/portfolio/$slug'
       preLoaderRoute: typeof PortfolioSlugRouteImport
       parentRoute: typeof PortfolioRoute
+    }
+    '/client/login': {
+      id: '/client/login'
+      path: '/client/login'
+      fullPath: '/client/login'
+      preLoaderRoute: typeof ClientLoginRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/client/dashboard': {
       id: '/client/dashboard'
@@ -606,6 +698,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBlogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/client/dashboard/': {
+      id: '/client/dashboard/'
+      path: '/'
+      fullPath: '/client/dashboard/'
+      preLoaderRoute: typeof ClientDashboardIndexRouteImport
+      parentRoute: typeof ClientDashboardRoute
+    }
+    '/client/dashboard/tickets': {
+      id: '/client/dashboard/tickets'
+      path: '/tickets'
+      fullPath: '/client/dashboard/tickets'
+      preLoaderRoute: typeof ClientDashboardTicketsRouteImport
+      parentRoute: typeof ClientDashboardRoute
+    }
+    '/client/dashboard/settings': {
+      id: '/client/dashboard/settings'
+      path: '/settings'
+      fullPath: '/client/dashboard/settings'
+      preLoaderRoute: typeof ClientDashboardSettingsRouteImport
+      parentRoute: typeof ClientDashboardRoute
+    }
     '/client/dashboard/reports': {
       id: '/client/dashboard/reports'
       path: '/reports'
@@ -618,6 +731,27 @@ declare module '@tanstack/react-router' {
       path: '/projects'
       fullPath: '/client/dashboard/projects'
       preLoaderRoute: typeof ClientDashboardProjectsRouteImport
+      parentRoute: typeof ClientDashboardRoute
+    }
+    '/client/dashboard/notifications': {
+      id: '/client/dashboard/notifications'
+      path: '/notifications'
+      fullPath: '/client/dashboard/notifications'
+      preLoaderRoute: typeof ClientDashboardNotificationsRouteImport
+      parentRoute: typeof ClientDashboardRoute
+    }
+    '/client/dashboard/membership': {
+      id: '/client/dashboard/membership'
+      path: '/membership'
+      fullPath: '/client/dashboard/membership'
+      preLoaderRoute: typeof ClientDashboardMembershipRouteImport
+      parentRoute: typeof ClientDashboardRoute
+    }
+    '/client/dashboard/billing': {
+      id: '/client/dashboard/billing'
+      path: '/billing'
+      fullPath: '/client/dashboard/billing'
+      preLoaderRoute: typeof ClientDashboardBillingRouteImport
       parentRoute: typeof ClientDashboardRoute
     }
     '/api/public/blog': {
@@ -665,13 +799,25 @@ const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
 )
 
 interface ClientDashboardRouteChildren {
+  ClientDashboardBillingRoute: typeof ClientDashboardBillingRoute
+  ClientDashboardMembershipRoute: typeof ClientDashboardMembershipRoute
+  ClientDashboardNotificationsRoute: typeof ClientDashboardNotificationsRoute
   ClientDashboardProjectsRoute: typeof ClientDashboardProjectsRoute
   ClientDashboardReportsRoute: typeof ClientDashboardReportsRoute
+  ClientDashboardSettingsRoute: typeof ClientDashboardSettingsRoute
+  ClientDashboardTicketsRoute: typeof ClientDashboardTicketsRoute
+  ClientDashboardIndexRoute: typeof ClientDashboardIndexRoute
 }
 
 const ClientDashboardRouteChildren: ClientDashboardRouteChildren = {
+  ClientDashboardBillingRoute: ClientDashboardBillingRoute,
+  ClientDashboardMembershipRoute: ClientDashboardMembershipRoute,
+  ClientDashboardNotificationsRoute: ClientDashboardNotificationsRoute,
   ClientDashboardProjectsRoute: ClientDashboardProjectsRoute,
   ClientDashboardReportsRoute: ClientDashboardReportsRoute,
+  ClientDashboardSettingsRoute: ClientDashboardSettingsRoute,
+  ClientDashboardTicketsRoute: ClientDashboardTicketsRoute,
+  ClientDashboardIndexRoute: ClientDashboardIndexRoute,
 }
 
 const ClientDashboardRouteWithChildren = ClientDashboardRoute._addFileChildren(
@@ -702,6 +848,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminWriteRoute: ApiAdminWriteRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   ClientDashboardRoute: ClientDashboardRouteWithChildren,
+  ClientLoginRoute: ClientLoginRoute,
   AdminIndexRoute: AdminIndexRoute,
   ApiPublicBlogRoute: ApiPublicBlogRoute,
 }

@@ -45,7 +45,7 @@ type ClientProfile = {
   avatar_url: string | null;
 };
 
-const nav = [
+const nav: Array<{ to: string; label: string; Icon: typeof LayoutDashboard; exact?: boolean }> = [
   { to: "/client/dashboard", label: "Overview", Icon: LayoutDashboard, exact: true },
   { to: "/client/dashboard/projects", label: "Projects", Icon: FolderKanban },
   { to: "/client/dashboard/reports", label: "Reports", Icon: FileBarChart },
@@ -54,7 +54,7 @@ const nav = [
   { to: "/client/dashboard/tickets", label: "Support", Icon: MessageCircle },
   { to: "/client/dashboard/notifications", label: "Notifications", Icon: Bell },
   { to: "/client/dashboard/settings", label: "Settings", Icon: Settings },
-] as const;
+];
 
 function ClientDashboardLayout() {
   const navigate = useNavigate();
