@@ -20,6 +20,49 @@ export function Navbar() {
   const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [authState, setAuthState] = useState<{
+    kind: "anon" | "client" | "admin";
+    name: string;
+  }>({ kind: "anon", name: "" });
+
+  useEffect(() => {
+    let mounted = true;
+    const detect = async () => {
+      const { data } = await supabase.auth.getSession();
+      const user = data.session?.user;
+      if (!user) {
+        if (mounted) setAuthState({ kind: "anon", name: "" });
+        return;
+      }
+      const [{ data: profile }, { data: roles }] = await Promise.all([
+        supabase.from("client_profiles").select("full_name").eq("id", user.id).maybeSingle(),
+        supabase.from("user_roles").select("role").eq("user_id", user.id),
+      ]);
+      if (!mounted) return;
+      const isAdmin = (roles ?? []).some((r) => r.role === "admin");
+      if (isAdmin) {
+        setAuthState({ kind: "admin", name: user.email ?? "Admin" });
+      } else if (profile) {
+        setAuthState({ kind: "client", name: profile.full_name || user.email || "" });
+      } else {
+        setAuthState({ kind: "anon", name: "" });
+      }
+    };
+    void detect();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => void detect());
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  const initials = authState.name
+    .split(" ")
+    .map((s) => s[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase() || "U";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
