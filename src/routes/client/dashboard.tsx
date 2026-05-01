@@ -74,7 +74,6 @@ const nav: Array<{ to: string; label: string; Icon: typeof LayoutDashboard; exac
   { to: "/client/dashboard", label: "Overview", Icon: LayoutDashboard, exact: true },
   { to: "/client/dashboard/projects", label: "Projects", Icon: FolderKanban },
   { to: "/client/dashboard/reports", label: "Reports", Icon: FileBarChart },
-  { to: "/client/dashboard/membership", label: "Membership", Icon: Crown },
   { to: "/client/dashboard/packages", label: "My Packages", Icon: Package },
   { to: "/client/dashboard/billing", label: "Billing", Icon: CreditCard },
   { to: "/client/dashboard/tickets", label: "Support", Icon: MessageCircle },
