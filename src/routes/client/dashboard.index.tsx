@@ -138,20 +138,23 @@ function ClientDashboardOverview() {
       setLoading(false);
     }, 8000);
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!mounted) return;
-      window.clearTimeout(timeout);
-      setUserId(data.session?.user.id ?? null);
-      if (!data.session?.user.id) {
-        setError("Please sign in again to view your dashboard.");
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (!mounted) return;
+        window.clearTimeout(timeout);
+        setUserId(data.session?.user.id ?? null);
+        if (!data.session?.user.id) {
+          setError("Please sign in again to view your dashboard.");
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!mounted) return;
+        window.clearTimeout(timeout);
+        setError("Couldn't confirm your session. Please try again.");
         setLoading(false);
-      }
-    }).catch(() => {
-      if (!mounted) return;
-      window.clearTimeout(timeout);
-      setError("Couldn't confirm your session. Please try again.");
-      setLoading(false);
-    });
+      });
 
     return () => {
       mounted = false;
