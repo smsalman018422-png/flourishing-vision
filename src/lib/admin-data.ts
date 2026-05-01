@@ -25,6 +25,22 @@ export function invalidateAdminCache(key?: string) {
   else Object.keys(cache).forEach((k) => delete cache[k]);
 }
 
+export function applyRealtimeChange<T extends { id: string }>(
+  rows: T[],
+  payload: { eventType: "INSERT" | "UPDATE" | "DELETE"; new: Partial<T>; old: Partial<T> },
+) {
+  if (payload.eventType === "INSERT" && payload.new.id && !rows.some((row) => row.id === payload.new.id)) {
+    return [payload.new as T, ...rows];
+  }
+  if (payload.eventType === "UPDATE" && payload.new.id) {
+    return rows.map((row) => (row.id === payload.new.id ? { ...row, ...payload.new } as T : row));
+  }
+  if (payload.eventType === "DELETE" && payload.old.id) {
+    return rows.filter((row) => row.id !== payload.old.id);
+  }
+  return rows;
+}
+
 export type AdminDataQuery = {
   table: string;
   select?: string;
