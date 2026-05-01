@@ -161,13 +161,21 @@ export function Navbar() {
               </button>
 
               {authState.kind === "anon" ? (
-                <Link
-                  to="/client/login"
-                  className="hidden lg:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-                >
-                  <LogIn className="h-3.5 w-3.5" />
-                  Client Login
-                </Link>
+                <>
+                  <Link
+                    to="/client/login"
+                    className="hidden lg:inline-flex items-center gap-1.5 h-9 px-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                  >
+                    <LogIn className="h-3.5 w-3.5" />
+                    Login
+                  </Link>
+                  <Link
+                    to="/client/signup"
+                    className="hidden lg:inline-flex items-center h-9 px-3 rounded-xl text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+                  >
+                    Sign Up
+                  </Link>
+                </>
               ) : (
                 <Link
                   to={authState.kind === "admin" ? "/admin" : "/client/dashboard"}
