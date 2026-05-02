@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageShell, PageHeader } from "@/components/layout/PageShell";
 import { supabase } from "@/integrations/supabase/client";
-import { getServiceTitles } from "@/server/services.functions";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -42,20 +41,21 @@ export const Route = createFileRoute("/contact")({
   component: ContactPage,
 });
 
+const PACKAGE_OPTIONS = [
+  "Starter Growth",
+  "Business Growth",
+  "Full Management",
+  "Full Page Management",
+  "Custom Package",
+];
+
 function ContactPage() {
-  const [services, setServices] = useState<{ id: string; title: string }[]>([]);
   const [submitted, setSubmitted] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { full_name: "", email: "", phone: "", company: "", service: "", budget: "", message: "" },
   });
-
-  useEffect(() => {
-    getServiceTitles()
-      .then((data) => setServices(data ?? []))
-      .catch(() => setServices([]));
-  }, []);
 
   const onSubmit = async (values: FormData) => {
     const { error } = await supabase.from("contact_submissions").insert({
@@ -161,12 +161,12 @@ function ContactPage() {
                     <Input {...form.register("company")} maxLength={120} />
                   </Field>
                   <div className="grid sm:grid-cols-2 gap-4">
-                    <Field label="Service">
+                    <Field label="Package">
                       <Select onValueChange={(v) => form.setValue("service", v)}>
                         <SelectTrigger><SelectValue placeholder="Pick one" /></SelectTrigger>
                         <SelectContent>
-                          {services.map((s) => (
-                            <SelectItem key={s.id} value={s.title}>{s.title}</SelectItem>
+                          {PACKAGE_OPTIONS.map((p) => (
+                            <SelectItem key={p} value={p}>{p}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>

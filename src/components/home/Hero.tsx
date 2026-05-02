@@ -352,17 +352,17 @@ export function Hero() {
                 <motion.a
                   whileHover={{ y: -2 }}
                   whileTap={{ y: 0 }}
-                  href="#contact"
+                  href="/pricing"
                   className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-gradient-primary text-primary-foreground font-medium shadow-glow"
                 >
-                  Book Free Strategy Call
+                  View Our Packages
                   <ArrowRight className="h-4 w-4" />
                 </motion.a>
                 <a
-                  href="#work"
+                  href="/contact"
                   className="inline-flex items-center h-12 px-6 rounded-xl glass font-medium border border-glass-border hover:bg-muted/30 transition-colors"
                 >
-                  View Our Work
+                  Book a Free Call
                 </a>
               </div>
 

@@ -7,12 +7,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const services: { label: string; to: string }[] = [
-  { label: "Social Media", to: "/services" },
-  { label: "Paid Ads", to: "/services" },
-  { label: "SEO", to: "/services" },
-  { label: "Branding", to: "/services" },
-  { label: "Design", to: "/services" },
-  { label: "Analytics", to: "/services" },
+  { label: "Starter Growth", to: "/pricing" },
+  { label: "Business Growth", to: "/pricing" },
+  { label: "Full Management", to: "/pricing" },
+  { label: "Full Page Management", to: "/pricing" },
+  { label: "Custom Package", to: "/pricing" },
+  { label: "View All Packages", to: "/pricing" },
 ];
 const company: { label: string; to: string }[] = [
   { label: "About", to: "/about" },
@@ -139,10 +139,10 @@ export function Footer() {
             </div>
           </div>
 
-          {/* COL 2 — Services */}
+          {/* COL 2 — Packages */}
           <div>
             <h4 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
-              Services
+              Packages
             </h4>
             <ul className="mt-4 space-y-2.5">
               {services.map((s) => (
