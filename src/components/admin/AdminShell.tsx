@@ -25,6 +25,7 @@ import {
   Package,
   Sun,
   Moon,
+  ShieldCheck,
 } from "lucide-react";
 
 import {
@@ -35,22 +36,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useNavigate as _unused } from "@tanstack/react-router"; // keep types
+import type { Permission } from "@/lib/admin-roles";
 
-const nav = [
-  { to: "/admin", label: "Dashboard", Icon: LayoutDashboard },
-  { to: "/admin/team", label: "Team", Icon: Users },
-  { to: "/admin/portfolio", label: "Case Studies", Icon: Briefcase },
-  { to: "/admin/services", label: "Services", Icon: Sparkles },
-  { to: "/admin/packages", label: "Packages", Icon: Package },
-  { to: "/admin/testimonials", label: "Testimonials", Icon: Quote },
-  { to: "/admin/blog", label: "Blog", Icon: FileText },
-  { to: "/admin/contacts", label: "Contacts", Icon: Mail },
-  { to: "/admin/clients", label: "Clients", Icon: Users, group: "Clients" },
-  { to: "/admin/memberships", label: "Memberships", Icon: Crown },
-  { to: "/admin/client-reports", label: "Client Reports", Icon: FileBarChart },
-  { to: "/admin/client-tickets", label: "Client Tickets", Icon: MessageCircle },
-  { to: "/admin/settings", label: "Settings", Icon: Settings, group: "System" },
-] as const;
+type NavItem = { to: string; label: string; Icon: typeof LayoutDashboard; perm: Permission };
+
+const nav: NavItem[] = [
+  { to: "/admin", label: "Dashboard", Icon: LayoutDashboard, perm: "dashboard" },
+  { to: "/admin/team", label: "Team", Icon: Users, perm: "team" },
+  { to: "/admin/portfolio", label: "Case Studies", Icon: Briefcase, perm: "portfolio" },
+  { to: "/admin/services", label: "Services", Icon: Sparkles, perm: "services" },
+  { to: "/admin/packages", label: "Packages", Icon: Package, perm: "packages" },
+  { to: "/admin/testimonials", label: "Testimonials", Icon: Quote, perm: "testimonials" },
+  { to: "/admin/blog", label: "Blog", Icon: FileText, perm: "blog" },
+  { to: "/admin/contacts", label: "Contacts", Icon: Mail, perm: "contacts" },
+  { to: "/admin/clients", label: "Clients", Icon: Users, perm: "clients" },
+  { to: "/admin/memberships", label: "Memberships", Icon: Crown, perm: "memberships" },
+  { to: "/admin/client-reports", label: "Client Reports", Icon: FileBarChart, perm: "client-reports" },
+  { to: "/admin/client-tickets", label: "Client Tickets", Icon: MessageCircle, perm: "client-tickets" },
+  { to: "/admin/users", label: "Admin Users", Icon: ShieldCheck, perm: "admin-users" },
+  { to: "/admin/settings", label: "Settings", Icon: Settings, perm: "settings" },
+];
 
 export function AdminShell({ children }: { children?: ReactNode }) {
   return (
