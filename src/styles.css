@@ -130,12 +130,30 @@
     input, select, textarea {
       font-size: 16px !important;
     }
+
+    /* Minimum readable body text on small screens */
+    body {
+      font-size: 15px;
+    }
+
+    /* Ensure interactive elements meet 44px tap target */
+    button:not([data-no-tap]),
+    a[role="button"]:not([data-no-tap]),
+    [role="button"]:not([data-no-tap]) {
+      min-height: 44px;
+    }
   }
 
-  /* Images responsive by default */
-  img, video {
+  /* Images / media responsive by default */
+  img, video, svg, canvas, iframe {
     max-width: 100%;
     height: auto;
+  }
+
+  /* Prevent long words/URLs from blowing out layout */
+  p, h1, h2, h3, h4, h5, h6, li, a, span {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 
   h1, h2, h3, h4 {
