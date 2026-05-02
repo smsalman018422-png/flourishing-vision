@@ -38,22 +38,29 @@ type ClientProfile = {
   account_manager_whatsapp: string | null;
 };
 
+type FeatureItem = { text: string; type?: "feature" | "bonus" } | string;
+
 type Plan = {
   id: string;
   name: string;
-  slug: string;
+  slug?: string | null;
+  category?: string | null;
   price_monthly: number;
-  currency: string;
-  features: string[];
+  features: FeatureItem[];
 };
 
 type Membership = {
   id: string;
-  plan_id: string;
+  package_id: string | null;
   status: string;
   start_date: string;
   end_date: string;
-  membership_plans: Plan | null;
+  billing_cycle: string;
+  amount: number;
+  is_custom: boolean;
+  custom_name: string | null;
+  custom_features: FeatureItem[];
+  package: Plan | null;
 };
 
 type Report = {
