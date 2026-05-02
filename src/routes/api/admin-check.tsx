@@ -25,6 +25,7 @@ export const Route = createFileRoute("/api/admin-check")({
           process.env.SUPABASE_PUBLISHABLE_KEY ??
           process.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
           process.env.SUPABASE_ANON_KEY;
+        const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
         if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
           const missing = [
@@ -38,6 +39,11 @@ export const Route = createFileRoute("/api/admin-check")({
           global: { headers: { Authorization: `Bearer ${token}` } },
           auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
         });
+        const privilegedSupabase = SUPABASE_SERVICE_ROLE_KEY
+          ? createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+              auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+            })
+          : supabase;
 
         const { data: userData, error: userError } = await supabase.auth.getUser(token);
         if (userError || !userData.user) {
@@ -63,7 +69,7 @@ export const Route = createFileRoute("/api/admin-check")({
             return json({ ok: true, roles });
           }
 
-          const legacyClient = supabaseAdmin as unknown as {
+          const legacyClient = privilegedSupabase as unknown as {
             from: (table: string) => {
               select: (columns: string) => {
                 or: (filters: string) => { maybeSingle: () => Promise<{ data: unknown; error: { code?: string; message?: string } | null }> };
@@ -82,7 +88,7 @@ export const Route = createFileRoute("/api/admin-check")({
           }
 
           if (legacyCheck) {
-            await supabaseAdmin
+            await privilegedSupabase
               .from("user_roles")
               .upsert({ user_id: userData.user.id, role: "super_admin" }, { onConflict: "user_id,role" });
             return json({ ok: true, roles: ["super_admin"] });
