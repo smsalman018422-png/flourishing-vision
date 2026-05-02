@@ -59,7 +59,7 @@ export function PortfolioPreview() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex items-end justify-between flex-wrap gap-6">
           <div className="max-w-2xl">
-            <p className="text-sm font-medium text-accent uppercase tracking-wider">Case Study</p>
+            <p className="text-sm font-medium text-accent uppercase tracking-wider">Case Studies</p>
             <h2 className="mt-3 text-4xl sm:text-5xl font-bold tracking-tight">
               Brands we've helped <span className="text-gradient">scale</span>.
             </h2>
