@@ -6,6 +6,7 @@ import { Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button, Field, TextInput } from "@/components/admin/ui";
+import { trackCompleteRegistration, trackCTAClick } from "@/lib/meta-pixel";
 
 type Tab = "login" | "signup";
 const sb = supabase as any;
