@@ -48,7 +48,7 @@ export const Route = createFileRoute("/api/admin-users")({
         const { data: roleRows, error } = await supabaseAdmin
           .from("user_roles")
           .select("user_id, role, created_at")
-          .in("role", STAFF_ROLES as unknown as ("admin"|"super_admin"|"manager"|"editor")[]);
+          .in("role", [...STAFF_ROLES]);
         if (error) return json({ ok: false, error: error.message }, 500);
         const userIds = Array.from(new Set((roleRows ?? []).map((r) => r.user_id)));
         const users: Array<{ id: string; email: string | null; last_sign_in_at: string | null }> = [];
@@ -100,7 +100,7 @@ export const Route = createFileRoute("/api/admin-users")({
           .from("user_roles")
           .delete()
           .eq("user_id", user_id)
-          .in("role", STAFF_ROLES as unknown as ("admin"|"super_admin"|"manager"|"editor")[]);
+          .in("role", [...STAFF_ROLES]);
         const { error } = await supabaseAdmin.from("user_roles").insert({ user_id, role });
         if (error) return json({ ok: false, error: error.message }, 500);
         return json({ ok: true });
@@ -119,7 +119,7 @@ export const Route = createFileRoute("/api/admin-users")({
           .from("user_roles")
           .delete()
           .eq("user_id", parsed.data.user_id)
-          .in("role", STAFF_ROLES as unknown as ("admin"|"super_admin"|"manager"|"editor")[]);
+          .in("role", [...STAFF_ROLES]);
         if (error) return json({ ok: false, error: error.message }, 500);
         return json({ ok: true });
       },
