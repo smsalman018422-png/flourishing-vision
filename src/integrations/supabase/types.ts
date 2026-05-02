@@ -1036,13 +1036,15 @@ export type Database = {
           role: Database["public"]["Enums"]["app_role"]
         }[]
       }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+      has_role:
+        | {
+            Args: {
+              _role: Database["public"]["Enums"]["app_role"]
+              _user_id: string
+            }
+            Returns: boolean
+          }
+        | { Args: { _role: string; _user_id: string }; Returns: boolean }
       is_ticket_owner: {
         Args: { _ticket_id: string; _user_id: string }
         Returns: boolean
