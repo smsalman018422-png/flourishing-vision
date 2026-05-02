@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, Check, Loader2, Mail, MapPin, Send } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { trackLead, trackSchedule, trackCTAClick } from "@/lib/meta-pixel";
 
 function LazyCalendly({ src }: { src: string }) {
   const ref = useRef<HTMLDivElement | null>(null);
