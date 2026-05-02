@@ -129,13 +129,33 @@ function AdminShellContent({ children, requirePermission }: { children?: ReactNo
     );
   }
 
+  if (requirePermission && !hasPermission(requirePermission)) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-background text-foreground p-6">
+        <div className="max-w-md text-center glass rounded-2xl p-8">
+          <ShieldAlert className="h-10 w-10 text-primary mx-auto" />
+          <h1 className="mt-4 text-xl font-display font-semibold">Access denied</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Your role doesn't allow access to this page.
+          </p>
+          <button
+            onClick={() => navigate({ to: "/admin" })}
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-glow"
+          >
+            Back to dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const initials = (user.email ?? "A").slice(0, 1).toUpperCase();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Desktop sidebar (fixed) */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[280px] flex-col border-r border-border/60 bg-card/80 backdrop-blur z-30">
-        <SidebarBody pathname={pathname} email={user.email ?? ""} onSignOut={async () => { await signOut(); navigate({ to: "/admin/login" }); }} />
+        <SidebarBody pathname={pathname} email={user.email ?? ""} roles={roles} onSignOut={async () => { await signOut(); navigate({ to: "/admin/login" }); }} />
       </aside>
 
       {/* Mobile drawer */}
@@ -165,7 +185,7 @@ function AdminShellContent({ children, requirePermission }: { children?: ReactNo
               >
                 <X className="h-5 w-5" />
               </button>
-              <SidebarBody pathname={pathname} email={user.email ?? ""} onSignOut={async () => { await signOut(); navigate({ to: "/admin/login" }); }} />
+              <SidebarBody pathname={pathname} email={user.email ?? ""} roles={roles} onSignOut={async () => { await signOut(); navigate({ to: "/admin/login" }); }} />
             </motion.aside>
           </>
         )}
