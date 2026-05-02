@@ -259,25 +259,39 @@ function PricingPage() {
 
       {/* Billing toggle */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 mt-6 flex justify-center">
-        <LayoutGroup>
-          <div className="relative inline-flex items-center rounded-full border border-border/60 bg-card/60 backdrop-blur-xl p-1.5">
+        <LayoutGroup id="billing-toggle">
+          <div className="relative inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/60 backdrop-blur-xl p-1.5">
             <button
               onClick={() => setYearly(false)}
-              className={`relative z-10 px-7 sm:px-8 py-2.5 text-sm sm:text-base font-medium rounded-full min-h-[44px] transition ${
+              className={`relative px-7 sm:px-8 py-2.5 text-sm sm:text-base font-medium rounded-full min-h-[44px] transition-colors ${
                 !yearly ? "text-primary-foreground" : "text-muted-foreground"
               }`}
             >
-              Monthly
+              {!yearly && (
+                <motion.span
+                  layoutId="billing-pill"
+                  transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                  className="absolute inset-0 rounded-full bg-primary"
+                />
+              )}
+              <span className="relative z-10">Monthly</span>
             </button>
             <button
               onClick={() => setYearly(true)}
-              className={`relative z-10 px-7 sm:px-8 py-2.5 text-sm sm:text-base font-medium rounded-full min-h-[44px] transition flex items-center gap-2.5 whitespace-nowrap ${
+              className={`relative px-7 sm:px-8 py-2.5 text-sm sm:text-base font-medium rounded-full min-h-[44px] transition-colors flex items-center gap-2.5 whitespace-nowrap ${
                 yearly ? "text-primary-foreground" : "text-muted-foreground"
               }`}
             >
-              Yearly
+              {yearly && (
+                <motion.span
+                  layoutId="billing-pill"
+                  transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                  className="absolute inset-0 rounded-full bg-primary"
+                />
+              )}
+              <span className="relative z-10">Yearly</span>
               <span
-                className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                className={`relative z-10 text-[11px] font-semibold px-2 py-0.5 rounded-full ${
                   yearly
                     ? "bg-primary-foreground/20 text-primary-foreground"
                     : "bg-primary/20 text-primary"
@@ -286,15 +300,6 @@ function PricingPage() {
                 SAVE 20%
               </span>
             </button>
-            <motion.div
-              layout
-              transition={{ type: "spring", stiffness: 400, damping: 32 }}
-              className="absolute inset-y-1.5 rounded-full bg-primary"
-              style={{
-                left: yearly ? "50%" : "0.375rem",
-                right: yearly ? "0.375rem" : "50%",
-              }}
-            />
           </div>
         </LayoutGroup>
       </div>
