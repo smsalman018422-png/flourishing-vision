@@ -1,7 +1,8 @@
-import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts, ScriptOnce } from "@tanstack/react-router";
 import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
 
 import appCss from "../styles.css?url";
 
@@ -65,9 +66,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
+        <ScriptOnce children={THEME_INIT_SCRIPT} />
       </head>
       <body>
         <ThemeProvider>{children}</ThemeProvider>

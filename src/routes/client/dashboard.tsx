@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tansta
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { useTheme } from "@/components/ThemeProvider";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -17,6 +18,8 @@ import {
   X,
   ChevronDown,
   User as UserIcon,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 import {
@@ -311,7 +314,7 @@ function ClientDashboardLayout() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[280px] flex-col border-r border-border/60 bg-[oklch(0.14_0.012_160)]/60 backdrop-blur z-30">
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[280px] flex-col border-r border-border/60 bg-card/80 backdrop-blur z-30">
         <SidebarBody
           pathname={pathname}
           client={client}
@@ -337,7 +340,7 @@ function ClientDashboardLayout() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "tween", duration: 0.25 }}
-              className="lg:hidden fixed inset-y-0 left-0 w-[85%] max-w-[320px] z-50 border-r border-border/60 bg-[oklch(0.12_0.012_160)] flex flex-col"
+              className="lg:hidden fixed inset-y-0 left-0 w-[85%] max-w-[320px] z-50 border-r border-border/60 bg-card flex flex-col"
             >
               <button
                 onClick={() => setDrawerOpen(false)}
@@ -480,6 +483,7 @@ function SidebarBody({
             )}
           </div>
         </div>
+        <ThemeToggleRow />
         <button
           onClick={onSignOut}
           className="mt-1 min-h-[44px] w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/40"
@@ -488,5 +492,19 @@ function SidebarBody({
         </button>
       </div>
     </>
+  );
+}
+
+function ThemeToggleRow() {
+  const { theme, toggle } = useTheme();
+  return (
+    <button
+      onClick={toggle}
+      className="mt-1 min-h-[44px] w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/40"
+      aria-label="Toggle theme"
+    >
+      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      {theme === "dark" ? "Light mode" : "Dark mode"}
+    </button>
   );
 }

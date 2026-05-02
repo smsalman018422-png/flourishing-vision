@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { AuthProvider, useAuth } from "@/components/AuthProvider";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTheme } from "@/components/ThemeProvider";
 import {
   LayoutDashboard,
   Users,
@@ -22,6 +23,8 @@ import {
   FileBarChart,
   MessageCircle,
   Package,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 import {
@@ -120,7 +123,7 @@ function AdminShellContent({ children }: { children?: ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Desktop sidebar (fixed) */}
-      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[280px] flex-col border-r border-border/60 bg-[oklch(0.14_0.012_160)]/60 backdrop-blur z-30">
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[280px] flex-col border-r border-border/60 bg-card/80 backdrop-blur z-30">
         <SidebarBody pathname={pathname} email={user.email ?? ""} onSignOut={async () => { await signOut(); navigate({ to: "/admin/login" }); }} />
       </aside>
 
@@ -142,7 +145,7 @@ function AdminShellContent({ children }: { children?: ReactNode }) {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "tween", duration: 0.25 }}
-              className="lg:hidden fixed inset-y-0 left-0 w-[85%] max-w-[320px] z-50 border-r border-border/60 bg-[oklch(0.12_0.012_160)] flex flex-col"
+              className="lg:hidden fixed inset-y-0 left-0 w-[85%] max-w-[320px] z-50 border-r border-border/60 bg-card flex flex-col"
             >
               <button
                 onClick={() => setDrawerOpen(false)}
@@ -250,15 +253,30 @@ function SidebarBody({
           })}
         </ul>
       </nav>
-      <div className="p-3 border-t border-border/60">
+      <div className="p-3 border-t border-border/60 space-y-1">
         <div className="px-3 py-1 text-xs text-muted-foreground truncate">{email}</div>
+        <ThemeToggleRow />
         <button
           onClick={onSignOut}
-          className="mt-1 min-h-[44px] w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/40"
+          className="min-h-[44px] w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/40"
         >
           <LogOut className="h-4 w-4" /> Sign out
         </button>
       </div>
     </>
+  );
+}
+
+function ThemeToggleRow() {
+  const { theme, toggle } = useTheme();
+  return (
+    <button
+      onClick={toggle}
+      className="min-h-[44px] w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/40"
+      aria-label="Toggle theme"
+    >
+      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      {theme === "dark" ? "Light mode" : "Dark mode"}
+    </button>
   );
 }
