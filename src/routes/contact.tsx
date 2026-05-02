@@ -14,6 +14,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mail, MessageCircle, MapPin, Clock, CheckCircle2 } from "lucide-react";
 import { TwitterIcon, LinkedInIcon, InstagramIcon } from "@/components/icons/Brands";
+import { trackLead, trackCTAClick } from "@/lib/meta-pixel";
+import { useScrollTracking } from "@/hooks/useScrollTracking";
+import { useTimeTracking } from "@/hooks/useTimeTracking";
 
 const schema = z.object({
   full_name: z.string().trim().min(1, "Name is required").max(100),
