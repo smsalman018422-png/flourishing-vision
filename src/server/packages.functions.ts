@@ -1,25 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { PublicPackage } from "./packages.types";
 
-export type PublicPackage = {
-  id: string;
-  category: string;
-  name: string;
-  slug: string;
-  price_monthly: number;
-  price_yearly: number;
-  tagline: string | null;
-  description: string | null;
-  icon_name: string;
-  features: any;
-  best_for: string | null;
-  is_popular: boolean;
-  is_premium: boolean;
-  is_visible: boolean;
-  order_index: number;
-  cta_text: string;
-  cta_link: string;
-};
+export type { PublicPackage };
 
 export const getPublicPackages = createServerFn({ method: "GET" }).handler(async () => {
   const { data, error } = await supabaseAdmin
