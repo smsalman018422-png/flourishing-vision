@@ -36,7 +36,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Permission } from "@/lib/admin-roles";
+import { rolesHavePermission, type Permission, type StaffRole } from "@/lib/admin-roles";
 
 type NavItem = { to: string; label: string; Icon: typeof LayoutDashboard; perm: Permission };
 
@@ -248,15 +248,10 @@ function SidebarBody({
 }: {
   pathname: string;
   email: string;
-  roles: import("@/lib/admin-roles").StaffRole[];
+  roles: StaffRole[];
   onSignOut: () => void;
 }) {
-  const visibleNav = nav.filter((item) =>
-    roles.some((r) => {
-      // Reuse rolesHavePermission via inline check
-      return true;
-    }) && require_perm(roles, item.perm),
-  );
+  const visibleNav = nav.filter((item) => rolesHavePermission(roles, item.perm));
   return (
     <>
       <div className="p-5 flex items-center gap-2">
