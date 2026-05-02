@@ -161,12 +161,12 @@ function ContactPage() {
                     <Input {...form.register("company")} maxLength={120} />
                   </Field>
                   <div className="grid sm:grid-cols-2 gap-4">
-                    <Field label="Service">
+                    <Field label="Package">
                       <Select onValueChange={(v) => form.setValue("service", v)}>
                         <SelectTrigger><SelectValue placeholder="Pick one" /></SelectTrigger>
                         <SelectContent>
-                          {services.map((s) => (
-                            <SelectItem key={s.id} value={s.title}>{s.title}</SelectItem>
+                          {PACKAGE_OPTIONS.map((p) => (
+                            <SelectItem key={p} value={p}>{p}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
