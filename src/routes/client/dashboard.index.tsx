@@ -216,7 +216,7 @@ function ClientDashboardOverview() {
           async () =>
             await supabase
               .from("client_memberships")
-              .select("*, membership_plans(*)")
+              .select("*, package:packages(id,name,slug,category,price_monthly,features)")
               .eq("client_id", uid)
               .eq("status", "active")
               .order("end_date", { ascending: false })
