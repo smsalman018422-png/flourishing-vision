@@ -318,6 +318,7 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
       // Auto-confirmed: session present
       if (authData.session) {
         await createProfile(authData.user.id);
+        trackCompleteRegistration({ content_name: "Client Signup" });
         toast.success("Account created! Welcome!");
         await navigate({ to: "/client/dashboard", replace: true });
         return;
