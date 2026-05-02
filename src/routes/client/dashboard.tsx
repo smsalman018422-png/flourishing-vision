@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, useLocation, useNavigate } from "@tansta
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { useTheme } from "@/components/ThemeProvider";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -17,6 +18,8 @@ import {
   X,
   ChevronDown,
   User as UserIcon,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 import {
@@ -480,6 +483,7 @@ function SidebarBody({
             )}
           </div>
         </div>
+        <ThemeToggleRow />
         <button
           onClick={onSignOut}
           className="mt-1 min-h-[44px] w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/40"
@@ -488,5 +492,19 @@ function SidebarBody({
         </button>
       </div>
     </>
+  );
+}
+
+function ThemeToggleRow() {
+  const { theme, toggle } = useTheme();
+  return (
+    <button
+      onClick={toggle}
+      className="mt-1 min-h-[44px] w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/40"
+      aria-label="Toggle theme"
+    >
+      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      {theme === "dark" ? "Light mode" : "Dark mode"}
+    </button>
   );
 }
