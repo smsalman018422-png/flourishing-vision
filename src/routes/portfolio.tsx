@@ -34,9 +34,9 @@ const PAGE_SIZE = 9;
 export const Route = createFileRoute("/portfolio")({
   head: () => ({
     meta: [
-      { title: "Our Work — Let Us Grow" },
+      { title: "Case Studies — Let Us Grow" },
       { name: "description", content: "Selected case studies for ambitious brands. Real campaigns, real revenue." },
-      { property: "og:title", content: "Our Work — Let Us Grow" },
+      { property: "og:title", content: "Case Studies — Let Us Grow" },
       { property: "og:description", content: "Real campaigns, real revenue. See the work." },
     ],
   }),
@@ -81,8 +81,8 @@ function PortfolioPage() {
   return (
     <PageShell>
       <PageHeader
-        eyebrow="Selected work"
-        title="Our Work"
+        eyebrow="Case Studies"
+        title="Case Studies"
         subtitle="A snapshot of recent engagements. Click any case study for the full story."
       />
 
