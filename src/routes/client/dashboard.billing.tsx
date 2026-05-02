@@ -138,8 +138,8 @@ function BillingPage() {
           icon={CircleDollarSign}
           label="Current Plan Cost"
           value={
-            membership?.plan
-              ? `${fmtMoney(membership.plan.price_monthly, membership.plan.currency)}/mo`
+            membership
+              ? `${fmtMoney(membership.amount, planCurrency)}/${membership.billing_cycle === "yearly" ? "yr" : "mo"}`
               : "—"
           }
           tint="primary"
