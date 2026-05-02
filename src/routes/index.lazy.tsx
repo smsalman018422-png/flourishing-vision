@@ -27,6 +27,8 @@ export const Route = createLazyFileRoute("/")({
 });
 
 function Index() {
+  useScrollTracking("Home");
+  useTimeTracking("Home");
   return (
     <div className="min-h-screen bg-background text-foreground antialiased relative overflow-x-hidden">
       <Navbar />
