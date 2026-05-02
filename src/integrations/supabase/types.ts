@@ -686,6 +686,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "package_purchase_requests_client_profile_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "package_purchase_requests_package_id_fkey"
             columns: ["package_id"]
             isOneToOne: false
