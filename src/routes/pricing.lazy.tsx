@@ -771,6 +771,12 @@ function PurchaseModal({
         toast.error(body?.error || "Could not start checkout");
         return;
       }
+      trackPurchase({
+        content_name: plan.name,
+        value: Number(price) || 0,
+        currency: "USD",
+        content_type: "service",
+      });
       toast.success("Request submitted! An admin will activate your package shortly.");
       onClose();
       navigate({ to: body.redirect_url ?? "/client/dashboard/membership" });
