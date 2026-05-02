@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { createClient } from "@supabase/supabase-js";
 
 const STAFF_ROLES = ["super_admin", "admin", "manager", "editor"] as const;
 type StaffRole = (typeof STAFF_ROLES)[number];
@@ -19,18 +20,36 @@ export const Route = createFileRoute("/api/admin-check")({
         }
 
         const token = authHeader.replace("Bearer ", "").trim();
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const SUPABASE_URL = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;
+        const SUPABASE_PUBLISHABLE_KEY =
+          process.env.SUPABASE_PUBLISHABLE_KEY ??
+          process.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+          process.env.SUPABASE_ANON_KEY;
 
-        const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
+        if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+          const missing = [
+            ...(!SUPABASE_URL ? ["SUPABASE_URL"] : []),
+            ...(!SUPABASE_PUBLISHABLE_KEY ? ["SUPABASE_PUBLISHABLE_KEY"] : []),
+          ];
+          return json({ ok: false, error: `Missing backend environment variable(s): ${missing.join(", ")}` }, 500);
+        }
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+          global: { headers: { Authorization: `Bearer ${token}` } },
+          auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+        });
+
+        const { data: userData, error: userError } = await supabase.auth.getUser(token);
         if (userError || !userData.user) {
           return json({ ok: false, error: userError?.message ?? "Invalid auth token" }, 401);
         }
 
         try {
-          const { data: rows, error: rolesError } = await supabaseAdmin
+          const { data: rows, error: rolesError } = await supabase
             .from("user_roles")
             .select("role")
-            .eq("user_id", userData.user.id);
+            .eq("user_id", userData.user.id)
+            .in("role", [...STAFF_ROLES]);
 
           if (rolesError) {
             return json({ ok: false, error: "Database error: " + rolesError.message }, 500);
