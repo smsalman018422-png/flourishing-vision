@@ -97,6 +97,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
+      <MetaPixel />
       <Outlet />
     </QueryClientProvider>
   );
