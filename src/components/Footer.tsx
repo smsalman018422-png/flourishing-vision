@@ -139,10 +139,10 @@ export function Footer() {
             </div>
           </div>
 
-          {/* COL 2 — Services */}
+          {/* COL 2 — Packages */}
           <div>
             <h4 className="text-sm font-semibold tracking-wide uppercase text-muted-foreground">
-              Services
+              Packages
             </h4>
             <ul className="mt-4 space-y-2.5">
               {services.map((s) => (
