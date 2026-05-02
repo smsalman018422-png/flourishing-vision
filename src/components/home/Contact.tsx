@@ -100,6 +100,7 @@ export function Contact() {
       setStatus("error");
       return;
     }
+    trackLead({ content_name: "Homepage Contact Form" });
     setStatus("success");
     setForm(initial);
   };
