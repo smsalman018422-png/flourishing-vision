@@ -57,16 +57,22 @@ const nav: NavItem[] = [
   { to: "/admin/settings", label: "Settings", Icon: Settings, perm: "settings" },
 ];
 
-export function AdminShell({ children }: { children?: ReactNode }) {
+export function AdminShell({
+  children,
+  requirePermission,
+}: {
+  children?: ReactNode;
+  requirePermission?: Permission;
+}) {
   return (
     <AuthProvider>
-      <AdminShellContent>{children}</AdminShellContent>
+      <AdminShellContent requirePermission={requirePermission}>{children}</AdminShellContent>
     </AuthProvider>
   );
 }
 
-function AdminShellContent({ children }: { children?: ReactNode }) {
-  const { user, isAdmin, loading, signOut } = useAuth();
+function AdminShellContent({ children, requirePermission }: { children?: ReactNode; requirePermission?: Permission }) {
+  const { user, isAdmin, loading, signOut, hasPermission, roles } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
