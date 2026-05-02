@@ -83,7 +83,7 @@ function BillingPage() {
           .order("payment_date", { ascending: false }),
         supabase
           .from("client_memberships")
-          .select("end_date, plan:membership_plans(name, price_monthly, currency)")
+          .select("end_date, amount, billing_cycle, is_custom, custom_name, package:packages(name, price_monthly)")
           .eq("client_id", userId)
           .eq("status", "active")
           .order("created_at", { ascending: false })
