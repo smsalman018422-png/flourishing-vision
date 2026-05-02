@@ -108,6 +108,40 @@ export const Route = createFileRoute("/api/purchase-approve")({
 
         if (memError) return json({ ok: false, error: memError.message }, 500);
 
+        // Create invoice + payment records so billing history shows up
+        const nowIso = new Date().toISOString();
+        const invoiceNumber = `INV-${Date.now().toString().slice(-8)}`;
+        const { data: invoice, error: invError } = await sb
+          .from("client_invoices")
+          .insert({
+            client_id: req.client_id,
+            membership_id: newMembership.id,
+            invoice_number: invoiceNumber,
+            amount: req.amount,
+            currency: "USD",
+            status: "paid",
+            issue_date: nowIso,
+            due_date: nowIso,
+            paid_date: nowIso,
+            notes: `${pkg.name} — ${req.billing_cycle}`,
+          })
+          .select("id")
+          .single();
+        if (invError) return json({ ok: false, error: invError.message }, 500);
+
+        const { error: payError } = await sb.from("client_payments").insert({
+          client_id: req.client_id,
+          invoice_id: invoice.id,
+          amount: req.amount,
+          currency: "USD",
+          method: "card",
+          status: "completed",
+          payment_date: nowIso,
+          reference: invoiceNumber,
+          notes: `Payment for ${pkg.name} (${req.billing_cycle})`,
+        });
+        if (payError) return json({ ok: false, error: payError.message }, 500);
+
         await sb
           .from("package_purchase_requests")
           .update({
