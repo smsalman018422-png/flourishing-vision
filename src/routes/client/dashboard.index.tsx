@@ -432,10 +432,23 @@ function ClientDashboardOverview() {
   }
 
   const clientName = profile?.full_name?.split(" ")[0] ?? "there";
-  const planName = membership?.membership_plans?.name ?? "No plan";
-  const planSlug = membership?.membership_plans?.slug;
+  const planName = membership
+    ? membership.is_custom && membership.custom_name
+      ? membership.custom_name
+      : (membership.package?.name ?? "Active Plan")
+    : "No plan";
+  const planSlug = membership?.package?.slug;
   const nextPlan = planSlug ? NEXT_PLAN[planSlug] : undefined;
-  const features = (membership?.membership_plans?.features ?? []) as string[];
+  const rawFeatures = membership
+    ? membership.is_custom
+      ? membership.custom_features
+      : (membership.package?.features ?? [])
+    : [];
+  const features: string[] = Array.isArray(rawFeatures)
+    ? rawFeatures
+        .map((f) => (typeof f === "string" ? f : f && typeof f === "object" ? (f as { text?: string }).text ?? "" : ""))
+        .filter(Boolean)
+    : [];
 
   const waNumber = profile?.account_manager_whatsapp?.replace(/\D/g, "") || "15550000000";
   const waHref = `https://wa.me/${waNumber}?text=${encodeURIComponent(
