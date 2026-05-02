@@ -47,8 +47,8 @@ export function initMetaPixel() {
   })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
   /* eslint-enable */
 
-  window.fbq?.("init", PIXEL_ID);
-  window.fbq?.("track", "PageView");
+  (window.fbq as FbqFn | undefined)?.("init", PIXEL_ID);
+  (window.fbq as FbqFn | undefined)?.("track", "PageView");
   debugLog("init + PageView", { PIXEL_ID });
 }
 
