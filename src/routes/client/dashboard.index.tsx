@@ -549,10 +549,9 @@ function ClientDashboardOverview() {
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <p className="text-2xl font-semibold">{planName}</p>
-                {membership?.membership_plans && (
-                  <p className="text-sm text-muted-foreground">
-                    {membership.membership_plans.currency}{" "}
-                    {membership.membership_plans.price_monthly}/mo
+                {membership && (
+                  <p className="text-sm text-muted-foreground capitalize">
+                    ${membership.amount} / {membership.billing_cycle}
                   </p>
                 )}
               </div>
