@@ -54,6 +54,8 @@ const PACKAGE_OPTIONS = [
 
 function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  useScrollTracking("Contact");
+  useTimeTracking("Contact");
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -61,6 +63,7 @@ function ContactPage() {
   });
 
   const onSubmit = async (values: FormData) => {
+    trackCTAClick("Send Message", "Contact");
     const { error } = await supabase.from("contact_submissions").insert({
       full_name: values.full_name,
       email: values.email,
@@ -74,6 +77,7 @@ function ContactPage() {
       toast.error("Couldn't send your message. Please try again.");
       return;
     }
+    trackLead({ content_name: "Contact Form" });
     toast.success("Thanks — we'll be in touch within one business day.");
     setSubmitted(true);
     form.reset();
