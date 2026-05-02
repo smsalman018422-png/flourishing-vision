@@ -68,13 +68,6 @@ async function assertSuperAdmin(request: Request, requireServiceRole = false): P
   return { ok: true, userId: userData.user.id, authClient, adminClient };
 }
 
-const createSchema = z.object({
-  email: z.string().trim().email().max(255),
-  password: z.string().min(8).max(128),
-  full_name: z.string().trim().min(1).max(120),
-  role: z.enum(["admin", "manager", "editor"]),
-});
-
 const updateRoleSchema = z.object({
   user_id: z.string().uuid(),
   role: z.enum(STAFF_ROLES),
