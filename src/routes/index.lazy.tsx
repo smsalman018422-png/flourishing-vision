@@ -4,6 +4,8 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/home/Hero";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { useScrollTracking } from "@/hooks/useScrollTracking";
+import { useTimeTracking } from "@/hooks/useTimeTracking";
 
 const PackagesPreview = lazy(() =>
   import("@/components/home/PackagesPreview").then((m) => ({ default: m.PackagesPreview })),
