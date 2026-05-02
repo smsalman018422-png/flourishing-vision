@@ -3,6 +3,8 @@ import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
+import { MetaPixel } from "@/components/MetaPixel";
+import { META_PIXEL_ID } from "@/lib/meta-pixel";
 
 import appCss from "../styles.css?url";
 
@@ -72,6 +74,17 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <ScriptOnce children={THEME_INIT_SCRIPT} />
       </head>
       <body>
+        {META_PIXEL_ID && (
+          <noscript>
+            <img
+              height="1"
+              width="1"
+              style={{ display: "none" }}
+              alt=""
+              src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+            />
+          </noscript>
+        )}
         <ThemeProvider>{children}</ThemeProvider>
         <Toaster />
         <Scripts />
@@ -84,6 +97,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
+      <MetaPixel />
       <Outlet />
     </QueryClientProvider>
   );

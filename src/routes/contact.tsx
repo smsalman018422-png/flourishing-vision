@@ -14,6 +14,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mail, MessageCircle, MapPin, Clock, CheckCircle2 } from "lucide-react";
 import { TwitterIcon, LinkedInIcon, InstagramIcon } from "@/components/icons/Brands";
+import { trackLead, trackCTAClick } from "@/lib/meta-pixel";
+import { useScrollTracking } from "@/hooks/useScrollTracking";
+import { useTimeTracking } from "@/hooks/useTimeTracking";
 
 const schema = z.object({
   full_name: z.string().trim().min(1, "Name is required").max(100),
@@ -51,6 +54,8 @@ const PACKAGE_OPTIONS = [
 
 function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  useScrollTracking("Contact");
+  useTimeTracking("Contact");
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -58,6 +63,7 @@ function ContactPage() {
   });
 
   const onSubmit = async (values: FormData) => {
+    trackCTAClick("Send Message", "Contact");
     const { error } = await supabase.from("contact_submissions").insert({
       full_name: values.full_name,
       email: values.email,
@@ -71,6 +77,7 @@ function ContactPage() {
       toast.error("Couldn't send your message. Please try again.");
       return;
     }
+    trackLead({ content_name: "Contact Form" });
     toast.success("Thanks — we'll be in touch within one business day.");
     setSubmitted(true);
     form.reset();

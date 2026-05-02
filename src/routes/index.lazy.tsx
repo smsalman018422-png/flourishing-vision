@@ -4,6 +4,8 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/home/Hero";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { useScrollTracking } from "@/hooks/useScrollTracking";
+import { useTimeTracking } from "@/hooks/useTimeTracking";
 
 const PackagesPreview = lazy(() =>
   import("@/components/home/PackagesPreview").then((m) => ({ default: m.PackagesPreview })),
@@ -25,6 +27,8 @@ export const Route = createLazyFileRoute("/")({
 });
 
 function Index() {
+  useScrollTracking("Home");
+  useTimeTracking("Home");
   return (
     <div className="min-h-screen bg-background text-foreground antialiased relative overflow-x-hidden">
       <Navbar />

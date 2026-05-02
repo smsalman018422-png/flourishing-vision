@@ -6,6 +6,7 @@ import { Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button, Field, TextInput } from "@/components/admin/ui";
+import { trackCompleteRegistration, trackCTAClick } from "@/lib/meta-pixel";
 
 type Tab = "login" | "signup";
 const sb = supabase as any;
@@ -247,6 +248,7 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    trackCTAClick("Create Account", "Client Signup");
 
     const normalizedEmail = email.trim().toLowerCase();
     const parsed = signupSchema.safeParse({ fullName, email: normalizedEmail, phone, companyName, password });
@@ -317,6 +319,7 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
       // Auto-confirmed: session present
       if (authData.session) {
         await createProfile(authData.user.id);
+        trackCompleteRegistration({ content_name: "Client Signup" });
         toast.success("Account created! Welcome!");
         await navigate({ to: "/client/dashboard", replace: true });
         return;
@@ -331,6 +334,7 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
 
       if (!loginError && loginData?.session) {
         await createProfile(loginData.user.id);
+        trackCompleteRegistration({ content_name: "Client Signup" });
         toast.success("Account created! Welcome!");
         await navigate({ to: "/client/dashboard", replace: true });
         return;
