@@ -1,7 +1,7 @@
 import { createLazyFileRoute, Link, useNavigate, getRouteApi } from "@tanstack/react-router";
 import { PageShell } from "@/components/layout/PageShell";
 import { useEffect, useMemo, useState } from "react";
-import type { PublicPackage } from "@/server/packages.types";
+import type { PublicPackage } from "@/functions/packages.types";
 
 const pricingRouteApi = getRouteApi("/pricing");
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
