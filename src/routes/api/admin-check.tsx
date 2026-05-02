@@ -47,7 +47,6 @@ export const Route = createFileRoute("/api/admin-check")({
           const legacyClient = supabaseAdmin as unknown as {
             from: (table: string) => {
               select: (columns: string) => {
-                eq: (column: string, value: string) => { maybeSingle: () => Promise<{ data: unknown; error: { code?: string; message?: string } | null }> };
                 or: (filters: string) => { maybeSingle: () => Promise<{ data: unknown; error: { code?: string; message?: string } | null }> };
               };
             };
@@ -58,7 +57,8 @@ export const Route = createFileRoute("/api/admin-check")({
             .or(`id.eq.${userData.user.id},email.eq.${userData.user.email ?? ""}`)
             .maybeSingle();
 
-          if (legacyError && legacyError.code !== "42P01") {
+          const legacyMissing = legacyError?.code === "42P01" || legacyError?.code === "PGRST205";
+          if (legacyError && !legacyMissing) {
             return json({ ok: false, error: "Database error: " + legacyError.message }, 500);
           }
 
@@ -69,9 +69,7 @@ export const Route = createFileRoute("/api/admin-check")({
             return json({ ok: true, roles: ["super_admin"] });
           }
 
-          {
-            return json({ ok: false, error: "You are not authorized as admin" }, 403);
-          }
+          return json({ ok: false, error: "You are not authorized as admin" }, 403);
         } catch (error) {
           const message = error instanceof Error ? error.message : "Database error";
           return json({ ok: false, error: "Database error: " + message }, 500);
