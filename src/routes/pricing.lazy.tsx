@@ -162,6 +162,17 @@ function PricingPage() {
   const [activeCategory, setActiveCategory] = useState<string>("social_media");
   const [purchaseTarget, setPurchaseTarget] = useState<Pkg | null>(null);
 
+  useScrollTracking("Pricing");
+  useTimeTracking("Pricing");
+
+  useEffect(() => {
+    trackViewContent({
+      content_name: "Packages Page",
+      content_category: "Social Media Marketing",
+      content_type: "product_group",
+    });
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
