@@ -40,10 +40,38 @@ export const Route = createFileRoute("/api/admin-check")({
           const roles = allRoles.filter((r): r is StaffRole =>
             (STAFF_ROLES as readonly string[]).includes(r),
           );
-          if (roles.length === 0) {
+          if (roles.length > 0) {
+            return json({ ok: true, roles });
+          }
+
+          const legacyClient = supabaseAdmin as unknown as {
+            from: (table: string) => {
+              select: (columns: string) => {
+                eq: (column: string, value: string) => { maybeSingle: () => Promise<{ data: unknown; error: { code?: string; message?: string } | null }> };
+                or: (filters: string) => { maybeSingle: () => Promise<{ data: unknown; error: { code?: string; message?: string } | null }> };
+              };
+            };
+          };
+          const { data: legacyCheck, error: legacyError } = await legacyClient
+            .from("admin_users")
+            .select("id")
+            .or(`id.eq.${userData.user.id},email.eq.${userData.user.email ?? ""}`)
+            .maybeSingle();
+
+          if (legacyError && legacyError.code !== "42P01") {
+            return json({ ok: false, error: "Database error: " + legacyError.message }, 500);
+          }
+
+          if (legacyCheck) {
+            await supabaseAdmin
+              .from("user_roles")
+              .upsert({ user_id: userData.user.id, role: "super_admin" }, { onConflict: "user_id,role" });
+            return json({ ok: true, roles: ["super_admin"] });
+          }
+
+          {
             return json({ ok: false, error: "You are not authorized as admin" }, 403);
           }
-          return json({ ok: true, roles });
         } catch (error) {
           const message = error instanceof Error ? error.message : "Database error";
           return json({ ok: false, error: "Database error: " + message }, 500);
