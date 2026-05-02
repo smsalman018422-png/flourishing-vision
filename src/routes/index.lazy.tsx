@@ -31,7 +31,7 @@ function Index() {
       <main>
         <Hero />
         <Suspense fallback={null}>
-          <Services />
+          <PackagesPreview />
           <Stats />
           <PortfolioPreview />
           <Process />
