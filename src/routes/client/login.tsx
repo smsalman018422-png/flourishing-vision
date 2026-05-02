@@ -248,6 +248,7 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    trackCTAClick("Create Account", "Client Signup");
 
     const normalizedEmail = email.trim().toLowerCase();
     const parsed = signupSchema.safeParse({ fullName, email: normalizedEmail, phone, companyName, password });
