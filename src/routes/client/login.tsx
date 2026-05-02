@@ -333,6 +333,7 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
 
       if (!loginError && loginData?.session) {
         await createProfile(loginData.user.id);
+        trackCompleteRegistration({ content_name: "Client Signup" });
         toast.success("Account created! Welcome!");
         await navigate({ to: "/client/dashboard", replace: true });
         return;
