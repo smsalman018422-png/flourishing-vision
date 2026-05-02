@@ -260,10 +260,10 @@ function PricingPage() {
       {/* Billing toggle */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 mt-6 flex justify-center">
         <LayoutGroup>
-          <div className="relative inline-flex items-center rounded-full border border-border/60 bg-card/60 backdrop-blur-xl p-1">
+          <div className="relative inline-flex items-center rounded-full border border-border/60 bg-card/60 backdrop-blur-xl p-1.5">
             <button
               onClick={() => setYearly(false)}
-              className={`relative z-10 px-5 py-2 text-sm font-medium rounded-full min-h-[40px] transition ${
+              className={`relative z-10 px-7 sm:px-8 py-2.5 text-sm sm:text-base font-medium rounded-full min-h-[44px] transition ${
                 !yearly ? "text-primary-foreground" : "text-muted-foreground"
               }`}
             >
@@ -271,13 +271,13 @@ function PricingPage() {
             </button>
             <button
               onClick={() => setYearly(true)}
-              className={`relative z-10 px-5 py-2 text-sm font-medium rounded-full min-h-[40px] transition flex items-center gap-2 ${
+              className={`relative z-10 px-7 sm:px-8 py-2.5 text-sm sm:text-base font-medium rounded-full min-h-[44px] transition flex items-center gap-2.5 whitespace-nowrap ${
                 yearly ? "text-primary-foreground" : "text-muted-foreground"
               }`}
             >
               Yearly
               <span
-                className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
                   yearly
                     ? "bg-primary-foreground/20 text-primary-foreground"
                     : "bg-primary/20 text-primary"
@@ -289,10 +289,10 @@ function PricingPage() {
             <motion.div
               layout
               transition={{ type: "spring", stiffness: 400, damping: 32 }}
-              className="absolute inset-y-1 rounded-full bg-primary"
+              className="absolute inset-y-1.5 rounded-full bg-primary"
               style={{
-                left: yearly ? "50%" : "0.25rem",
-                right: yearly ? "0.25rem" : "50%",
+                left: yearly ? "50%" : "0.375rem",
+                right: yearly ? "0.375rem" : "50%",
               }}
             />
           </div>
