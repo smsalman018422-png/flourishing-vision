@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { AuthProvider, useAuth } from "@/components/AuthProvider";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTheme } from "@/components/ThemeProvider";
 import {
   LayoutDashboard,
   Users,
@@ -22,6 +23,8 @@ import {
   FileBarChart,
   MessageCircle,
   Package,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 import {
@@ -250,15 +253,30 @@ function SidebarBody({
           })}
         </ul>
       </nav>
-      <div className="p-3 border-t border-border/60">
+      <div className="p-3 border-t border-border/60 space-y-1">
         <div className="px-3 py-1 text-xs text-muted-foreground truncate">{email}</div>
+        <ThemeToggleRow />
         <button
           onClick={onSignOut}
-          className="mt-1 min-h-[44px] w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/40"
+          className="min-h-[44px] w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/40"
         >
           <LogOut className="h-4 w-4" /> Sign out
         </button>
       </div>
     </>
+  );
+}
+
+function ThemeToggleRow() {
+  const { theme, toggle } = useTheme();
+  return (
+    <button
+      onClick={toggle}
+      className="min-h-[44px] w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/40"
+      aria-label="Toggle theme"
+    >
+      {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      {theme === "dark" ? "Light mode" : "Dark mode"}
+    </button>
   );
 }
