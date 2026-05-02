@@ -8,11 +8,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 const links = [
   { label: "Home", href: "/" },
-  { label: "Services", href: "/services" },
+  { label: "Packages", href: "/pricing" },
   { label: "Portfolio", href: "/portfolio" },
   { label: "Team", href: "/team" },
   { label: "About", href: "/about" },
-  { label: "Pricing", href: "/pricing" },
   { label: "Blog", href: "/blog" },
 ];
 
