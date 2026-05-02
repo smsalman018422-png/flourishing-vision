@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { trackContact, trackCTAClick } from "@/lib/meta-pixel";
 
 const PHONE = "15550000000"; // replace with real number
 const MESSAGE = "Hi Let Us Grow team, I'd like to discuss...";
@@ -12,6 +13,10 @@ export function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"
+      onClick={() => {
+        trackContact({ content_name: "WhatsApp Chat" });
+        trackCTAClick("WhatsApp Floating Button", typeof window !== "undefined" ? window.location.pathname : "unknown");
+      }}
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.6, type: "spring", stiffness: 260, damping: 18 }}
