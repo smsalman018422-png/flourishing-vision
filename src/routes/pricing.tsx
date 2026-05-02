@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getPublicPackages } from "@/server/packages.functions";
+import { getPublicPackages } from "@/functions/packages";
 
 export const Route = createFileRoute("/pricing")({
   loader: () => getPublicPackages(),
