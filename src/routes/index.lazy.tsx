@@ -5,8 +5,8 @@ import { Footer } from "@/components/Footer";
 import { Hero } from "@/components/home/Hero";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 
-const Services = lazy(() =>
-  import("@/components/home/Services").then((m) => ({ default: m.Services })),
+const PackagesPreview = lazy(() =>
+  import("@/components/home/PackagesPreview").then((m) => ({ default: m.PackagesPreview })),
 );
 const Stats = lazy(() => import("@/components/home/Stats").then((m) => ({ default: m.Stats })));
 const PortfolioPreview = lazy(() =>
