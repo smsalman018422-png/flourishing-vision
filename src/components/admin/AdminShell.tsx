@@ -36,7 +36,7 @@ import {
 const nav = [
   { to: "/admin", label: "Dashboard", Icon: LayoutDashboard },
   { to: "/admin/team", label: "Team", Icon: Users },
-  { to: "/admin/portfolio", label: "Portfolio", Icon: Briefcase },
+  { to: "/admin/portfolio", label: "Case Studies", Icon: Briefcase },
   { to: "/admin/services", label: "Services", Icon: Sparkles },
   { to: "/admin/packages", label: "Packages", Icon: Package },
   { to: "/admin/testimonials", label: "Testimonials", Icon: Quote },

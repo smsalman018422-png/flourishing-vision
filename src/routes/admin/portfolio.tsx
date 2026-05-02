@@ -74,7 +74,7 @@ const slugify = (s: string) =>
     .slice(0, 80);
 
 export const Route = createFileRoute("/admin/portfolio")({
-  head: () => ({ meta: [{ title: "Portfolio — Admin" }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Case Studies — Admin" }, { name: "robots", content: "noindex" }] }),
   component: () => (
     <AdminShell>
       <PortfolioAdmin />
@@ -183,7 +183,7 @@ function PortfolioAdmin() {
   return (
     <>
       <PageTitle
-        title="Portfolio"
+        title="Case Studies"
         action={
           <Button onClick={() => setEditing(empty())}>
             <Plus className="h-4 w-4" /> Add case study

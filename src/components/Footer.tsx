@@ -17,7 +17,7 @@ const services: { label: string; to: string }[] = [
 const company: { label: string; to: string }[] = [
   { label: "About", to: "/about" },
   { label: "Team", to: "/team" },
-  { label: "Portfolio", to: "/portfolio" },
+  { label: "Case Studies", to: "/portfolio" },
   { label: "Blog", to: "/blog" },
   { label: "Careers", to: "/contact" },
   { label: "Contact", to: "/contact" },
