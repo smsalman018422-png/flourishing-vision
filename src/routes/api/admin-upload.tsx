@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { assertStaffAccess } from "@/lib/admin-api-auth.server";
 
 const ALLOWED_BUCKETS = new Set([
   "team-photos",
@@ -33,34 +34,11 @@ async function withRetries<T extends { error: { code?: string; message?: string 
   return last!;
 }
 
-async function assertAdmin(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) return { ok: false as const, status: 401, error: "Missing auth token" };
-
-  const token = authHeader.replace("Bearer ", "").trim();
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
-  if (userError || !userData.user) return { ok: false as const, status: 401, error: userError?.message ?? "Invalid auth token" };
-
-  const { data: roleRow, error: roleError } = await withRetries(async () =>
-    supabaseAdmin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userData.user.id)
-      .eq("role", "admin")
-      .maybeSingle(),
-  );
-
-  if (roleError) return { ok: false as const, status: 500, error: roleError.message };
-  if (!roleRow) return { ok: false as const, status: 403, error: "Not authorized" };
-  return { ok: true as const, supabaseAdmin };
-}
-
 export const Route = createFileRoute("/api/admin-upload")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const admin = await assertAdmin(request);
+        const admin = await assertStaffAccess(request);
         if (!admin.ok) return json({ ok: false, error: admin.error }, admin.status);
 
         const form = await request.formData().catch(() => null);
@@ -76,14 +54,14 @@ export const Route = createFileRoute("/api/admin-upload")({
 
         const ext = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
         const path = `${folder ? folder + "/" : ""}${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
-        const { error } = await admin.supabaseAdmin.storage.from(bucket).upload(path, file, {
+        const { error } = await admin.supabase.storage.from(bucket).upload(path, file, {
           cacheControl: "31536000",
           upsert: false,
           contentType: file.type,
         });
         if (error) return json({ ok: false, error: error.message }, 500);
 
-        const { data } = admin.supabaseAdmin.storage.from(bucket).getPublicUrl(path);
+        const { data } = admin.supabase.storage.from(bucket).getPublicUrl(path);
         return json({ ok: true, url: data.publicUrl });
       },
     },
