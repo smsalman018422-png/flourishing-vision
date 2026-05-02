@@ -41,20 +41,21 @@ export const Route = createFileRoute("/contact")({
   component: ContactPage,
 });
 
+const PACKAGE_OPTIONS = [
+  "Starter Growth",
+  "Business Growth",
+  "Full Management",
+  "Full Page Management",
+  "Custom Package",
+];
+
 function ContactPage() {
-  const [services, setServices] = useState<{ id: string; title: string }[]>([]);
   const [submitted, setSubmitted] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { full_name: "", email: "", phone: "", company: "", service: "", budget: "", message: "" },
   });
-
-  useEffect(() => {
-    getServiceTitles()
-      .then((data) => setServices(data ?? []))
-      .catch(() => setServices([]));
-  }, []);
 
   const onSubmit = async (values: FormData) => {
     const { error } = await supabase.from("contact_submissions").insert({
