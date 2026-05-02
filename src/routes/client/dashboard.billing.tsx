@@ -39,7 +39,11 @@ type Payment = {
 
 type Membership = {
   end_date: string | null;
-  plan: { name: string; price_monthly: number; currency: string } | null;
+  amount: number;
+  billing_cycle: string;
+  is_custom: boolean;
+  custom_name: string | null;
+  package: { name: string; price_monthly: number } | null;
 };
 
 export const Route = createFileRoute("/client/dashboard/billing")({
