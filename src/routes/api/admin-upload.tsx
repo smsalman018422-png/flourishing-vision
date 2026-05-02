@@ -18,22 +18,6 @@ const json = (body: unknown, status = 200) =>
     headers: { "Content-Type": "application/json" },
   });
 
-const isTransient = (error: { code?: string; message?: string } | null | undefined) =>
-  !!error &&
-  (error.code === "PGRST002" ||
-    error.code === "503" ||
-    /schema cache|database client|retrying|timeout|network/i.test(error.message ?? ""));
-
-async function withRetries<T extends { error: { code?: string; message?: string } | null }>(run: () => PromiseLike<T> | Promise<T> | T) {
-  let last: T | null = null;
-  for (let attempt = 0; attempt < 4; attempt += 1) {
-    last = await run();
-    if (!last.error || !isTransient(last.error)) return last;
-    await new Promise((resolve) => setTimeout(resolve, 700 * (attempt + 1)));
-  }
-  return last!;
-}
-
 export const Route = createFileRoute("/api/admin-upload")({
   server: {
     handlers: {
