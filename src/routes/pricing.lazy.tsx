@@ -52,6 +52,14 @@ import {
 } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  trackViewContent,
+  trackInitiateCheckout,
+  trackPurchase,
+  trackCTAClick,
+} from "@/lib/meta-pixel";
+import { useScrollTracking } from "@/hooks/useScrollTracking";
+import { useTimeTracking } from "@/hooks/useTimeTracking";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Sparkles, Sprout, Rocket, Shield, Crown, Star, Zap, TrendingUp, Target,
