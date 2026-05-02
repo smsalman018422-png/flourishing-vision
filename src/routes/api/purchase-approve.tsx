@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { assertStaffAccess } from "@/lib/admin-api-auth.server";
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -12,34 +13,13 @@ type ApproveBody = {
   reason?: string;
 };
 
-async function assertAdmin(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return { ok: false as const, status: 401, error: "Missing auth token" };
-  }
-  const token = authHeader.replace("Bearer ", "").trim();
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
-  if (userError || !userData.user) {
-    return { ok: false as const, status: 401, error: userError?.message ?? "Invalid token" };
-  }
-  const { data: roleRow } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userData.user.id)
-    .eq("role", "admin")
-    .maybeSingle();
-  if (!roleRow) return { ok: false as const, status: 403, error: "Not authorized" };
-  return { ok: true as const, supabaseAdmin };
-}
-
 export const Route = createFileRoute("/api/purchase-approve")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const admin = await assertAdmin(request);
+        const admin = await assertStaffAccess(request, ["super_admin", "admin", "manager"]);
         if (!admin.ok) return json({ ok: false, error: admin.error }, admin.status);
-        const sb = admin.supabaseAdmin;
+        const sb = admin.supabase;
 
         const body = (await request.json().catch(() => null)) as ApproveBody | null;
         const requestId = body?.request_id;
