@@ -74,6 +74,17 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <ScriptOnce children={THEME_INIT_SCRIPT} />
       </head>
       <body>
+        {META_PIXEL_ID && (
+          <noscript>
+            <img
+              height="1"
+              width="1"
+              style={{ display: "none" }}
+              alt=""
+              src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+            />
+          </noscript>
+        )}
         <ThemeProvider>{children}</ThemeProvider>
         <Toaster />
         <Scripts />
