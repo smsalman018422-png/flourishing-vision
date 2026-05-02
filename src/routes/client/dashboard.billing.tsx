@@ -107,7 +107,7 @@ function BillingPage() {
     [payments],
   );
 
-  const planCurrency = membership?.plan?.currency ?? "USD";
+  const planCurrency = "USD";
 
   if (!ready || loading) {
     return (
