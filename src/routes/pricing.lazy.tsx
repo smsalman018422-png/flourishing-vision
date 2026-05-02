@@ -368,7 +368,24 @@ function PricingPage() {
                 plan={plan}
                 yearly={yearly}
                 index={i}
-                onPurchase={() => setPurchaseTarget(plan)}
+                onPurchase={() => {
+                  const price = yearly ? plan.price_yearly : plan.price_monthly;
+                  trackViewContent({
+                    content_name: plan.name,
+                    content_category: CATEGORY_LABELS[plan.category] ?? plan.category,
+                    content_type: "product",
+                    value: Number(price) || 0,
+                    currency: "USD",
+                  });
+                  trackInitiateCheckout({
+                    content_name: plan.name,
+                    value: Number(price) || 0,
+                    currency: "USD",
+                    num_items: 1,
+                  });
+                  trackCTAClick(`Get Started: ${plan.name}`, "Pricing");
+                  setPurchaseTarget(plan);
+                }}
               />
             ))}
           </div>
