@@ -311,7 +311,7 @@ function ClientDashboardLayout() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[280px] flex-col border-r border-border/60 bg-[oklch(0.14_0.012_160)]/60 backdrop-blur z-30">
+      <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[280px] flex-col border-r border-border/60 bg-card/80 backdrop-blur z-30">
         <SidebarBody
           pathname={pathname}
           client={client}
@@ -337,7 +337,7 @@ function ClientDashboardLayout() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "tween", duration: 0.25 }}
-              className="lg:hidden fixed inset-y-0 left-0 w-[85%] max-w-[320px] z-50 border-r border-border/60 bg-[oklch(0.12_0.012_160)] flex flex-col"
+              className="lg:hidden fixed inset-y-0 left-0 w-[85%] max-w-[320px] z-50 border-r border-border/60 bg-card flex flex-col"
             >
               <button
                 onClick={() => setDrawerOpen(false)}
