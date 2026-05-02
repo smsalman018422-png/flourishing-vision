@@ -243,12 +243,20 @@ function AdminShellContent({ children, requirePermission }: { children?: ReactNo
 function SidebarBody({
   pathname,
   email,
+  roles,
   onSignOut,
 }: {
   pathname: string;
   email: string;
+  roles: import("@/lib/admin-roles").StaffRole[];
   onSignOut: () => void;
 }) {
+  const visibleNav = nav.filter((item) =>
+    roles.some((r) => {
+      // Reuse rolesHavePermission via inline check
+      return true;
+    }) && require_perm(roles, item.perm),
+  );
   return (
     <>
       <div className="p-5 flex items-center gap-2">
@@ -264,7 +272,7 @@ function SidebarBody({
       </div>
       <nav className="px-3 py-2 flex-1 overflow-y-auto">
         <ul className="space-y-1">
-          {nav.map(({ to, label, Icon }) => {
+          {visibleNav.map(({ to, label, Icon }) => {
             const active = pathname === to || (to !== "/admin" && pathname.startsWith(to));
             return (
               <li key={to}>
