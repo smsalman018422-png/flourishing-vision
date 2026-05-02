@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TeamRouteImport } from './routes/team'
-import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -22,7 +21,6 @@ import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as PortfolioSlugRouteImport } from './routes/portfolio.$slug'
 import { Route as ClientSignupRouteImport } from './routes/client/signup'
 import { Route as ClientLoginRouteImport } from './routes/client/login'
@@ -69,11 +67,6 @@ const TeamRoute = TeamRouteImport.update({
   path: '/team',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/team.lazy').then((d) => d.Route))
-const ServicesRoute = ServicesRouteImport.update({
-  id: '/services',
-  path: '/services',
-  getParentRoute: () => rootRouteImport,
-} as any).lazy(() => import('./routes/services.lazy').then((d) => d.Route))
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
@@ -123,11 +116,6 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const ServicesSlugRoute = ServicesSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => ServicesRoute,
 } as any)
 const PortfolioSlugRoute = PortfolioSlugRouteImport.update({
   id: '/$slug',
@@ -316,7 +304,6 @@ export interface FileRoutesByFullPath {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/services': typeof ServicesRouteWithChildren
   '/team': typeof TeamRoute
   '/terms': typeof TermsRoute
   '/admin/blog': typeof AdminBlogRoute
@@ -345,7 +332,6 @@ export interface FileRoutesByFullPath {
   '/client/login': typeof ClientLoginRoute
   '/client/signup': typeof ClientSignupRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
-  '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/blog': typeof ApiPublicBlogRoute
   '/client/dashboard/billing': typeof ClientDashboardBillingRoute
@@ -367,7 +353,6 @@ export interface FileRoutesByTo {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/services': typeof ServicesRouteWithChildren
   '/team': typeof TeamRoute
   '/terms': typeof TermsRoute
   '/admin/blog': typeof AdminBlogRoute
@@ -395,7 +380,6 @@ export interface FileRoutesByTo {
   '/client/login': typeof ClientLoginRoute
   '/client/signup': typeof ClientSignupRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
-  '/services/$slug': typeof ServicesSlugRoute
   '/admin': typeof AdminIndexRoute
   '/api/public/blog': typeof ApiPublicBlogRoute
   '/client/dashboard/billing': typeof ClientDashboardBillingRoute
@@ -418,7 +402,6 @@ export interface FileRoutesById {
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/services': typeof ServicesRouteWithChildren
   '/team': typeof TeamRoute
   '/terms': typeof TermsRoute
   '/admin/blog': typeof AdminBlogRoute
@@ -447,7 +430,6 @@ export interface FileRoutesById {
   '/client/login': typeof ClientLoginRoute
   '/client/signup': typeof ClientSignupRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
-  '/services/$slug': typeof ServicesSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/api/public/blog': typeof ApiPublicBlogRoute
   '/client/dashboard/billing': typeof ClientDashboardBillingRoute
@@ -471,7 +453,6 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/reset-password'
-    | '/services'
     | '/team'
     | '/terms'
     | '/admin/blog'
@@ -500,7 +481,6 @@ export interface FileRouteTypes {
     | '/client/login'
     | '/client/signup'
     | '/portfolio/$slug'
-    | '/services/$slug'
     | '/admin/'
     | '/api/public/blog'
     | '/client/dashboard/billing'
@@ -522,7 +502,6 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/reset-password'
-    | '/services'
     | '/team'
     | '/terms'
     | '/admin/blog'
@@ -550,7 +529,6 @@ export interface FileRouteTypes {
     | '/client/login'
     | '/client/signup'
     | '/portfolio/$slug'
-    | '/services/$slug'
     | '/admin'
     | '/api/public/blog'
     | '/client/dashboard/billing'
@@ -572,7 +550,6 @@ export interface FileRouteTypes {
     | '/pricing'
     | '/privacy'
     | '/reset-password'
-    | '/services'
     | '/team'
     | '/terms'
     | '/admin/blog'
@@ -601,7 +578,6 @@ export interface FileRouteTypes {
     | '/client/login'
     | '/client/signup'
     | '/portfolio/$slug'
-    | '/services/$slug'
     | '/admin/'
     | '/api/public/blog'
     | '/client/dashboard/billing'
@@ -624,7 +600,6 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
-  ServicesRoute: typeof ServicesRouteWithChildren
   TeamRoute: typeof TeamRoute
   TermsRoute: typeof TermsRoute
   AdminBlogRoute: typeof AdminBlogRoute
@@ -669,13 +644,6 @@ declare module '@tanstack/react-router' {
       path: '/team'
       fullPath: '/team'
       preLoaderRoute: typeof TeamRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/services': {
-      id: '/services'
-      path: '/services'
-      fullPath: '/services'
-      preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -747,13 +715,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/services/$slug': {
-      id: '/services/$slug'
-      path: '/$slug'
-      fullPath: '/services/$slug'
-      preLoaderRoute: typeof ServicesSlugRouteImport
-      parentRoute: typeof ServicesRoute
     }
     '/portfolio/$slug': {
       id: '/portfolio/$slug'
@@ -1025,18 +986,6 @@ const PortfolioRouteWithChildren = PortfolioRoute._addFileChildren(
   PortfolioRouteChildren,
 )
 
-interface ServicesRouteChildren {
-  ServicesSlugRoute: typeof ServicesSlugRoute
-}
-
-const ServicesRouteChildren: ServicesRouteChildren = {
-  ServicesSlugRoute: ServicesSlugRoute,
-}
-
-const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
-  ServicesRouteChildren,
-)
-
 interface ClientDashboardRouteChildren {
   ClientDashboardBillingRoute: typeof ClientDashboardBillingRoute
   ClientDashboardNotificationsRoute: typeof ClientDashboardNotificationsRoute
@@ -1073,7 +1022,6 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
-  ServicesRoute: ServicesRouteWithChildren,
   TeamRoute: TeamRoute,
   TermsRoute: TermsRoute,
   AdminBlogRoute: AdminBlogRoute,
