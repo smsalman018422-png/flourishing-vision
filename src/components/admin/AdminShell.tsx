@@ -36,7 +36,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useNavigate as _unused } from "@tanstack/react-router"; // keep types
 import type { Permission } from "@/lib/admin-roles";
 
 type NavItem = { to: string; label: string; Icon: typeof LayoutDashboard; perm: Permission };
