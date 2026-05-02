@@ -39,7 +39,11 @@ type Payment = {
 
 type Membership = {
   end_date: string | null;
-  plan: { name: string; price_monthly: number; currency: string } | null;
+  amount: number;
+  billing_cycle: string;
+  is_custom: boolean;
+  custom_name: string | null;
+  package: { name: string; price_monthly: number } | null;
 };
 
 export const Route = createFileRoute("/client/dashboard/billing")({
@@ -79,7 +83,7 @@ function BillingPage() {
           .order("payment_date", { ascending: false }),
         supabase
           .from("client_memberships")
-          .select("end_date, plan:membership_plans(name, price_monthly, currency)")
+          .select("end_date, amount, billing_cycle, is_custom, custom_name, package:packages(name, price_monthly)")
           .eq("client_id", userId)
           .eq("status", "active")
           .order("created_at", { ascending: false })
@@ -103,7 +107,7 @@ function BillingPage() {
     [payments],
   );
 
-  const planCurrency = membership?.plan?.currency ?? "USD";
+  const planCurrency = "USD";
 
   if (!ready || loading) {
     return (
@@ -134,8 +138,8 @@ function BillingPage() {
           icon={CircleDollarSign}
           label="Current Plan Cost"
           value={
-            membership?.plan
-              ? `${fmtMoney(membership.plan.price_monthly, membership.plan.currency)}/mo`
+            membership
+              ? `${fmtMoney(membership.amount, planCurrency)}/${membership.billing_cycle === "yearly" ? "yr" : "mo"}`
               : "—"
           }
           tint="primary"

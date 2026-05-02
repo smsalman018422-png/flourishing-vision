@@ -38,22 +38,29 @@ type ClientProfile = {
   account_manager_whatsapp: string | null;
 };
 
+type FeatureItem = { text: string; type?: "feature" | "bonus" } | string;
+
 type Plan = {
   id: string;
   name: string;
-  slug: string;
+  slug?: string | null;
+  category?: string | null;
   price_monthly: number;
-  currency: string;
-  features: string[];
+  features: FeatureItem[];
 };
 
 type Membership = {
   id: string;
-  plan_id: string;
+  package_id: string | null;
   status: string;
   start_date: string;
   end_date: string;
-  membership_plans: Plan | null;
+  billing_cycle: string;
+  amount: number;
+  is_custom: boolean;
+  custom_name: string | null;
+  custom_features: FeatureItem[];
+  package: Plan | null;
 };
 
 type Report = {
@@ -209,7 +216,7 @@ function ClientDashboardOverview() {
           async () =>
             await supabase
               .from("client_memberships")
-              .select("*, membership_plans(*)")
+              .select("*, package:packages(id,name,slug,category,price_monthly,features)")
               .eq("client_id", uid)
               .eq("status", "active")
               .order("end_date", { ascending: false })
@@ -425,10 +432,23 @@ function ClientDashboardOverview() {
   }
 
   const clientName = profile?.full_name?.split(" ")[0] ?? "there";
-  const planName = membership?.membership_plans?.name ?? "No plan";
-  const planSlug = membership?.membership_plans?.slug;
+  const planName = membership
+    ? membership.is_custom && membership.custom_name
+      ? membership.custom_name
+      : (membership.package?.name ?? "Active Plan")
+    : "No plan";
+  const planSlug = membership?.package?.slug;
   const nextPlan = planSlug ? NEXT_PLAN[planSlug] : undefined;
-  const features = (membership?.membership_plans?.features ?? []) as string[];
+  const rawFeatures = membership
+    ? membership.is_custom
+      ? membership.custom_features
+      : (membership.package?.features ?? [])
+    : [];
+  const features: string[] = Array.isArray(rawFeatures)
+    ? rawFeatures
+        .map((f) => (typeof f === "string" ? f : f && typeof f === "object" ? (f as { text?: string }).text ?? "" : ""))
+        .filter(Boolean)
+    : [];
 
   const waNumber = profile?.account_manager_whatsapp?.replace(/\D/g, "") || "15550000000";
   const waHref = `https://wa.me/${waNumber}?text=${encodeURIComponent(
@@ -529,10 +549,9 @@ function ClientDashboardOverview() {
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <p className="text-2xl font-semibold">{planName}</p>
-                {membership?.membership_plans && (
-                  <p className="text-sm text-muted-foreground">
-                    {membership.membership_plans.currency}{" "}
-                    {membership.membership_plans.price_monthly}/mo
+                {membership && (
+                  <p className="text-sm text-muted-foreground capitalize">
+                    ${membership.amount} / {membership.billing_cycle}
                   </p>
                 )}
               </div>
