@@ -3,6 +3,8 @@ import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
+import { MetaPixel } from "@/components/MetaPixel";
+import { META_PIXEL_ID } from "@/lib/meta-pixel";
 
 import appCss from "../styles.css?url";
 
