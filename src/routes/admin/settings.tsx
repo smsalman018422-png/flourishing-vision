@@ -24,7 +24,7 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
-const SECTION_KEYS: Record<Exclude<TabId, "admins">, { key: string; label: string; placeholder?: string; multiline?: boolean }[]> = {
+const SECTION_KEYS: Record<Exclude<TabId, "admins" | "pixel">, { key: string; label: string; placeholder?: string; multiline?: boolean }[]> = {
   contact: [
     { key: "contact_email", label: "Contact email", placeholder: "hello@letusgrow.com" },
     { key: "whatsapp_number", label: "WhatsApp number", placeholder: "+1 555 123 4567" },
@@ -91,7 +91,13 @@ function SettingsAdmin() {
         </div>
       </div>
 
-      {tab === "admins" ? <AdminsSection /> : <SettingsSection key={tab} fields={SECTION_KEYS[tab]} />}
+      {tab === "admins" ? (
+        <AdminsSection />
+      ) : tab === "pixel" ? (
+        <PixelSection />
+      ) : (
+        <SettingsSection key={tab} fields={SECTION_KEYS[tab]} />
+      )}
     </>
   );
 }
