@@ -145,13 +145,22 @@ function MyPackagesPage() {
   }, [userId]);
 
   const active = useMemo(
-    () => memberships.filter((m) => m.status === "active" && new Date(m.end_date) > new Date()),
+    () =>
+      memberships.filter(
+        (m) => m.status === "active" && m.end_date && new Date(m.end_date) > new Date(),
+      ),
+    [memberships],
+  );
+  const pendingMemberships = useMemo(
+    () => memberships.filter((m) => m.status === "pending"),
     [memberships],
   );
   const past = useMemo(
     () =>
       memberships.filter(
-        (m) => m.status !== "active" || new Date(m.end_date) <= new Date(),
+        (m) =>
+          m.status !== "pending" &&
+          (m.status !== "active" || (m.end_date && new Date(m.end_date) <= new Date())),
       ),
     [memberships],
   );
