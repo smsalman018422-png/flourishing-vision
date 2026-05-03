@@ -9,34 +9,32 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ArrowLeft, Calendar, Clock, Link as LinkIcon } from "lucide-react";
 import { TwitterIcon, LinkedInIcon, FacebookIcon } from "@/components/icons/Brands";
-
-type Post = {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string | null;
-  content: string | null;
-  cover_image_url: string | null;
-  author_name: string | null;
-  author_role: string | null;
-  author_avatar_url: string | null;
-  category: string | null;
-  read_time_minutes: number | null;
-  published_at: string | null;
-};
+import { fetchBlogPostBySlug, fetchBlogPosts, type BlogPost } from "@/lib/blog";
 
 export const Route = createFileRoute("/blog/$slug")({
-  head: ({ params }) => ({
-    meta: [
-      { title: `${params.slug} — Let Us Grow Blog` },
-      {
-        name: "description",
-        content: "Insights on growth, marketing and brand from the Let Us Grow team.",
-      },
-      { property: "og:title", content: params.slug },
-      { property: "og:description", content: "Insights on growth, marketing and brand." },
-    ],
-  }),
+  loader: async ({ params }) => {
+    const post = await fetchBlogPostBySlug(params.slug);
+    if (!post) throw notFound();
+    return { post };
+  },
+  staleTime: 0,
+  head: ({ loaderData, params }) => {
+    const post = loaderData?.post;
+    const title = post?.metaTitle || params.slug;
+    const desc =
+      post?.metaDescription || "Insights on growth, marketing and brand from Let Us Grow.";
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: desc },
+      { property: "og:title", content: title },
+      { property: "og:description", content: desc },
+    ];
+    if (post?.image) {
+      meta.push({ property: "og:image", content: post.image });
+      meta.push({ name: "twitter:image", content: post.image });
+    }
+    return { meta };
+  },
   errorComponent: ({ error }) => (
     <PageShell>
       <div className="mx-auto max-w-3xl px-4 py-32 text-center">
@@ -62,64 +60,28 @@ export const Route = createFileRoute("/blog/$slug")({
 });
 
 function BlogPostPage() {
-  const { slug } = Route.useParams();
-  const [post, setPost] = useState<Post | null>(null);
-  const [related, setRelated] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [missing, setMissing] = useState(false);
+  const { post } = Route.useLoaderData();
+  const [related, setRelated] = useState<BlogPost[]>([]);
   const [email, setEmail] = useState("");
   const [subscribing, setSubscribing] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      try {
-        const postRes = await fetch(`/api/public/blog?slug=${encodeURIComponent(slug)}`);
-        if (!postRes.ok) throw new Error("Failed to load post");
-        const postBody = (await postRes.json()) as { data?: Post | null };
+    fetchBlogPosts()
+      .then((all) => {
         if (cancelled) return;
-        if (!postBody.data) {
-          setMissing(true);
-          setLoading(false);
-          return;
-        }
-        setPost(postBody.data);
-
-        const relatedRes = await fetch("/api/public/blog");
-        const relatedBody = relatedRes.ok
-          ? ((await relatedRes.json()) as { data?: Post[] })
-          : { data: [] };
-        if (!cancelled) {
-          setRelated(
-            (relatedBody.data ?? []).filter((item) => item.id !== postBody.data?.id).slice(0, 3),
-          );
-        }
-      } catch {
-        if (!cancelled) setMissing(true);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
+        setRelated(all.filter((r) => r.id !== post.id).slice(0, 3));
+      })
+      .catch(() => {
+        if (!cancelled) setRelated([]);
+      });
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [post.id]);
 
-  if (loading) {
-    return (
-      <PageShell>
-        <div className="mx-auto max-w-3xl px-4 py-32">
-          <div className="h-12 w-2/3 rounded-lg glass animate-pulse" />
-          <div className="mt-6 aspect-video rounded-2xl glass animate-pulse" />
-        </div>
-      </PageShell>
-    );
-  }
-
-  if (missing || !post) throw notFound();
-
-  const date = post.published_at
-    ? new Date(post.published_at).toLocaleDateString(undefined, {
+  const date = post.publishedAt
+    ? new Date(post.publishedAt).toLocaleDateString(undefined, {
         month: "long",
         day: "numeric",
         year: "numeric",
@@ -153,7 +115,6 @@ function BlogPostPage() {
 
   return (
     <PageShell>
-      {/* Hero */}
       <article className="mx-auto max-w-3xl px-4 sm:px-6 pt-4 pb-16">
         <Link
           to="/blog"
@@ -170,40 +131,45 @@ function BlogPostPage() {
           {post.title}
         </h1>
         <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
-          {post.author_name && (
-            <span className="font-medium text-foreground">{post.author_name}</span>
-          )}
+          {post.author && <span className="font-medium text-foreground">{post.author}</span>}
           {date && (
             <span className="inline-flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5" />
               {date}
             </span>
           )}
-          {post.read_time_minutes && (
+          {post.readTime && (
             <span className="inline-flex items-center gap-1">
               <Clock className="h-3.5 w-3.5" />
-              {post.read_time_minutes} min read
+              {post.readTime}
             </span>
           )}
         </div>
-        {post.cover_image_url && (
+        {post.image && (
           <div className="mt-8 aspect-video rounded-2xl overflow-hidden bg-muted">
-            <img
-              src={post.cover_image_url}
-              alt={post.title}
-              className="h-full w-full object-cover"
-            />
+            <img src={post.image} alt={post.title} className="h-full w-full object-cover" />
           </div>
         )}
 
-        {/* Content */}
         <div className="prose prose-invert prose-lg mt-10 max-w-none prose-headings:font-display prose-a:text-primary prose-img:rounded-xl">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {post.content ?? post.excerpt ?? ""}
+            {post.content || post.excerpt || ""}
           </ReactMarkdown>
         </div>
 
-        {/* Share */}
+        {post.tags.length > 0 && (
+          <div className="mt-8 flex flex-wrap gap-2">
+            {post.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full glass px-3 py-1 text-xs text-muted-foreground"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="mt-12 flex flex-wrap items-center gap-3 border-t border-border pt-8">
           <span className="text-sm text-muted-foreground mr-2">Share:</span>
           <ShareBtn
@@ -229,33 +195,31 @@ function BlogPostPage() {
           </button>
         </div>
 
-        {/* Author bio */}
-        {post.author_name && (
+        {post.author && (
           <div className="mt-12 glass rounded-2xl p-6 flex items-start gap-4">
             <div className="h-14 w-14 rounded-full overflow-hidden bg-muted shrink-0">
-              {post.author_avatar_url ? (
+              {post.authorAvatar ? (
                 <img
-                  src={post.author_avatar_url}
-                  alt={post.author_name}
+                  src={post.authorAvatar}
+                  alt={post.author}
                   className="h-full w-full object-cover"
                 />
               ) : (
                 <div className="h-full w-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-lg font-display text-primary/60">
-                  {post.author_name.slice(0, 1)}
+                  {post.author.slice(0, 1)}
                 </div>
               )}
             </div>
             <div>
-              <p className="font-semibold">{post.author_name}</p>
-              {post.author_role && (
-                <p className="text-sm text-muted-foreground">{post.author_role}</p>
+              <p className="font-semibold">{post.author}</p>
+              {post.authorRole && (
+                <p className="text-sm text-muted-foreground">{post.authorRole}</p>
               )}
             </div>
           </div>
         )}
       </article>
 
-      {/* Related */}
       {related.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 sm:px-6 py-12">
           <h2 className="text-2xl sm:text-3xl font-display font-semibold mb-6">Keep reading</h2>
@@ -268,9 +232,9 @@ function BlogPostPage() {
                 className="group block rounded-2xl overflow-hidden glass hover:shadow-elegant transition-all hover:-translate-y-1"
               >
                 <div className="aspect-video bg-muted overflow-hidden">
-                  {r.cover_image_url ? (
+                  {r.image ? (
                     <img
-                      src={r.cover_image_url}
+                      src={r.image}
                       alt={r.title}
                       loading="lazy"
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -293,7 +257,6 @@ function BlogPostPage() {
         </section>
       )}
 
-      {/* Newsletter CTA */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-16">
         <div className="rounded-3xl bg-gradient-to-br from-primary to-primary/70 p-10 sm:p-16 text-center text-primary-foreground">
           <h2 className="text-2xl sm:text-4xl font-display font-semibold">
