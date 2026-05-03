@@ -223,6 +223,21 @@ function MyPackagesPage() {
         </Card>
       )}
 
+      {/* Pending memberships (manual payment requests) */}
+      {pendingMemberships.length > 0 && (
+        <section>
+          <div className="flex items-center gap-2 mb-3">
+            <Clock className="h-4 w-4 text-amber-500" />
+            <h2 className="text-lg font-semibold">Awaiting Approval ({pendingMemberships.length})</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {pendingMemberships.map((m) => (
+              <PackageCard key={m.id} membership={m} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Active packages */}
       <section>
         <div className="flex items-center gap-2 mb-3">
