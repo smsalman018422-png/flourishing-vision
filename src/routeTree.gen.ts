@@ -31,11 +31,9 @@ import { Route as ApiPurchaseCheckoutRouteImport } from './routes/api/purchase-c
 import { Route as ApiPurchaseApproveRouteImport } from './routes/api/purchase-approve'
 import { Route as ApiAssignPackageRouteImport } from './routes/api/assign-package'
 import { Route as ApiAdminWriteRouteImport } from './routes/api/admin-write'
-import { Route as ApiAdminUsersRouteImport } from './routes/api/admin-users'
 import { Route as ApiAdminUploadRouteImport } from './routes/api/admin-upload'
 import { Route as ApiAdminDataRouteImport } from './routes/api/admin-data'
 import { Route as ApiAdminCheckRouteImport } from './routes/api/admin-check'
-import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminTestimonialsRouteImport } from './routes/admin/testimonials'
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
@@ -169,11 +167,6 @@ const ApiAdminWriteRoute = ApiAdminWriteRouteImport.update({
   path: '/api/admin-write',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAdminUsersRoute = ApiAdminUsersRouteImport.update({
-  id: '/api/admin-users',
-  path: '/api/admin-users',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiAdminUploadRoute = ApiAdminUploadRouteImport.update({
   id: '/api/admin-upload',
   path: '/api/admin-upload',
@@ -187,11 +180,6 @@ const ApiAdminDataRoute = ApiAdminDataRouteImport.update({
 const ApiAdminCheckRoute = ApiAdminCheckRouteImport.update({
   id: '/api/admin-check',
   path: '/api/admin-check',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminUsersRoute = AdminUsersRouteImport.update({
-  id: '/admin/users',
-  path: '/admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminTestimonialsRoute = AdminTestimonialsRouteImport.update({
@@ -331,11 +319,9 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
-  '/admin/users': typeof AdminUsersRoute
   '/api/admin-check': typeof ApiAdminCheckRoute
   '/api/admin-data': typeof ApiAdminDataRoute
   '/api/admin-upload': typeof ApiAdminUploadRoute
-  '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/admin-write': typeof ApiAdminWriteRoute
   '/api/assign-package': typeof ApiAssignPackageRoute
   '/api/purchase-approve': typeof ApiPurchaseApproveRoute
@@ -382,11 +368,9 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
-  '/admin/users': typeof AdminUsersRoute
   '/api/admin-check': typeof ApiAdminCheckRoute
   '/api/admin-data': typeof ApiAdminDataRoute
   '/api/admin-upload': typeof ApiAdminUploadRoute
-  '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/admin-write': typeof ApiAdminWriteRoute
   '/api/assign-package': typeof ApiAssignPackageRoute
   '/api/purchase-approve': typeof ApiPurchaseApproveRoute
@@ -433,11 +417,9 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/testimonials': typeof AdminTestimonialsRoute
-  '/admin/users': typeof AdminUsersRoute
   '/api/admin-check': typeof ApiAdminCheckRoute
   '/api/admin-data': typeof ApiAdminDataRoute
   '/api/admin-upload': typeof ApiAdminUploadRoute
-  '/api/admin-users': typeof ApiAdminUsersRoute
   '/api/admin-write': typeof ApiAdminWriteRoute
   '/api/assign-package': typeof ApiAssignPackageRoute
   '/api/purchase-approve': typeof ApiPurchaseApproveRoute
@@ -486,11 +468,9 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/team'
     | '/admin/testimonials'
-    | '/admin/users'
     | '/api/admin-check'
     | '/api/admin-data'
     | '/api/admin-upload'
-    | '/api/admin-users'
     | '/api/admin-write'
     | '/api/assign-package'
     | '/api/purchase-approve'
@@ -537,11 +517,9 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/team'
     | '/admin/testimonials'
-    | '/admin/users'
     | '/api/admin-check'
     | '/api/admin-data'
     | '/api/admin-upload'
-    | '/api/admin-users'
     | '/api/admin-write'
     | '/api/assign-package'
     | '/api/purchase-approve'
@@ -587,11 +565,9 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/team'
     | '/admin/testimonials'
-    | '/admin/users'
     | '/api/admin-check'
     | '/api/admin-data'
     | '/api/admin-upload'
-    | '/api/admin-users'
     | '/api/admin-write'
     | '/api/assign-package'
     | '/api/purchase-approve'
@@ -639,11 +615,9 @@ export interface RootRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTeamRoute: typeof AdminTeamRoute
   AdminTestimonialsRoute: typeof AdminTestimonialsRoute
-  AdminUsersRoute: typeof AdminUsersRoute
   ApiAdminCheckRoute: typeof ApiAdminCheckRoute
   ApiAdminDataRoute: typeof ApiAdminDataRoute
   ApiAdminUploadRoute: typeof ApiAdminUploadRoute
-  ApiAdminUsersRoute: typeof ApiAdminUsersRoute
   ApiAdminWriteRoute: typeof ApiAdminWriteRoute
   ApiAssignPackageRoute: typeof ApiAssignPackageRoute
   ApiPurchaseApproveRoute: typeof ApiPurchaseApproveRoute
@@ -812,13 +786,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminWriteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/admin-users': {
-      id: '/api/admin-users'
-      path: '/api/admin-users'
-      fullPath: '/api/admin-users'
-      preLoaderRoute: typeof ApiAdminUsersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/admin-upload': {
       id: '/api/admin-upload'
       path: '/api/admin-upload'
@@ -838,13 +805,6 @@ declare module '@tanstack/react-router' {
       path: '/api/admin-check'
       fullPath: '/api/admin-check'
       preLoaderRoute: typeof ApiAdminCheckRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/users': {
-      id: '/admin/users'
-      path: '/admin/users'
-      fullPath: '/admin/users'
-      preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/testimonials': {
@@ -1077,11 +1037,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTeamRoute: AdminTeamRoute,
   AdminTestimonialsRoute: AdminTestimonialsRoute,
-  AdminUsersRoute: AdminUsersRoute,
   ApiAdminCheckRoute: ApiAdminCheckRoute,
   ApiAdminDataRoute: ApiAdminDataRoute,
   ApiAdminUploadRoute: ApiAdminUploadRoute,
-  ApiAdminUsersRoute: ApiAdminUsersRoute,
   ApiAdminWriteRoute: ApiAdminWriteRoute,
   ApiAssignPackageRoute: ApiAssignPackageRoute,
   ApiPurchaseApproveRoute: ApiPurchaseApproveRoute,

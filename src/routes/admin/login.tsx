@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "@/components/AuthProvider";
 import { Button, Field, TextInput } from "@/components/admin/ui";
 import { Loader2 } from "lucide-react";
+
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/login")({
@@ -17,8 +18,9 @@ export const Route = createFileRoute("/admin/login")({
 });
 
 function AdminLogin() {
-  const { user, isAdmin, loading } = useAuth();
+  const { signIn, signUp, user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -31,26 +33,38 @@ function AdminLogin() {
     e.preventDefault();
     setBusy(true);
     try {
+      if (mode === "signup") {
+        const { error } = await signUp(email, password);
+        if (error) { toast.error(error); return; }
+        toast.success("Account created. Check your email to confirm, then sign in.");
+        setMode("signin");
+        return;
+      }
+
+      // 1. Sign in
       const { supabase } = await import("@/integrations/supabase/client");
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      if (authError || !authData.user) {
-        toast.error(authError?.message ?? "Sign-in failed");
+      if (authError) {
+        toast.error(authError.message);
+        return;
+      }
+      if (!authData.user) {
+        toast.error("Sign-in failed: no user returned");
         return;
       }
 
+      // 2. Check admin status on the server to avoid client schema-cache failures
       const adminRes = await fetch("/api/admin-check", {
         method: "POST",
         headers: { Authorization: `Bearer ${authData.session?.access_token ?? ""}` },
       });
-      const adminCheck = (await adminRes.json().catch(() => null)) as
-        | { ok?: boolean; error?: string }
-        | null;
+      const adminCheck = (await adminRes.json().catch(() => null)) as { ok?: boolean; error?: string } | null;
 
       if (!adminRes.ok || !adminCheck?.ok) {
-        toast.error(adminCheck?.error ?? "You are not authorized");
+        toast.error(adminCheck?.error ?? "Unable to verify admin access");
         await supabase.auth.signOut();
         return;
       }
@@ -65,11 +79,7 @@ function AdminLogin() {
   return (
     <div className="min-h-screen grid place-items-center bg-background px-4 py-12">
       <div className="w-full max-w-md">
-        <Link
-          to="/"
-          className="flex items-center justify-center gap-2 mb-8"
-          aria-label="Let Us Grow — Home"
-        >
+        <Link to="/" className="flex items-center justify-center gap-2 mb-8" aria-label="Let Us Grow — Home">
           <span className="font-display font-bold tracking-tight text-3xl leading-none whitespace-nowrap">
             <span className="text-foreground">Let Us </span>
             <span className="text-gradient">Grow</span>
@@ -77,64 +87,54 @@ function AdminLogin() {
         </Link>
         <div className="glass rounded-2xl p-6 sm:p-8">
           <h1 className="text-xl sm:text-2xl font-display font-semibold text-center">
-            Admin sign in
+            {mode === "signin" ? "Admin sign in" : "Create admin account"}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground text-center">
-            Authorized staff only.
+            {mode === "signin"
+              ? "Authorized staff only."
+              : "The first registered user automatically becomes admin."}
           </p>
 
           <form onSubmit={submit} className="mt-6 space-y-4">
             <Field label="Email">
-              <TextInput
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@letusgrow.com"
-                autoComplete="email"
-              />
+              <TextInput type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@letusgrow.com" autoComplete="email" />
             </Field>
             <Field label="Password">
-              <TextInput
-                type="password"
-                required
-                minLength={6}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                autoComplete="current-password"
-              />
+              <TextInput type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" autoComplete={mode === "signin" ? "current-password" : "new-password"} />
             </Field>
             <Button type="submit" disabled={busy} className="w-full">
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : mode === "signin" ? "Sign in" : "Create account"}
             </Button>
           </form>
 
-          <div className="mt-4 text-center">
+          <div className="mt-4 flex flex-col gap-2 text-center">
+            {mode === "signin" && (
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!email) { toast.error("Enter your email first"); return; }
+                  const { supabase } = await import("@/integrations/supabase/client");
+                  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/reset-password`,
+                  });
+                  if (error) toast.error(error.message);
+                  else toast.success("Check your email for a reset link.");
+                }}
+                className="text-xs text-primary hover:underline"
+              >
+                Forgot password?
+              </button>
+            )}
             <button
               type="button"
-              onClick={async () => {
-                if (!email) {
-                  toast.error("Enter your email first");
-                  return;
-                }
-                const { supabase } = await import("@/integrations/supabase/client");
-                const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                  redirectTo: `${window.location.origin}/reset-password`,
-                });
-                if (error) toast.error(error.message);
-                else toast.success("Check your email for a reset link.");
-              }}
-              className="text-xs text-primary hover:underline"
+              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >
-              Forgot password?
+              {mode === "signin" ? "First-time setup? Create the first admin →" : "← Back to sign in"}
             </button>
           </div>
         </div>
-        <Link
-          to="/"
-          className="mt-6 block text-center text-xs text-muted-foreground hover:text-foreground"
-        >
+        <Link to="/" className="mt-6 block text-center text-xs text-muted-foreground hover:text-foreground">
           ← Back to site
         </Link>
       </div>

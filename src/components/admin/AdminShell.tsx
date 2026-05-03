@@ -25,7 +25,6 @@ import {
   Package,
   Sun,
   Moon,
-  ShieldCheck,
 } from "lucide-react";
 
 import {
@@ -36,43 +35,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { rolesHavePermission, type Permission, type StaffRole } from "@/lib/admin-roles";
 
-type NavItem = { to: string; label: string; Icon: typeof LayoutDashboard; perm: Permission };
+const nav = [
+  { to: "/admin", label: "Dashboard", Icon: LayoutDashboard },
+  { to: "/admin/team", label: "Team", Icon: Users },
+  { to: "/admin/portfolio", label: "Case Studies", Icon: Briefcase },
+  { to: "/admin/services", label: "Services", Icon: Sparkles },
+  { to: "/admin/packages", label: "Packages", Icon: Package },
+  { to: "/admin/testimonials", label: "Testimonials", Icon: Quote },
+  { to: "/admin/blog", label: "Blog", Icon: FileText },
+  { to: "/admin/contacts", label: "Contacts", Icon: Mail },
+  { to: "/admin/clients", label: "Clients", Icon: Users, group: "Clients" },
+  { to: "/admin/memberships", label: "Memberships", Icon: Crown },
+  { to: "/admin/client-reports", label: "Client Reports", Icon: FileBarChart },
+  { to: "/admin/client-tickets", label: "Client Tickets", Icon: MessageCircle },
+  { to: "/admin/settings", label: "Settings", Icon: Settings, group: "System" },
+] as const;
 
-const nav: NavItem[] = [
-  { to: "/admin", label: "Dashboard", Icon: LayoutDashboard, perm: "dashboard" },
-  { to: "/admin/team", label: "Team", Icon: Users, perm: "team" },
-  { to: "/admin/portfolio", label: "Case Studies", Icon: Briefcase, perm: "portfolio" },
-  { to: "/admin/services", label: "Services", Icon: Sparkles, perm: "services" },
-  { to: "/admin/packages", label: "Packages", Icon: Package, perm: "packages" },
-  { to: "/admin/testimonials", label: "Testimonials", Icon: Quote, perm: "testimonials" },
-  { to: "/admin/blog", label: "Blog", Icon: FileText, perm: "blog" },
-  { to: "/admin/contacts", label: "Contacts", Icon: Mail, perm: "contacts" },
-  { to: "/admin/clients", label: "Clients", Icon: Users, perm: "clients" },
-  { to: "/admin/memberships", label: "Memberships", Icon: Crown, perm: "memberships" },
-  { to: "/admin/client-reports", label: "Client Reports", Icon: FileBarChart, perm: "client-reports" },
-  { to: "/admin/client-tickets", label: "Client Tickets", Icon: MessageCircle, perm: "client-tickets" },
-  { to: "/admin/users", label: "Admin Users", Icon: ShieldCheck, perm: "admin-users" },
-  { to: "/admin/settings", label: "Settings", Icon: Settings, perm: "settings" },
-];
-
-export function AdminShell({
-  children,
-  requirePermission,
-}: {
-  children?: ReactNode;
-  requirePermission?: Permission;
-}) {
+export function AdminShell({ children }: { children?: ReactNode }) {
   return (
     <AuthProvider>
-      <AdminShellContent requirePermission={requirePermission}>{children}</AdminShellContent>
+      <AdminShellContent>{children}</AdminShellContent>
     </AuthProvider>
   );
 }
 
-function AdminShellContent({ children, requirePermission }: { children?: ReactNode; requirePermission?: Permission }) {
-  const { user, isAdmin, loading, signOut, hasPermission, roles } = useAuth();
+function AdminShellContent({ children }: { children?: ReactNode }) {
+  const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -129,33 +118,13 @@ function AdminShellContent({ children, requirePermission }: { children?: ReactNo
     );
   }
 
-  if (requirePermission && !hasPermission(requirePermission)) {
-    return (
-      <div className="min-h-screen grid place-items-center bg-background text-foreground p-6">
-        <div className="max-w-md text-center glass rounded-2xl p-8">
-          <ShieldAlert className="h-10 w-10 text-primary mx-auto" />
-          <h1 className="mt-4 text-xl font-display font-semibold">Access denied</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Your role doesn't allow access to this page.
-          </p>
-          <button
-            onClick={() => navigate({ to: "/admin" })}
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-glow"
-          >
-            Back to dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const initials = (user.email ?? "A").slice(0, 1).toUpperCase();
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Desktop sidebar (fixed) */}
       <aside className="hidden lg:flex fixed inset-y-0 left-0 w-[280px] flex-col border-r border-border/60 bg-card/80 backdrop-blur z-30">
-        <SidebarBody pathname={pathname} email={user.email ?? ""} roles={roles} onSignOut={async () => { await signOut(); navigate({ to: "/admin/login" }); }} />
+        <SidebarBody pathname={pathname} email={user.email ?? ""} onSignOut={async () => { await signOut(); navigate({ to: "/admin/login" }); }} />
       </aside>
 
       {/* Mobile drawer */}
@@ -185,7 +154,7 @@ function AdminShellContent({ children, requirePermission }: { children?: ReactNo
               >
                 <X className="h-5 w-5" />
               </button>
-              <SidebarBody pathname={pathname} email={user.email ?? ""} roles={roles} onSignOut={async () => { await signOut(); navigate({ to: "/admin/login" }); }} />
+              <SidebarBody pathname={pathname} email={user.email ?? ""} onSignOut={async () => { await signOut(); navigate({ to: "/admin/login" }); }} />
             </motion.aside>
           </>
         )}
@@ -243,15 +212,12 @@ function AdminShellContent({ children, requirePermission }: { children?: ReactNo
 function SidebarBody({
   pathname,
   email,
-  roles,
   onSignOut,
 }: {
   pathname: string;
   email: string;
-  roles: StaffRole[];
   onSignOut: () => void;
 }) {
-  const visibleNav = nav.filter((item) => rolesHavePermission(roles, item.perm));
   return (
     <>
       <div className="p-5 flex items-center gap-2">
@@ -267,7 +233,7 @@ function SidebarBody({
       </div>
       <nav className="px-3 py-2 flex-1 overflow-y-auto">
         <ul className="space-y-1">
-          {visibleNav.map(({ to, label, Icon }) => {
+          {nav.map(({ to, label, Icon }) => {
             const active = pathname === to || (to !== "/admin" && pathname.startsWith(to));
             return (
               <li key={to}>
