@@ -53,6 +53,13 @@ import {
 } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  trackInitiateCheckout,
+  trackPurchase,
+  trackViewContent,
+  trackPackageView,
+  trackCTAClick,
+} from "@/lib/meta-pixel";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Sparkles, Sprout, Rocket, Shield, Crown, Star, Zap, TrendingUp, Target,
@@ -350,7 +357,13 @@ function PricingPage() {
                 plan={plan}
                 yearly={yearly}
                 index={i}
-                onPurchase={() => setPurchaseTarget(plan)}
+                onPurchase={() => {
+                  const price = yearly ? plan.price_yearly : plan.price_monthly;
+                  trackPackageView(plan.name, price);
+                  trackInitiateCheckout({ content_name: plan.name, value: price });
+                  trackCTAClick(`Get Started - ${plan.name}`, "Pricing");
+                  setPurchaseTarget(plan);
+                }}
               />
             ))}
           </div>
@@ -743,6 +756,7 @@ function PurchaseModal({
         return;
       }
       toast.success("Payment received! Your package will be activated shortly.");
+      trackPurchase({ content_name: plan.name, value: price });
       onClose();
       navigate({ to: body.redirect_url ?? "/client/dashboard/packages" });
     } finally {
