@@ -21,7 +21,7 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [authState, setAuthState] = useState<{
-    kind: "anon" | "client" | "admin";
+    kind: "anon" | "client";
     name: string;
   }>({ kind: "anon", name: "" });
 
@@ -34,19 +34,16 @@ export function Navbar() {
         if (mounted) setAuthState({ kind: "anon", name: "" });
         return;
       }
-      const [{ data: profile }, { data: roles }] = await Promise.all([
-        supabase.from("client_profiles").select("full_name").eq("id", user.id).maybeSingle(),
-        supabase.from("user_roles").select("role").eq("user_id", user.id),
-      ]);
+      const { data: profile } = await supabase
+        .from("client_profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .maybeSingle();
       if (!mounted) return;
-      const isAdmin = (roles ?? []).some((r) => r.role === "admin");
-      if (isAdmin) {
-        setAuthState({ kind: "admin", name: user.email ?? "Admin" });
-      } else if (profile) {
-        setAuthState({ kind: "client", name: profile.full_name || user.email || "" });
-      } else {
-        setAuthState({ kind: "anon", name: "" });
-      }
+      setAuthState({
+        kind: "client",
+        name: profile?.full_name || user.email || "",
+      });
     };
     void detect();
     const { data: sub } = supabase.auth.onAuthStateChange(() => void detect());

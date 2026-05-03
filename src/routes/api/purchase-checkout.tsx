@@ -106,21 +106,7 @@ export const Route = createFileRoute("/api/purchase-checkout")({
           });
         }
 
-        const { data: admins } = await supabaseAdmin
-          .from("user_roles")
-          .select("user_id")
-          .eq("role", "admin");
-        if (admins?.length) {
-          await supabaseAdmin.from("client_notifications").insert(
-            admins.map((a: { user_id: string }) => ({
-              client_id: a.user_id,
-              title: paid ? "New PAID package request" : "New package purchase request",
-              body: `A client requested ${pkg.name} (${billingCycle})${paid ? ` — paid via PayPal (${paypalOrderId})` : ""}. Review in Packages → Pending.`,
-              type: "info",
-              link: "/admin/packages",
-            })),
-          );
-        }
+        // Admin notifications removed — admin panel lives in a separate project.
 
         return json({
           ok: true,
