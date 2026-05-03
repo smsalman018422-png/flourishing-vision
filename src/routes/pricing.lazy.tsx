@@ -175,10 +175,13 @@ function PricingPage() {
     const load = async () => {
       const { data, error } = await supabase
         .from("packages")
-        .select("*")
+        .select(
+          "id, category, name, slug, price_monthly, price_yearly, tagline, description, icon_name, features, best_for, is_popular, is_premium, is_visible, order_index, cta_text, cta_link",
+        )
         .eq("is_visible", true)
         .order("category")
-        .order("order_index");
+        .order("order_index")
+        .limit(200);
       if (cancelled) return;
       if (!error && data) {
         setPackages(
