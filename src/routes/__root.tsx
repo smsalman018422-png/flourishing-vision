@@ -1,8 +1,10 @@
-import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts, ScriptOnce } from "@tanstack/react-router";
+import { Outlet, Link, createRootRouteWithContext, HeadContent, Scripts, ScriptOnce, useRouterState } from "@tanstack/react-router";
 import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
+import { initMetaPixel, trackPageView } from "@/lib/meta-pixel";
 
 import appCss from "../styles.css?url";
 
@@ -82,6 +84,16 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  useEffect(() => {
+    void initMetaPixel();
+  }, []);
+
+  useEffect(() => {
+    trackPageView();
+  }, [pathname]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
