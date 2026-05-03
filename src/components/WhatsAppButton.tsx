@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { trackContact, trackWhatsAppClick } from "@/lib/meta-pixel";
 
 const PHONE = "15550000000"; // replace with real number
 const MESSAGE = "Hi Let Us Grow team, I'd like to discuss...";
@@ -6,11 +7,18 @@ const MESSAGE = "Hi Let Us Grow team, I'd like to discuss...";
 export function WhatsAppButton() {
   const href = `https://wa.me/${PHONE}?text=${encodeURIComponent(MESSAGE)}`;
 
+  const handleClick = () => {
+    const page = typeof window !== "undefined" ? window.location.pathname : "Unknown";
+    trackWhatsAppClick(page);
+    trackContact({ content_name: "WhatsApp" });
+  };
+
   return (
     <motion.a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={handleClick}
       aria-label="Chat on WhatsApp"
       initial={{ opacity: 0, scale: 0 }}
       animate={{ opacity: 1, scale: 1 }}
