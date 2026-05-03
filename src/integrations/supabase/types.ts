@@ -168,10 +168,14 @@ export type Database = {
           end_date: string
           id: string
           is_custom: boolean
+          note: string | null
           package_id: string | null
+          payment_method: string | null
+          payment_status: string
           plan_id: string | null
-          start_date: string
+          start_date: string | null
           status: string
+          transaction_id: string | null
           updated_at: string
         }
         Insert: {
@@ -186,10 +190,14 @@ export type Database = {
           end_date: string
           id?: string
           is_custom?: boolean
+          note?: string | null
           package_id?: string | null
+          payment_method?: string | null
+          payment_status?: string
           plan_id?: string | null
-          start_date?: string
+          start_date?: string | null
           status?: string
+          transaction_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -204,10 +212,14 @@ export type Database = {
           end_date?: string
           id?: string
           is_custom?: boolean
+          note?: string | null
           package_id?: string | null
+          payment_method?: string | null
+          payment_status?: string
           plan_id?: string | null
-          start_date?: string
+          start_date?: string | null
           status?: string
+          transaction_id?: string | null
           updated_at?: string
         }
         Relationships: [
