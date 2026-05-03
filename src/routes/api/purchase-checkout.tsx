@@ -25,6 +25,8 @@ const json = (body: unknown, status = 200) =>
 type CheckoutRequest = {
   package_id?: string;
   billing_cycle?: "monthly" | "yearly";
+  paypal_order_id?: string;
+  payer_email?: string;
 };
 
 export const Route = createFileRoute("/api/purchase-checkout")({
@@ -61,10 +63,10 @@ export const Route = createFileRoute("/api/purchase-checkout")({
         const amount =
           billingCycle === "yearly" ? pkg.price_yearly || 0 : pkg.price_monthly || 0;
 
-        // ───────── BEGIN: replace this block when you wire up real Stripe ─────────
-        // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-        // const session = await stripe.checkout.sessions.create({ ... });
-        // For now: create a pending request so admin can manually approve.
+        const paypalOrderId = body?.paypal_order_id?.trim();
+        const payerEmail = body?.payer_email?.trim();
+        const paid = !!paypalOrderId;
+
         const { data: inserted, error: insertError } = await supabaseAdmin
           .from("package_purchase_requests")
           .insert({
@@ -73,15 +75,37 @@ export const Route = createFileRoute("/api/purchase-checkout")({
             billing_cycle: billingCycle,
             amount,
             status: "pending",
-            payment_status: "unpaid",
-            notes: "Awaiting Stripe integration. Created via placeholder checkout.",
+            payment_status: paid ? "paid" : "unpaid",
+            stripe_session_id: paypalOrderId ?? null,
+            notes: paid
+              ? `PayPal order ${paypalOrderId}${payerEmail ? ` · ${payerEmail}` : ""}`
+              : "Awaiting payment integration. Created via placeholder checkout.",
           })
           .select("id")
           .single();
 
         if (insertError) return json({ ok: false, error: insertError.message }, 500);
 
-        // Notify admin via a notification on every admin user
+        if (paid) {
+          await supabaseAdmin.from("client_payments").insert({
+            client_id: userId,
+            amount,
+            currency: "USD",
+            method: "paypal",
+            status: "completed",
+            reference: paypalOrderId,
+            notes: `PayPal payment for ${pkg.name}${payerEmail ? ` · payer ${payerEmail}` : ""}`,
+          });
+
+          await supabaseAdmin.from("client_notifications").insert({
+            client_id: userId,
+            title: "Payment received",
+            body: `We received your $${amount} payment for ${pkg.name}. Your package will be activated within 24 hours.`,
+            type: "success",
+            link: "/client/dashboard/packages",
+          });
+        }
+
         const { data: admins } = await supabaseAdmin
           .from("user_roles")
           .select("user_id")
@@ -90,8 +114,8 @@ export const Route = createFileRoute("/api/purchase-checkout")({
           await supabaseAdmin.from("client_notifications").insert(
             admins.map((a: { user_id: string }) => ({
               client_id: a.user_id,
-              title: "New package purchase request",
-              body: `A client requested ${pkg.name} (${billingCycle}). Review in Packages → Pending.`,
+              title: paid ? "New PAID package request" : "New package purchase request",
+              body: `A client requested ${pkg.name} (${billingCycle})${paid ? ` — paid via PayPal (${paypalOrderId})` : ""}. Review in Packages → Pending.`,
               type: "info",
               link: "/admin/packages",
             })),
@@ -102,10 +126,8 @@ export const Route = createFileRoute("/api/purchase-checkout")({
           ok: true,
           mode: "pending_approval",
           request_id: inserted.id,
-          // When real Stripe is added, this becomes the Stripe-hosted checkout URL.
-          redirect_url: "/client/dashboard/membership?purchase=pending",
+          redirect_url: "/client/dashboard/packages?purchase=pending",
         });
-        // ───────── END Stripe-replaceable block ─────────
       },
     },
   },

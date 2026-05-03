@@ -16,6 +16,7 @@ const TABS = [
   { id: "about", label: "About" },
   { id: "calendly", label: "Calendly" },
   { id: "legal", label: "Legal pages" },
+  { id: "paypal", label: "PayPal" },
   { id: "admins", label: "Admins" },
 ] as const;
 
@@ -47,6 +48,11 @@ const SECTION_KEYS: Record<Exclude<TabId, "admins">, { key: string; label: strin
     { key: "legal_privacy", label: "Privacy Policy (/privacy)", multiline: true, placeholder: "Write your full Privacy Policy here. Plain text or simple paragraphs." },
     { key: "legal_terms", label: "Terms of Service (/terms)", multiline: true, placeholder: "Write your full Terms of Service here." },
     { key: "legal_cookies", label: "Cookie Policy (/cookies)", multiline: true, placeholder: "Write your full Cookie Policy here." },
+  ],
+  paypal: [
+    { key: "paypal_client_id", label: "PayPal Client ID", placeholder: "Public Client ID from PayPal Developer Dashboard" },
+    { key: "paypal_mode", label: "PayPal Mode (sandbox or live)", placeholder: "sandbox" },
+    { key: "paypal_business_email", label: "PayPal Business Email", placeholder: "payments@yourbusiness.com" },
   ],
 };
 

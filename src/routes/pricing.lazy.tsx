@@ -14,7 +14,8 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { CreditCard, MessageCircle, LogIn, UserPlus, Loader2 } from "lucide-react";
+import { MessageCircle, LogIn, UserPlus, Loader2 } from "lucide-react";
+import { PayPalCheckout, type PayPalCaptureDetails } from "@/components/PayPalCheckout";
 import { toast } from "sonner";
 import {
   Check,
@@ -714,7 +715,8 @@ function PurchaseModal({
   const price = yearly ? plan.price_yearly : plan.price_monthly;
   const cycle = yearly ? "yearly" : "monthly";
 
-  const handlePay = async () => {
+  const handlePaid = async (orderId: string, details: PayPalCaptureDetails) => {
+    if (submitting) return;
     setSubmitting(true);
     try {
       const { data: sess } = await supabase.auth.getSession();
@@ -726,18 +728,23 @@ function PurchaseModal({
       const res = await fetch("/api/purchase-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ package_id: plan.id, billing_cycle: cycle }),
+        body: JSON.stringify({
+          package_id: plan.id,
+          billing_cycle: cycle,
+          paypal_order_id: orderId,
+          payer_email: details.payer?.email_address,
+        }),
       });
       const body = (await res.json().catch(() => null)) as
         | { ok: boolean; redirect_url?: string; error?: string }
         | null;
       if (!res.ok || !body?.ok) {
-        toast.error(body?.error || "Could not start checkout");
+        toast.error(body?.error || "Could not record payment");
         return;
       }
-      toast.success("Request submitted! An admin will activate your package shortly.");
+      toast.success("Payment received! Your package will be activated shortly.");
       onClose();
-      navigate({ to: body.redirect_url ?? "/client/dashboard/membership" });
+      navigate({ to: body.redirect_url ?? "/client/dashboard/packages" });
     } finally {
       setSubmitting(false);
     }
@@ -751,7 +758,7 @@ function PurchaseModal({
 
   return (
     <Dialog open={!!plan} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         {authState === "out" ? (
           <>
             <DialogHeader>
@@ -791,7 +798,7 @@ function PurchaseModal({
             <DialogHeader>
               <DialogTitle>{plan.name}</DialogTitle>
               <DialogDescription>
-                {plan.tagline ?? "Choose your billing cycle and continue to checkout."}
+                {plan.tagline ?? "Choose your billing cycle and pay securely with PayPal."}
               </DialogDescription>
             </DialogHeader>
 
@@ -810,27 +817,27 @@ function PurchaseModal({
               </button>
             </div>
 
-            <div className="text-center py-3">
-              <p className="text-4xl font-black">${price.toLocaleString()}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Billed {yearly ? "yearly" : "monthly"}
-              </p>
-            </div>
+            {submitting && (
+              <div className="flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" /> Recording payment…
+              </div>
+            )}
+
+            {price > 0 ? (
+              <PayPalCheckout
+                key={`${plan.id}-${cycle}`}
+                packageName={plan.name}
+                amount={price}
+                billingCycle={cycle}
+                onSuccess={handlePaid}
+              />
+            ) : (
+              <div className="text-sm text-muted-foreground text-center py-4">
+                This plan has no online price. Please contact us for a quote.
+              </div>
+            )}
 
             <DialogFooter className="flex-col gap-2 sm:flex-col">
-              <Button
-                onClick={handlePay}
-                disabled={submitting || authState === "loading"}
-                className="w-full"
-                size="lg"
-              >
-                {submitting ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <CreditCard className="h-4 w-4 mr-2" />
-                )}
-                Pay with Stripe
-              </Button>
               <div className="grid grid-cols-2 gap-2 w-full">
                 <Button asChild variant="outline">
                   <a href={waHref} target="_blank" rel="noreferrer">
@@ -841,9 +848,6 @@ function PurchaseModal({
                   <Link to={contactHref}>Custom Quote</Link>
                 </Button>
               </div>
-              <p className="text-[11px] text-center text-muted-foreground pt-1">
-                Stripe checkout is being finalised — your request goes to our team for instant activation.
-              </p>
             </DialogFooter>
           </>
         )}
