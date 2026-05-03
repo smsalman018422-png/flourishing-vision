@@ -5,7 +5,7 @@ import { Loader2, Eye, EyeOff } from "lucide-react";
 
 import { toast } from "sonner";
 import { z } from "zod";
-import { Button, Field, TextInput } from "@/components/admin/ui";
+import { Button, Field, TextInput } from "@/components/forms/ui";
 import { trackCompleteRegistration } from "@/lib/meta-pixel";
 
 type Tab = "login" | "signup";

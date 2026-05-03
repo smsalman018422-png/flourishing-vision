@@ -1,18 +1,5 @@
 import { type ReactNode } from "react";
 
-export function PageTitle({ title, action }: { title: string; action?: ReactNode }) {
-  return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-      <h1 className="text-2xl sm:text-3xl font-display font-semibold tracking-tight">{title}</h1>
-      {action}
-    </div>
-  );
-}
-
-export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`glass rounded-2xl p-4 sm:p-6 ${className}`}>{children}</div>;
-}
-
 export function Field({
   label,
   children,
@@ -33,14 +20,6 @@ const baseInput =
 
 export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={`${baseInput} ${props.className ?? ""}`} />;
-}
-
-export function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} className={`${baseInput} min-h-[120px] py-2.5 ${props.className ?? ""}`} />;
-}
-
-export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={`${baseInput} ${props.className ?? ""}`} />;
 }
 
 export function Button({
