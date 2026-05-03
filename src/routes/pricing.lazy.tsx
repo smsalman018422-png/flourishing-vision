@@ -52,14 +52,6 @@ import {
 } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  trackViewContent,
-  trackInitiateCheckout,
-  trackPurchase,
-  trackCTAClick,
-} from "@/lib/meta-pixel";
-import { useScrollTracking } from "@/hooks/useScrollTracking";
-import { useTimeTracking } from "@/hooks/useTimeTracking";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Sparkles, Sprout, Rocket, Shield, Crown, Star, Zap, TrendingUp, Target,
@@ -161,17 +153,6 @@ function PricingPage() {
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>("social_media");
   const [purchaseTarget, setPurchaseTarget] = useState<Pkg | null>(null);
-
-  useScrollTracking("Pricing");
-  useTimeTracking("Pricing");
-
-  useEffect(() => {
-    trackViewContent({
-      content_name: "Packages Page",
-      content_category: "Social Media Marketing",
-      content_type: "product_group",
-    });
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -368,24 +349,7 @@ function PricingPage() {
                 plan={plan}
                 yearly={yearly}
                 index={i}
-                onPurchase={() => {
-                  const price = yearly ? plan.price_yearly : plan.price_monthly;
-                  trackViewContent({
-                    content_name: plan.name,
-                    content_category: CATEGORY_LABELS[plan.category] ?? plan.category,
-                    content_type: "product",
-                    value: Number(price) || 0,
-                    currency: "USD",
-                  });
-                  trackInitiateCheckout({
-                    content_name: plan.name,
-                    value: Number(price) || 0,
-                    currency: "USD",
-                    num_items: 1,
-                  });
-                  trackCTAClick(`Get Started: ${plan.name}`, "Pricing");
-                  setPurchaseTarget(plan);
-                }}
+                onPurchase={() => setPurchaseTarget(plan)}
               />
             ))}
           </div>
@@ -771,12 +735,6 @@ function PurchaseModal({
         toast.error(body?.error || "Could not start checkout");
         return;
       }
-      trackPurchase({
-        content_name: plan.name,
-        value: Number(price) || 0,
-        currency: "USD",
-        content_type: "service",
-      });
       toast.success("Request submitted! An admin will activate your package shortly.");
       onClose();
       navigate({ to: body.redirect_url ?? "/client/dashboard/membership" });

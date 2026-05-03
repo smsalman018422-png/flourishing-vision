@@ -130,30 +130,12 @@
     input, select, textarea {
       font-size: 16px !important;
     }
-
-    /* Minimum readable body text on small screens */
-    body {
-      font-size: 15px;
-    }
-
-    /* Ensure interactive elements meet 44px tap target */
-    button:not([data-no-tap]),
-    a[role="button"]:not([data-no-tap]),
-    [role="button"]:not([data-no-tap]) {
-      min-height: 44px;
-    }
   }
 
-  /* Images / media responsive by default */
-  img, video, svg, canvas, iframe {
+  /* Images responsive by default */
+  img, video {
     max-width: 100%;
     height: auto;
-  }
-
-  /* Prevent long words/URLs from blowing out layout */
-  p, h1, h2, h3, h4, h5, h6, li, a, span {
-    overflow-wrap: break-word;
-    word-wrap: break-word;
   }
 
   h1, h2, h3, h4 {
@@ -214,58 +196,6 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
-  }
-
-  /* Horizontally scrollable filter/tab strip — for mobile tab rows */
-  .scroll-tabs {
-    display: flex;
-    gap: 0.5rem;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    flex-wrap: nowrap;
-    padding-bottom: 0.25rem;
-  }
-  .scroll-tabs::-webkit-scrollbar { display: none; }
-  .scroll-tabs > * { flex: 0 0 auto; }
-
-  /* Table-as-cards: add `responsive-table` to a <table>; set data-label on td */
-  @media (max-width: 767px) {
-    table.responsive-table,
-    table.responsive-table thead,
-    table.responsive-table tbody,
-    table.responsive-table tr,
-    table.responsive-table th,
-    table.responsive-table td {
-      display: block;
-      width: 100%;
-    }
-    table.responsive-table thead {
-      position: absolute;
-      left: -9999px;
-      top: -9999px;
-    }
-    table.responsive-table tr {
-      margin-bottom: 0.75rem;
-      border: 1px solid var(--color-border);
-      border-radius: 0.75rem;
-      padding: 0.75rem;
-      background-color: var(--color-card);
-    }
-    table.responsive-table td {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      padding: 0.4rem 0;
-      border: 0;
-      text-align: right;
-    }
-    table.responsive-table td::before {
-      content: attr(data-label);
-      font-weight: 600;
-      color: var(--color-muted-foreground);
-      text-align: left;
-    }
   }
 }
 
