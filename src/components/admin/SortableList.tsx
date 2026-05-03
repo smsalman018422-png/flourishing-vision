@@ -1,3 +1,4 @@
+import * as React from "react";
 import { lazy, Suspense, type ReactNode } from "react";
 
 type Item = { id: string };
@@ -10,9 +11,9 @@ type Props<T extends Item> = {
 
 const Impl = lazy(() =>
   import("./SortableList.impl").then((m) => ({
-    default: m.SortableList as unknown as <T extends Item>(p: Props<T>) => JSX.Element,
+    default: m.SortableList as unknown as <T extends Item>(p: Props<T>) => React.ReactElement,
   })),
-) as unknown as <T extends Item>(p: Props<T>) => JSX.Element;
+) as unknown as <T extends Item>(p: Props<T>) => React.ReactElement;
 
 export function SortableList<T extends Item>(props: Props<T>) {
   return (
