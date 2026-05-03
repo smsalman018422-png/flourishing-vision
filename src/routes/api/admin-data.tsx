@@ -30,7 +30,9 @@ const isTransient = (error: { code?: string; message?: string } | null | undefin
     error.code === "503" ||
     /schema cache|database client|retrying|timeout|network/i.test(error.message ?? ""));
 
-async function withRetries<T extends { error: { code?: string; message?: string } | null }>(run: () => PromiseLike<T> | Promise<T> | T) {
+async function withRetries<T extends { error: { code?: string; message?: string } | null }>(
+  run: () => PromiseLike<T> | Promise<T> | T,
+) {
   let last: T | null = null;
   for (let attempt = 0; attempt < 4; attempt += 1) {
     last = await run();
@@ -61,7 +63,8 @@ export const Route = createFileRoute("/api/admin-data")({
 
         const body = (await request.json().catch(() => null)) as AdminDataRequest | null;
         const table = body?.table;
-        if (!table || !ALLOWED_TABLES.has(table)) return json({ ok: false, error: "Unsupported table" }, 400);
+        if (!table || !ALLOWED_TABLES.has(table))
+          return json({ ok: false, error: "Unsupported table" }, 400);
 
         const buildQuery = () => {
           let query = (admin.supabaseAdmin as any)
@@ -70,21 +73,28 @@ export const Route = createFileRoute("/api/admin-data")({
 
           for (const filter of body.filters ?? []) {
             if (filter.op === "eq") query = query.eq(filter.column, filter.value);
-            if (filter.op === "in") query = query.in(filter.column, Array.isArray(filter.value) ? filter.value : []);
+            if (filter.op === "in")
+              query = query.in(filter.column, Array.isArray(filter.value) ? filter.value : []);
             if (filter.op === "gte") query = query.gte(filter.column, filter.value);
           }
 
           for (const order of body.orders ?? []) {
-            query = query.order(order.column, { ascending: order.ascending ?? true, nullsFirst: order.nullsFirst });
+            query = query.order(order.column, {
+              ascending: order.ascending ?? true,
+              nullsFirst: order.nullsFirst,
+            });
           }
 
-          if (typeof body.limit === "number") query = query.limit(Math.max(1, Math.min(body.limit, 1000)));
+          if (typeof body.limit === "number")
+            query = query.limit(Math.max(1, Math.min(body.limit, 1000)));
           return query;
         };
 
-        const { data, count, error } = await withRetries<{ data: unknown[] | null; count: number | null; error: { code?: string; message?: string } | null }>(
-          async () => buildQuery(),
-        );
+        const { data, count, error } = await withRetries<{
+          data: unknown[] | null;
+          count: number | null;
+          error: { code?: string; message?: string } | null;
+        }>(async () => buildQuery());
         if (error) return json({ ok: false, error: error.message, code: error.code }, 500);
         return json({ ok: true, data: data ?? [], count: count ?? null });
       },

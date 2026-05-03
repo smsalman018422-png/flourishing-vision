@@ -13,7 +13,9 @@ function getPublicSupabaseEnv() {
     process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
   if (!url || !key) {
-    const missing = [!url ? "SUPABASE_URL" : null, !key ? "SUPABASE_PUBLISHABLE_KEY" : null].filter(Boolean);
+    const missing = [!url ? "SUPABASE_URL" : null, !key ? "SUPABASE_PUBLISHABLE_KEY" : null].filter(
+      Boolean,
+    );
     throw new Error(`Missing backend environment variable(s): ${missing.join(", ")}`);
   }
 
@@ -34,7 +36,8 @@ function createAdminUserClient(token: string) {
 
 export async function requireAdmin(request: Request): Promise<AdminAuthResult> {
   const authHeader = request.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) return { ok: false, status: 401, error: "Missing auth token" };
+  if (!authHeader?.startsWith("Bearer "))
+    return { ok: false, status: 401, error: "Missing auth token" };
 
   const token = authHeader.replace("Bearer ", "").trim();
 
@@ -68,6 +71,10 @@ export async function requireAdmin(request: Request): Promise<AdminAuthResult> {
 
     return { ok: true, userId: userData.user.id, supabase };
   } catch (error) {
-    return { ok: false, status: 500, error: error instanceof Error ? error.message : "Admin check failed" };
+    return {
+      ok: false,
+      status: 500,
+      error: error instanceof Error ? error.message : "Admin check failed",
+    };
   }
 }
