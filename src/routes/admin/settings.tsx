@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Button, Card, Field, PageTitle, TextArea, TextInput } from "@/components/admin/ui";
 import { adminData, adminWrite } from "@/lib/admin-data";
-import { Loader2, Save, Trash2, UserPlus } from "lucide-react";
+import { Loader2, Save, Trash2, UserPlus, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
+import { resetPixelConfig } from "@/lib/meta-pixel";
 
 type RoleRow = { id: string; user_id: string; role: string; created_at: string };
 
@@ -17,6 +18,7 @@ const TABS = [
   { id: "calendly", label: "Calendly" },
   { id: "legal", label: "Legal pages" },
   { id: "paypal", label: "PayPal" },
+  { id: "pixel", label: "Meta Pixel" },
   { id: "admins", label: "Admins" },
 ] as const;
 
