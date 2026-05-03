@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          last_login_at: string | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          last_login_at?: string | null
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          last_login_at?: string | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       blog_posts: {
         Row: {
           author_avatar_url: string | null
@@ -285,6 +315,7 @@ export type Database = {
           account_manager_name: string | null
           account_manager_whatsapp: string | null
           avatar_url: string | null
+          company: string | null
           company_name: string | null
           country: string | null
           created_at: string
@@ -292,6 +323,7 @@ export type Database = {
           full_name: string
           id: string
           is_active: boolean
+          name: string | null
           phone: string | null
           timezone: string | null
           updated_at: string
@@ -301,6 +333,7 @@ export type Database = {
           account_manager_name?: string | null
           account_manager_whatsapp?: string | null
           avatar_url?: string | null
+          company?: string | null
           company_name?: string | null
           country?: string | null
           created_at?: string
@@ -308,6 +341,7 @@ export type Database = {
           full_name: string
           id: string
           is_active?: boolean
+          name?: string | null
           phone?: string | null
           timezone?: string | null
           updated_at?: string
@@ -317,6 +351,7 @@ export type Database = {
           account_manager_name?: string | null
           account_manager_whatsapp?: string | null
           avatar_url?: string | null
+          company?: string | null
           company_name?: string | null
           country?: string | null
           created_at?: string
@@ -324,6 +359,7 @@ export type Database = {
           full_name?: string
           id?: string
           is_active?: boolean
+          name?: string | null
           phone?: string | null
           timezone?: string | null
           updated_at?: string
@@ -548,8 +584,10 @@ export type Database = {
           full_name: string
           id: string
           message: string | null
+          name: string | null
           phone: string | null
           service: string | null
+          service_interest: string | null
           status: Database["public"]["Enums"]["contact_status"]
         }
         Insert: {
@@ -560,8 +598,10 @@ export type Database = {
           full_name: string
           id?: string
           message?: string | null
+          name?: string | null
           phone?: string | null
           service?: string | null
+          service_interest?: string | null
           status?: Database["public"]["Enums"]["contact_status"]
         }
         Update: {
@@ -572,48 +612,74 @@ export type Database = {
           full_name?: string
           id?: string
           message?: string | null
+          name?: string | null
           phone?: string | null
           service?: string | null
+          service_interest?: string | null
           status?: Database["public"]["Enums"]["contact_status"]
         }
         Relationships: []
       }
       membership_plans: {
         Row: {
+          best_for: string | null
+          bonus_features: Json | null
+          category: string | null
           created_at: string
+          cta_text: string | null
           currency: string
+          description: string | null
           features: Json
           id: string
+          is_popular: boolean | null
           is_visible: boolean
+          monthly_price: number | null
           name: string
           price_monthly: number
           price_yearly: number
           slug: string
           sort_order: number
+          yearly_price: number | null
         }
         Insert: {
+          best_for?: string | null
+          bonus_features?: Json | null
+          category?: string | null
           created_at?: string
+          cta_text?: string | null
           currency?: string
+          description?: string | null
           features?: Json
           id?: string
+          is_popular?: boolean | null
           is_visible?: boolean
+          monthly_price?: number | null
           name: string
           price_monthly?: number
           price_yearly?: number
           slug: string
           sort_order?: number
+          yearly_price?: number | null
         }
         Update: {
+          best_for?: string | null
+          bonus_features?: Json | null
+          category?: string | null
           created_at?: string
+          cta_text?: string | null
           currency?: string
+          description?: string | null
           features?: Json
           id?: string
+          is_popular?: boolean | null
           is_visible?: boolean
+          monthly_price?: number | null
           name?: string
           price_monthly?: number
           price_yearly?: number
           slug?: string
           sort_order?: number
+          yearly_price?: number | null
         }
         Relationships: []
       }
@@ -1043,6 +1109,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: { _uid: string }; Returns: boolean }
       is_ticket_owner: {
         Args: { _ticket_id: string; _user_id: string }
         Returns: boolean
