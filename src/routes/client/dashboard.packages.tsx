@@ -35,14 +35,19 @@ type Membership = {
   id: string;
   client_id: string;
   package_id: string | null;
+  plan_id: string | null;
   status: string;
   billing_cycle: string;
   amount: number;
-  start_date: string;
-  end_date: string;
+  start_date: string | null;
+  end_date: string | null;
   is_custom: boolean;
   custom_name: string | null;
   custom_features: FeatureItem[];
+  payment_method?: string | null;
+  transaction_id?: string | null;
+  payment_status?: string | null;
+  note?: string | null;
   package?: {
     id: string;
     name: string;
@@ -51,6 +56,14 @@ type Membership = {
     icon_name: string;
     features: FeatureItem[];
     is_premium: boolean;
+  } | null;
+  plan?: {
+    id: string;
+    name: string;
+    category: string | null;
+    description: string | null;
+    features: FeatureItem[];
+    bonus_features: FeatureItem[];
   } | null;
 };
 
