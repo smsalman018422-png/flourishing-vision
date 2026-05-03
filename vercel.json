@@ -10,6 +10,6 @@
     }
   },
   "rewrites": [
-    { "source": "/((?!_build/|assets/|favicon\\.svg|robots\\.txt|logo\\.png).*)", "destination": "/api/server" }
+    { "source": "/(.*)", "destination": "/api/server" }
   ]
 }
