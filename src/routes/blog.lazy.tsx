@@ -5,20 +5,7 @@ import { motion, LayoutGroup } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Clock, BookOpen } from "lucide-react";
 import { subscribeToTable } from "@/lib/realtime";
-
-type Post = {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string | null;
-  cover_image_url: string | null;
-  author_name: string | null;
-  author_avatar_url: string | null;
-  category: string | null;
-  read_time_minutes: number | null;
-  published_at: string | null;
-  is_featured: boolean;
-};
+import { fetchBlogPosts, type BlogPost } from "@/lib/blog";
 
 const PAGE_SIZE = 6;
 
@@ -27,26 +14,32 @@ export const Route = createLazyFileRoute("/blog")({
 });
 
 function BlogPage() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeCat, setActiveCat] = useState<string>("all");
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     let cancelled = false;
-    const loadPosts = () => fetch("/api/public/blog")
-      .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Failed to load posts"))))
-      .then((body: { data?: Post[] }) => {
-        if (!cancelled) setPosts(body.data ?? []);
-      })
-      .catch(() => {
-        if (!cancelled) setPosts([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    loadPosts();
-    const unsubscribe = subscribeToTable("blog_posts", loadPosts, "public-blog-posts-changes");
+    const load = () => {
+      fetchBlogPosts()
+        .then((data) => {
+          if (cancelled) return;
+          setPosts(data);
+          setError(null);
+        })
+        .catch((err) => {
+          if (cancelled) return;
+          setError(err instanceof Error ? err.message : "Failed to load posts");
+          setPosts([]);
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    };
+    load();
+    const unsubscribe = subscribeToTable("blog_posts", load, "public-blog-posts-changes");
     return () => {
       cancelled = true;
       unsubscribe();
@@ -64,7 +57,7 @@ function BlogPage() {
     return posts.filter((p) => p.category === activeCat);
   }, [posts, activeCat]);
 
-  const featured = filtered.find((p) => p.is_featured) ?? filtered[0];
+  const featured = filtered.find((p) => p.isFeatured) ?? filtered[0];
   const rest = filtered.filter((p) => p.id !== featured?.id);
   const visible = rest.slice(0, page * PAGE_SIZE);
   const hasMore = rest.length > visible.length;
@@ -77,7 +70,6 @@ function BlogPage() {
         subtitle="Tactics, case studies, and lessons from scaling brands across categories."
       />
 
-      {/* Category tabs */}
       {categories.length > 1 && (
         <section className="mx-auto max-w-7xl px-4 sm:px-6">
           <LayoutGroup>
@@ -113,10 +105,14 @@ function BlogPage() {
         </section>
       )}
 
-      {/* Featured */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-12">
         {loading ? (
           <div className="aspect-[16/9] rounded-3xl glass animate-pulse" />
+        ) : error ? (
+          <div className="text-center py-24 glass rounded-2xl">
+            <p className="text-lg text-muted-foreground">Couldn't load posts. Please try again.</p>
+            <p className="mt-2 text-xs text-muted-foreground/70">{error}</p>
+          </div>
         ) : !featured ? (
           <div className="text-center py-24 glass rounded-2xl">
             <BookOpen className="h-10 w-10 text-muted-foreground/50 mx-auto" />
@@ -130,9 +126,9 @@ function BlogPage() {
           >
             <div className="grid md:grid-cols-2 gap-0">
               <div className="relative aspect-video md:aspect-auto bg-muted overflow-hidden">
-                {featured.cover_image_url ? (
+                {featured.image ? (
                   <img
-                    src={featured.cover_image_url}
+                    src={featured.image}
                     alt={featured.title}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
@@ -162,7 +158,6 @@ function BlogPage() {
         )}
       </section>
 
-      {/* Grid */}
       {rest.length > 0 && (
         <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -190,7 +185,7 @@ function BlogPage() {
   );
 }
 
-function PostCard({ post }: { post: Post }) {
+function PostCard({ post }: { post: BlogPost }) {
   return (
     <Link
       to="/blog/$slug"
@@ -198,9 +193,9 @@ function PostCard({ post }: { post: Post }) {
       className="group block h-full rounded-2xl overflow-hidden glass hover:shadow-elegant transition-all hover:-translate-y-1"
     >
       <div className="aspect-video bg-muted overflow-hidden">
-        {post.cover_image_url ? (
+        {post.image ? (
           <img
-            src={post.cover_image_url}
+            src={post.image}
             alt={post.title}
             loading="lazy"
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -228,9 +223,9 @@ function PostCard({ post }: { post: Post }) {
   );
 }
 
-function PostMeta({ post, className }: { post: Post; className?: string }) {
-  const date = post.published_at
-    ? new Date(post.published_at).toLocaleDateString(undefined, {
+function PostMeta({ post, className }: { post: BlogPost; className?: string }) {
+  const date = post.publishedAt
+    ? new Date(post.publishedAt).toLocaleDateString(undefined, {
         month: "short",
         day: "numeric",
         year: "numeric",
@@ -240,17 +235,17 @@ function PostMeta({ post, className }: { post: Post; className?: string }) {
     <div
       className={`flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground ${className ?? ""}`}
     >
-      {post.author_name && <span className="font-medium text-foreground">{post.author_name}</span>}
+      {post.author && <span className="font-medium text-foreground">{post.author}</span>}
       {date && (
         <span className="inline-flex items-center gap-1">
           <Calendar className="h-3 w-3" />
           {date}
         </span>
       )}
-      {post.read_time_minutes && (
+      {post.readTime && (
         <span className="inline-flex items-center gap-1">
           <Clock className="h-3 w-3" />
-          {post.read_time_minutes} min
+          {post.readTime}
         </span>
       )}
     </div>
