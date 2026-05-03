@@ -77,7 +77,7 @@ function MyPackagesPage() {
       sb
         .from("client_memberships")
         .select(
-          "*, package:packages(id,name,category,tagline,icon_name,features,is_premium)",
+          "*, package:packages(id,name,category,tagline,icon_name,features,is_premium), plan:membership_plans(id,name,category,description,features,bonus_features)",
         )
         .eq("client_id", userId)
         .order("created_at", { ascending: false }),
