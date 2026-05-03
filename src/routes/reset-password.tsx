@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button, Field, TextInput } from "@/components/admin/ui";
+import { Button, Field, TextInput } from "@/components/forms/ui";
 import { Loader2 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -39,7 +39,7 @@ function ResetPassword() {
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Password updated. Signing you in…");
-    navigate({ to: "/admin" });
+    navigate({ to: "/client/dashboard" });
   };
 
   return (
@@ -74,7 +74,7 @@ function ResetPassword() {
               </Button>
             </form>
           )}
-          <Link to="/admin/login" className="mt-4 block text-center text-xs text-muted-foreground hover:text-foreground">
+          <Link to="/client/login" className="mt-4 block text-center text-xs text-muted-foreground hover:text-foreground">
             ← Back to sign in
           </Link>
         </div>

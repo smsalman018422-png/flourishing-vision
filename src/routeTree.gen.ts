@@ -20,7 +20,6 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as PortfolioSlugRouteImport } from './routes/portfolio.$slug'
 import { Route as ClientSignupRouteImport } from './routes/client/signup'
 import { Route as ClientLoginRouteImport } from './routes/client/login'
@@ -28,25 +27,6 @@ import { Route as ClientDashboardRouteImport } from './routes/client/dashboard'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ApiSitemapDotxmlRouteImport } from './routes/api/sitemap[.]xml'
 import { Route as ApiPurchaseCheckoutRouteImport } from './routes/api/purchase-checkout'
-import { Route as ApiPurchaseApproveRouteImport } from './routes/api/purchase-approve'
-import { Route as ApiAssignPackageRouteImport } from './routes/api/assign-package'
-import { Route as ApiAdminWriteRouteImport } from './routes/api/admin-write'
-import { Route as ApiAdminUploadRouteImport } from './routes/api/admin-upload'
-import { Route as ApiAdminDataRouteImport } from './routes/api/admin-data'
-import { Route as ApiAdminCheckRouteImport } from './routes/api/admin-check'
-import { Route as AdminTestimonialsRouteImport } from './routes/admin/testimonials'
-import { Route as AdminTeamRouteImport } from './routes/admin/team'
-import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
-import { Route as AdminServicesRouteImport } from './routes/admin/services'
-import { Route as AdminPortfolioRouteImport } from './routes/admin/portfolio'
-import { Route as AdminPackagesRouteImport } from './routes/admin/packages'
-import { Route as AdminMembershipsRouteImport } from './routes/admin/memberships'
-import { Route as AdminLoginRouteImport } from './routes/admin/login'
-import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
-import { Route as AdminClientsRouteImport } from './routes/admin/clients'
-import { Route as AdminClientTicketsRouteImport } from './routes/admin/client-tickets'
-import { Route as AdminClientReportsRouteImport } from './routes/admin/client-reports'
-import { Route as AdminBlogRouteImport } from './routes/admin/blog'
 import { Route as ClientDashboardIndexRouteImport } from './routes/client/dashboard.index'
 import { Route as ClientDashboardTicketsRouteImport } from './routes/client/dashboard.tickets'
 import { Route as ClientDashboardSettingsRouteImport } from './routes/client/dashboard.settings'
@@ -112,11 +92,6 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
-const AdminIndexRoute = AdminIndexRouteImport.update({
-  id: '/admin/',
-  path: '/admin/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PortfolioSlugRoute = PortfolioSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -150,101 +125,6 @@ const ApiSitemapDotxmlRoute = ApiSitemapDotxmlRouteImport.update({
 const ApiPurchaseCheckoutRoute = ApiPurchaseCheckoutRouteImport.update({
   id: '/api/purchase-checkout',
   path: '/api/purchase-checkout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPurchaseApproveRoute = ApiPurchaseApproveRouteImport.update({
-  id: '/api/purchase-approve',
-  path: '/api/purchase-approve',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAssignPackageRoute = ApiAssignPackageRouteImport.update({
-  id: '/api/assign-package',
-  path: '/api/assign-package',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminWriteRoute = ApiAdminWriteRouteImport.update({
-  id: '/api/admin-write',
-  path: '/api/admin-write',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminUploadRoute = ApiAdminUploadRouteImport.update({
-  id: '/api/admin-upload',
-  path: '/api/admin-upload',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminDataRoute = ApiAdminDataRouteImport.update({
-  id: '/api/admin-data',
-  path: '/api/admin-data',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminCheckRoute = ApiAdminCheckRouteImport.update({
-  id: '/api/admin-check',
-  path: '/api/admin-check',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminTestimonialsRoute = AdminTestimonialsRouteImport.update({
-  id: '/admin/testimonials',
-  path: '/admin/testimonials',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminTeamRoute = AdminTeamRouteImport.update({
-  id: '/admin/team',
-  path: '/admin/team',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminSettingsRoute = AdminSettingsRouteImport.update({
-  id: '/admin/settings',
-  path: '/admin/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminServicesRoute = AdminServicesRouteImport.update({
-  id: '/admin/services',
-  path: '/admin/services',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminPortfolioRoute = AdminPortfolioRouteImport.update({
-  id: '/admin/portfolio',
-  path: '/admin/portfolio',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminPackagesRoute = AdminPackagesRouteImport.update({
-  id: '/admin/packages',
-  path: '/admin/packages',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminMembershipsRoute = AdminMembershipsRouteImport.update({
-  id: '/admin/memberships',
-  path: '/admin/memberships',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminLoginRoute = AdminLoginRouteImport.update({
-  id: '/admin/login',
-  path: '/admin/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminContactsRoute = AdminContactsRouteImport.update({
-  id: '/admin/contacts',
-  path: '/admin/contacts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminClientsRoute = AdminClientsRouteImport.update({
-  id: '/admin/clients',
-  path: '/admin/clients',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminClientTicketsRoute = AdminClientTicketsRouteImport.update({
-  id: '/admin/client-tickets',
-  path: '/admin/client-tickets',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminClientReportsRoute = AdminClientReportsRouteImport.update({
-  id: '/admin/client-reports',
-  path: '/admin/client-reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminBlogRoute = AdminBlogRouteImport.update({
-  id: '/admin/blog',
-  path: '/admin/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClientDashboardIndexRoute = ClientDashboardIndexRouteImport.update({
@@ -306,25 +186,6 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/team': typeof TeamRoute
   '/terms': typeof TermsRoute
-  '/admin/blog': typeof AdminBlogRoute
-  '/admin/client-reports': typeof AdminClientReportsRoute
-  '/admin/client-tickets': typeof AdminClientTicketsRoute
-  '/admin/clients': typeof AdminClientsRoute
-  '/admin/contacts': typeof AdminContactsRoute
-  '/admin/login': typeof AdminLoginRoute
-  '/admin/memberships': typeof AdminMembershipsRoute
-  '/admin/packages': typeof AdminPackagesRoute
-  '/admin/portfolio': typeof AdminPortfolioRoute
-  '/admin/services': typeof AdminServicesRoute
-  '/admin/settings': typeof AdminSettingsRoute
-  '/admin/team': typeof AdminTeamRoute
-  '/admin/testimonials': typeof AdminTestimonialsRoute
-  '/api/admin-check': typeof ApiAdminCheckRoute
-  '/api/admin-data': typeof ApiAdminDataRoute
-  '/api/admin-upload': typeof ApiAdminUploadRoute
-  '/api/admin-write': typeof ApiAdminWriteRoute
-  '/api/assign-package': typeof ApiAssignPackageRoute
-  '/api/purchase-approve': typeof ApiPurchaseApproveRoute
   '/api/purchase-checkout': typeof ApiPurchaseCheckoutRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -332,7 +193,6 @@ export interface FileRoutesByFullPath {
   '/client/login': typeof ClientLoginRoute
   '/client/signup': typeof ClientSignupRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
-  '/admin/': typeof AdminIndexRoute
   '/api/public/blog': typeof ApiPublicBlogRoute
   '/client/dashboard/billing': typeof ClientDashboardBillingRoute
   '/client/dashboard/notifications': typeof ClientDashboardNotificationsRoute
@@ -355,32 +215,12 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/team': typeof TeamRoute
   '/terms': typeof TermsRoute
-  '/admin/blog': typeof AdminBlogRoute
-  '/admin/client-reports': typeof AdminClientReportsRoute
-  '/admin/client-tickets': typeof AdminClientTicketsRoute
-  '/admin/clients': typeof AdminClientsRoute
-  '/admin/contacts': typeof AdminContactsRoute
-  '/admin/login': typeof AdminLoginRoute
-  '/admin/memberships': typeof AdminMembershipsRoute
-  '/admin/packages': typeof AdminPackagesRoute
-  '/admin/portfolio': typeof AdminPortfolioRoute
-  '/admin/services': typeof AdminServicesRoute
-  '/admin/settings': typeof AdminSettingsRoute
-  '/admin/team': typeof AdminTeamRoute
-  '/admin/testimonials': typeof AdminTestimonialsRoute
-  '/api/admin-check': typeof ApiAdminCheckRoute
-  '/api/admin-data': typeof ApiAdminDataRoute
-  '/api/admin-upload': typeof ApiAdminUploadRoute
-  '/api/admin-write': typeof ApiAdminWriteRoute
-  '/api/assign-package': typeof ApiAssignPackageRoute
-  '/api/purchase-approve': typeof ApiPurchaseApproveRoute
   '/api/purchase-checkout': typeof ApiPurchaseCheckoutRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/client/login': typeof ClientLoginRoute
   '/client/signup': typeof ClientSignupRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
-  '/admin': typeof AdminIndexRoute
   '/api/public/blog': typeof ApiPublicBlogRoute
   '/client/dashboard/billing': typeof ClientDashboardBillingRoute
   '/client/dashboard/notifications': typeof ClientDashboardNotificationsRoute
@@ -404,25 +244,6 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/team': typeof TeamRoute
   '/terms': typeof TermsRoute
-  '/admin/blog': typeof AdminBlogRoute
-  '/admin/client-reports': typeof AdminClientReportsRoute
-  '/admin/client-tickets': typeof AdminClientTicketsRoute
-  '/admin/clients': typeof AdminClientsRoute
-  '/admin/contacts': typeof AdminContactsRoute
-  '/admin/login': typeof AdminLoginRoute
-  '/admin/memberships': typeof AdminMembershipsRoute
-  '/admin/packages': typeof AdminPackagesRoute
-  '/admin/portfolio': typeof AdminPortfolioRoute
-  '/admin/services': typeof AdminServicesRoute
-  '/admin/settings': typeof AdminSettingsRoute
-  '/admin/team': typeof AdminTeamRoute
-  '/admin/testimonials': typeof AdminTestimonialsRoute
-  '/api/admin-check': typeof ApiAdminCheckRoute
-  '/api/admin-data': typeof ApiAdminDataRoute
-  '/api/admin-upload': typeof ApiAdminUploadRoute
-  '/api/admin-write': typeof ApiAdminWriteRoute
-  '/api/assign-package': typeof ApiAssignPackageRoute
-  '/api/purchase-approve': typeof ApiPurchaseApproveRoute
   '/api/purchase-checkout': typeof ApiPurchaseCheckoutRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -430,7 +251,6 @@ export interface FileRoutesById {
   '/client/login': typeof ClientLoginRoute
   '/client/signup': typeof ClientSignupRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
-  '/admin/': typeof AdminIndexRoute
   '/api/public/blog': typeof ApiPublicBlogRoute
   '/client/dashboard/billing': typeof ClientDashboardBillingRoute
   '/client/dashboard/notifications': typeof ClientDashboardNotificationsRoute
@@ -455,25 +275,6 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/team'
     | '/terms'
-    | '/admin/blog'
-    | '/admin/client-reports'
-    | '/admin/client-tickets'
-    | '/admin/clients'
-    | '/admin/contacts'
-    | '/admin/login'
-    | '/admin/memberships'
-    | '/admin/packages'
-    | '/admin/portfolio'
-    | '/admin/services'
-    | '/admin/settings'
-    | '/admin/team'
-    | '/admin/testimonials'
-    | '/api/admin-check'
-    | '/api/admin-data'
-    | '/api/admin-upload'
-    | '/api/admin-write'
-    | '/api/assign-package'
-    | '/api/purchase-approve'
     | '/api/purchase-checkout'
     | '/api/sitemap.xml'
     | '/blog/$slug'
@@ -481,7 +282,6 @@ export interface FileRouteTypes {
     | '/client/login'
     | '/client/signup'
     | '/portfolio/$slug'
-    | '/admin/'
     | '/api/public/blog'
     | '/client/dashboard/billing'
     | '/client/dashboard/notifications'
@@ -504,32 +304,12 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/team'
     | '/terms'
-    | '/admin/blog'
-    | '/admin/client-reports'
-    | '/admin/client-tickets'
-    | '/admin/clients'
-    | '/admin/contacts'
-    | '/admin/login'
-    | '/admin/memberships'
-    | '/admin/packages'
-    | '/admin/portfolio'
-    | '/admin/services'
-    | '/admin/settings'
-    | '/admin/team'
-    | '/admin/testimonials'
-    | '/api/admin-check'
-    | '/api/admin-data'
-    | '/api/admin-upload'
-    | '/api/admin-write'
-    | '/api/assign-package'
-    | '/api/purchase-approve'
     | '/api/purchase-checkout'
     | '/api/sitemap.xml'
     | '/blog/$slug'
     | '/client/login'
     | '/client/signup'
     | '/portfolio/$slug'
-    | '/admin'
     | '/api/public/blog'
     | '/client/dashboard/billing'
     | '/client/dashboard/notifications'
@@ -552,25 +332,6 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/team'
     | '/terms'
-    | '/admin/blog'
-    | '/admin/client-reports'
-    | '/admin/client-tickets'
-    | '/admin/clients'
-    | '/admin/contacts'
-    | '/admin/login'
-    | '/admin/memberships'
-    | '/admin/packages'
-    | '/admin/portfolio'
-    | '/admin/services'
-    | '/admin/settings'
-    | '/admin/team'
-    | '/admin/testimonials'
-    | '/api/admin-check'
-    | '/api/admin-data'
-    | '/api/admin-upload'
-    | '/api/admin-write'
-    | '/api/assign-package'
-    | '/api/purchase-approve'
     | '/api/purchase-checkout'
     | '/api/sitemap.xml'
     | '/blog/$slug'
@@ -578,7 +339,6 @@ export interface FileRouteTypes {
     | '/client/login'
     | '/client/signup'
     | '/portfolio/$slug'
-    | '/admin/'
     | '/api/public/blog'
     | '/client/dashboard/billing'
     | '/client/dashboard/notifications'
@@ -602,31 +362,11 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   TeamRoute: typeof TeamRoute
   TermsRoute: typeof TermsRoute
-  AdminBlogRoute: typeof AdminBlogRoute
-  AdminClientReportsRoute: typeof AdminClientReportsRoute
-  AdminClientTicketsRoute: typeof AdminClientTicketsRoute
-  AdminClientsRoute: typeof AdminClientsRoute
-  AdminContactsRoute: typeof AdminContactsRoute
-  AdminLoginRoute: typeof AdminLoginRoute
-  AdminMembershipsRoute: typeof AdminMembershipsRoute
-  AdminPackagesRoute: typeof AdminPackagesRoute
-  AdminPortfolioRoute: typeof AdminPortfolioRoute
-  AdminServicesRoute: typeof AdminServicesRoute
-  AdminSettingsRoute: typeof AdminSettingsRoute
-  AdminTeamRoute: typeof AdminTeamRoute
-  AdminTestimonialsRoute: typeof AdminTestimonialsRoute
-  ApiAdminCheckRoute: typeof ApiAdminCheckRoute
-  ApiAdminDataRoute: typeof ApiAdminDataRoute
-  ApiAdminUploadRoute: typeof ApiAdminUploadRoute
-  ApiAdminWriteRoute: typeof ApiAdminWriteRoute
-  ApiAssignPackageRoute: typeof ApiAssignPackageRoute
-  ApiPurchaseApproveRoute: typeof ApiPurchaseApproveRoute
   ApiPurchaseCheckoutRoute: typeof ApiPurchaseCheckoutRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   ClientDashboardRoute: typeof ClientDashboardRouteWithChildren
   ClientLoginRoute: typeof ClientLoginRoute
   ClientSignupRoute: typeof ClientSignupRoute
-  AdminIndexRoute: typeof AdminIndexRoute
   ApiPublicBlogRoute: typeof ApiPublicBlogRoute
 }
 
@@ -709,13 +449,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
-      path: '/admin'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/portfolio/$slug': {
       id: '/portfolio/$slug'
       path: '/$slug'
@@ -763,139 +496,6 @@ declare module '@tanstack/react-router' {
       path: '/api/purchase-checkout'
       fullPath: '/api/purchase-checkout'
       preLoaderRoute: typeof ApiPurchaseCheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/purchase-approve': {
-      id: '/api/purchase-approve'
-      path: '/api/purchase-approve'
-      fullPath: '/api/purchase-approve'
-      preLoaderRoute: typeof ApiPurchaseApproveRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/assign-package': {
-      id: '/api/assign-package'
-      path: '/api/assign-package'
-      fullPath: '/api/assign-package'
-      preLoaderRoute: typeof ApiAssignPackageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin-write': {
-      id: '/api/admin-write'
-      path: '/api/admin-write'
-      fullPath: '/api/admin-write'
-      preLoaderRoute: typeof ApiAdminWriteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin-upload': {
-      id: '/api/admin-upload'
-      path: '/api/admin-upload'
-      fullPath: '/api/admin-upload'
-      preLoaderRoute: typeof ApiAdminUploadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin-data': {
-      id: '/api/admin-data'
-      path: '/api/admin-data'
-      fullPath: '/api/admin-data'
-      preLoaderRoute: typeof ApiAdminDataRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin-check': {
-      id: '/api/admin-check'
-      path: '/api/admin-check'
-      fullPath: '/api/admin-check'
-      preLoaderRoute: typeof ApiAdminCheckRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/testimonials': {
-      id: '/admin/testimonials'
-      path: '/admin/testimonials'
-      fullPath: '/admin/testimonials'
-      preLoaderRoute: typeof AdminTestimonialsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/team': {
-      id: '/admin/team'
-      path: '/admin/team'
-      fullPath: '/admin/team'
-      preLoaderRoute: typeof AdminTeamRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/settings': {
-      id: '/admin/settings'
-      path: '/admin/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/services': {
-      id: '/admin/services'
-      path: '/admin/services'
-      fullPath: '/admin/services'
-      preLoaderRoute: typeof AdminServicesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/portfolio': {
-      id: '/admin/portfolio'
-      path: '/admin/portfolio'
-      fullPath: '/admin/portfolio'
-      preLoaderRoute: typeof AdminPortfolioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/packages': {
-      id: '/admin/packages'
-      path: '/admin/packages'
-      fullPath: '/admin/packages'
-      preLoaderRoute: typeof AdminPackagesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/memberships': {
-      id: '/admin/memberships'
-      path: '/admin/memberships'
-      fullPath: '/admin/memberships'
-      preLoaderRoute: typeof AdminMembershipsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/login': {
-      id: '/admin/login'
-      path: '/admin/login'
-      fullPath: '/admin/login'
-      preLoaderRoute: typeof AdminLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/contacts': {
-      id: '/admin/contacts'
-      path: '/admin/contacts'
-      fullPath: '/admin/contacts'
-      preLoaderRoute: typeof AdminContactsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/clients': {
-      id: '/admin/clients'
-      path: '/admin/clients'
-      fullPath: '/admin/clients'
-      preLoaderRoute: typeof AdminClientsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/client-tickets': {
-      id: '/admin/client-tickets'
-      path: '/admin/client-tickets'
-      fullPath: '/admin/client-tickets'
-      preLoaderRoute: typeof AdminClientTicketsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/client-reports': {
-      id: '/admin/client-reports'
-      path: '/admin/client-reports'
-      fullPath: '/admin/client-reports'
-      preLoaderRoute: typeof AdminClientReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/blog': {
-      id: '/admin/blog'
-      path: '/admin/blog'
-      fullPath: '/admin/blog'
-      preLoaderRoute: typeof AdminBlogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/client/dashboard/': {
@@ -1024,31 +624,11 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   TeamRoute: TeamRoute,
   TermsRoute: TermsRoute,
-  AdminBlogRoute: AdminBlogRoute,
-  AdminClientReportsRoute: AdminClientReportsRoute,
-  AdminClientTicketsRoute: AdminClientTicketsRoute,
-  AdminClientsRoute: AdminClientsRoute,
-  AdminContactsRoute: AdminContactsRoute,
-  AdminLoginRoute: AdminLoginRoute,
-  AdminMembershipsRoute: AdminMembershipsRoute,
-  AdminPackagesRoute: AdminPackagesRoute,
-  AdminPortfolioRoute: AdminPortfolioRoute,
-  AdminServicesRoute: AdminServicesRoute,
-  AdminSettingsRoute: AdminSettingsRoute,
-  AdminTeamRoute: AdminTeamRoute,
-  AdminTestimonialsRoute: AdminTestimonialsRoute,
-  ApiAdminCheckRoute: ApiAdminCheckRoute,
-  ApiAdminDataRoute: ApiAdminDataRoute,
-  ApiAdminUploadRoute: ApiAdminUploadRoute,
-  ApiAdminWriteRoute: ApiAdminWriteRoute,
-  ApiAssignPackageRoute: ApiAssignPackageRoute,
-  ApiPurchaseApproveRoute: ApiPurchaseApproveRoute,
   ApiPurchaseCheckoutRoute: ApiPurchaseCheckoutRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   ClientDashboardRoute: ClientDashboardRouteWithChildren,
   ClientLoginRoute: ClientLoginRoute,
   ClientSignupRoute: ClientSignupRoute,
-  AdminIndexRoute: AdminIndexRoute,
   ApiPublicBlogRoute: ApiPublicBlogRoute,
 }
 export const routeTree = rootRouteImport
