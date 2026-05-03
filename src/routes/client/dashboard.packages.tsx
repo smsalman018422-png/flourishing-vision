@@ -271,20 +271,24 @@ function PackageCard({ membership, muted }: { membership: Membership; muted?: bo
   const name =
     membership.is_custom && membership.custom_name
       ? membership.custom_name
-      : membership.package?.name ?? "Package";
-  const features = normalizeFeatures(
-    membership.is_custom ? membership.custom_features : membership.package?.features,
-  );
+      : membership.package?.name ?? membership.plan?.name ?? "Package";
+  const featuresRaw = membership.is_custom
+    ? membership.custom_features
+    : membership.package?.features ?? [
+        ...(membership.plan?.features ?? []),
+        ...(membership.plan?.bonus_features ?? []),
+      ];
+  const features = normalizeFeatures(featuresRaw);
   const isPremium = membership.package?.is_premium && !membership.is_custom;
 
-  const start = new Date(membership.start_date).getTime();
-  const end = new Date(membership.end_date).getTime();
+  const start = membership.start_date ? new Date(membership.start_date).getTime() : 0;
+  const end = membership.end_date ? new Date(membership.end_date).getTime() : 0;
   const now = Date.now();
   const total = Math.max(1, Math.round((end - start) / 86400000));
-  const remaining = Math.max(0, Math.round((end - now) / 86400000));
+  const remaining = end ? Math.max(0, Math.round((end - now) / 86400000)) : 0;
   const elapsed = Math.max(0, Math.min(total, total - remaining));
-  const pct = Math.min(100, Math.max(0, (elapsed / total) * 100));
-  const expired = now > end || membership.status !== "active";
+  const pct = end ? Math.min(100, Math.max(0, (elapsed / total) * 100)) : 0;
+  const expired = membership.status === "pending" ? false : !end || now > end || membership.status !== "active";
 
   return (
     <Card
