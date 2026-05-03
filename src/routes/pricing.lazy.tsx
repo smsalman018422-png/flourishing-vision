@@ -163,6 +163,14 @@ function PricingPage() {
   const [purchaseTarget, setPurchaseTarget] = useState<Pkg | null>(null);
 
   useEffect(() => {
+    trackViewContent({
+      content_name: "Packages Page",
+      content_category: "Pricing",
+      content_type: "product_group",
+    });
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
     const load = async () => {
       const { data, error } = await supabase
