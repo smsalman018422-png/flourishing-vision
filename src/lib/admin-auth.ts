@@ -48,7 +48,7 @@ export async function requireAdmin(request: Request): Promise<AdminAuthResult> {
       return { ok: false, status: 401, error: userError?.message ?? "Invalid auth token" };
     }
 
-    const { data: isAdmin, error: rpcError } = await (supabase as any).rpc("has_role", {
+    const { data: isAdmin, error: rpcError } = await supabase.rpc("has_role", {
       _user_id: userData.user.id,
       _role: "admin",
     });
