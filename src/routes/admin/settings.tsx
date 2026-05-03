@@ -500,11 +500,11 @@ function PixelSection() {
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-border/60">
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" onClick={activateTest} disabled={saving}>
+          <Button variant="ghost" onClick={activateTest} disabled={saving}>
             Activate test mode
           </Button>
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={() =>
               window.open(
                 "https://chromewebstore.google.com/detail/meta-pixel-helper/fdgfkebogiimcoedlicjlajpkdmockpc",
