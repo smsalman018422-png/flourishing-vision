@@ -8,10 +8,11 @@ type Props<T extends Item> = {
   renderItem: (item: T) => ReactNode;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Impl = lazy(() =>
-  import("./SortableList.impl").then((m) => ({ default: m.SortableList as any })),
-);
+  import("./SortableList.impl").then((m) => ({
+    default: m.SortableList as unknown as <T extends Item>(p: Props<T>) => JSX.Element,
+  })),
+) as unknown as <T extends Item>(p: Props<T>) => JSX.Element;
 
 export function SortableList<T extends Item>(props: Props<T>) {
   return (
