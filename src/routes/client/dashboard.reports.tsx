@@ -2,16 +2,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useClientAuth } from "@/lib/use-client-auth";
+import { subscribeToTable } from "@/lib/realtime";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   ArrowLeft,
   ArrowDownRight,
   ArrowUpRight,
-  ChevronDown,
-  ChevronUp,
   Download,
   FileSpreadsheet,
   FileText,
@@ -25,6 +25,8 @@ import {
   Percent,
 } from "lucide-react";
 
+type RawReport = Record<string, any>;
+
 type Report = {
   id: string;
   title: string;
@@ -34,23 +36,13 @@ type Report = {
   file_url: string | null;
   file_path: string | null;
   file_type: string | null;
-  metrics: Record<string, number | string | null | undefined> & {
-    impressions?: number;
-    clicks?: number;
-    conversions?: number;
-    spend?: number;
-    revenue?: number;
-    roi?: number;
-    prev_impressions?: number;
-    prev_clicks?: number;
-    prev_conversions?: number;
-    prev_spend?: number;
-    prev_revenue?: number;
-    prev_roi?: number;
-  };
+  metrics: Record<string, any>;
   week_start: string | null;
   week_end: string | null;
+  period_start: string | null;
+  period_end: string | null;
   created_at: string;
+  raw: RawReport;
 };
 
 const TYPE_FILTERS = [
@@ -72,38 +64,70 @@ export const Route = createFileRoute("/client/dashboard/reports")({
   component: ReportsPage,
 });
 
+function pickFileUrl(r: RawReport): string | null {
+  return (
+    r.file_url ||
+    r.file ||
+    r.url ||
+    r.report_url ||
+    r.document_url ||
+    null
+  );
+}
+
+function normalize(r: RawReport): Report {
+  return {
+    id: String(r.id),
+    title: String(r.title ?? "Untitled report"),
+    summary: r.summary ?? null,
+    ai_summary: r.ai_summary ?? null,
+    report_type: String(r.report_type ?? "custom"),
+    file_url: pickFileUrl(r),
+    file_path: r.file_path ?? null,
+    file_type: r.file_type ?? null,
+    metrics: r.metrics ?? {},
+    week_start: r.week_start ?? null,
+    week_end: r.week_end ?? null,
+    period_start: r.period_start ?? null,
+    period_end: r.period_end ?? null,
+    created_at: r.created_at,
+    raw: r,
+  };
+}
+
 function ReportsPage() {
   const { userId, ready } = useClientAuth();
   const [loading, setLoading] = useState(true);
   const [reports, setReports] = useState<Report[]>([]);
   const [filter, setFilter] = useState<TypeKey>("all");
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Report | null>(null);
+
+  const load = async (uid: string) => {
+    const { data, error } = await supabase
+      .from("client_reports")
+      .select("*")
+      .eq("client_id", uid)
+      .eq("is_published", true)
+      .order("created_at", { ascending: false });
+    if (error) {
+      toast.error(error.message);
+      setReports([]);
+    } else {
+      setReports((data ?? []).map(normalize));
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
     if (!userId) return;
-    void (async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("client_reports")
-        .select("*")
-        .eq("client_id", userId)
-        .eq("is_published", true)
-        .order("created_at", { ascending: false });
-      if (error) {
-        toast.error(error.message);
-        setReports([]);
-      } else {
-        setReports((data ?? []) as unknown as Report[]);
-      }
-      setLoading(false);
-    })();
+    setLoading(true);
+    void load(userId);
+    const unsub = subscribeToTable("client_reports", () => void load(userId));
+    return unsub;
   }, [userId]);
 
   const filtered = useMemo(
-    () =>
-      filter === "all"
-        ? reports
-        : reports.filter((r) => r.report_type === filter),
+    () => (filter === "all" ? reports : reports.filter((r) => r.report_type === filter)),
     [filter, reports],
   );
 
@@ -151,84 +175,36 @@ function ReportsPage() {
           <Card>
             <CardContent className="py-16 text-center text-muted-foreground">
               {reports.length === 0
-                ? "No reports yet. Your first report will appear here after your first week."
+                ? "No reports yet. Your team will publish reports here."
                 : "No reports match this filter."}
             </CardContent>
           </Card>
         ) : (
           <div className="grid gap-4">
             {filtered.map((r) => (
-              <ReportCard
-                key={r.id}
-                report={r}
-                expanded={expanded === r.id}
-                onToggle={() => setExpanded(expanded === r.id ? null : r.id)}
-              />
+              <ReportCard key={r.id} report={r} onOpen={() => setSelected(r)} />
             ))}
           </div>
         )}
       </div>
+
+      <ReportDialog report={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }
 
-function ReportCard({
-  report,
-  expanded,
-  onToggle,
-}: {
-  report: Report;
-  expanded: boolean;
-  onToggle: () => void;
-}) {
-  const [downloading, setDownloading] = useState(false);
-
-  const handleDownload = async () => {
-    if (!report.file_path && !report.file_url) {
-      toast.error("No file attached to this report.");
-      return;
-    }
-    setDownloading(true);
-    try {
-      let blob: Blob | null = null;
-      let filename =
-        (report.file_path?.split("/").pop() ?? `${report.title}.${report.file_type ?? "pdf"}`) ||
-        "report";
-
-      if (report.file_path) {
-        const { data, error } = await supabase.storage
-          .from("client-reports")
-          .download(report.file_path);
-        if (error) throw error;
-        blob = data;
-      } else if (report.file_url) {
-        const res = await fetch(report.file_url);
-        if (!res.ok) throw new Error("Failed to fetch file");
-        blob = await res.blob();
-        filename = report.file_url.split("/").pop() ?? filename;
-      }
-
-      if (!blob) throw new Error("No file data");
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Download failed");
-    } finally {
-      setDownloading(false);
-    }
-  };
-
-  const typeLabel = report.report_type[0].toUpperCase() + report.report_type.slice(1);
+function ReportCard({ report, onOpen }: { report: Report; onOpen: () => void }) {
   const FileIcon = pickFileIcon(report.file_type);
+  const typeLabel = report.report_type[0].toUpperCase() + report.report_type.slice(1);
+  const range =
+    fmtRange(report.week_start, report.week_end) ||
+    fmtRange(report.period_start, report.period_end);
 
   return (
-    <Card>
+    <Card
+      className="cursor-pointer hover:border-primary/40 transition-colors"
+      onClick={onOpen}
+    >
       <CardContent className="p-5 space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex items-start gap-3">
@@ -239,68 +215,122 @@ function ReportCard({
               <h3 className="text-base font-semibold truncate">{report.title}</h3>
               <div className="mt-1.5 flex flex-wrap gap-2 items-center">
                 <Badge variant="secondary">{typeLabel}</Badge>
+                {range && (
+                  <span className="text-xs text-muted-foreground">{range}</span>
+                )}
                 <span className="text-xs text-muted-foreground">
-                  {fmtRange(report.week_start, report.week_end) ||
-                    new Date(report.created_at).toLocaleDateString()}
+                  · Sent {new Date(report.created_at).toLocaleDateString()}
                 </span>
               </div>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={onToggle}>
-              {expanded ? (
-                <>
-                  Hide <ChevronUp className="ml-1 h-4 w-4" />
-                </>
-              ) : (
-                <>
-                  View Summary <ChevronDown className="ml-1 h-4 w-4" />
-                </>
-              )}
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleDownload}
-              disabled={downloading || (!report.file_path && !report.file_url)}
-            >
-              {downloading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <>
-                  <Download className="h-4 w-4 mr-1" />
-                  Download
-                </>
-              )}
-            </Button>
+          <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+            <DownloadButton report={report} />
           </div>
         </div>
 
-        {expanded && (
-          <div className="pt-4 border-t border-border/40 space-y-5">
-            <MetricsGrid metrics={report.metrics} />
-
-            {report.ai_summary && (
-              <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
-                <div className="flex items-center gap-2 text-xs font-medium text-primary">
-                  <Sparkles className="h-4 w-4" />
-                  AI Summary
-                </div>
-                <p className="mt-2 text-sm whitespace-pre-line">{report.ai_summary}</p>
-                <p className="mt-3 text-[11px] text-muted-foreground">
-                  This summary was generated by AI.
-                </p>
-              </div>
-            )}
-
-            {report.summary && !report.ai_summary && (
-              <p className="text-sm text-muted-foreground whitespace-pre-line">
-                {report.summary}
-              </p>
-            )}
-          </div>
-        )}
+        <MetricsGrid metrics={report.metrics} compact />
       </CardContent>
     </Card>
+  );
+}
+
+function ReportDialog({ report, onClose }: { report: Report | null; onClose: () => void }) {
+  if (!report) return null;
+  const range =
+    fmtRange(report.week_start, report.week_end) ||
+    fmtRange(report.period_start, report.period_end);
+  const typeLabel = report.report_type[0].toUpperCase() + report.report_type.slice(1);
+  return (
+    <Dialog open={!!report} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{report.title}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">{typeLabel}</Badge>
+            {range && <span className="text-xs text-muted-foreground">{range}</span>}
+            <span className="text-xs text-muted-foreground">
+              Sent on {new Date(report.created_at).toLocaleString()}
+            </span>
+          </div>
+
+          <MetricsGrid metrics={report.metrics} />
+
+          {report.ai_summary && (
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+              <div className="flex items-center gap-2 text-xs font-medium text-primary">
+                <Sparkles className="h-4 w-4" /> AI Summary
+              </div>
+              <p className="mt-2 text-sm whitespace-pre-line">{report.ai_summary}</p>
+            </div>
+          )}
+
+          {report.summary && (
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                Summary
+              </h4>
+              <p className="text-sm whitespace-pre-line">{report.summary}</p>
+            </div>
+          )}
+
+          <div className="pt-2">
+            <DownloadButton report={report} large />
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DownloadButton({ report, large = false }: { report: Report; large?: boolean }) {
+  const [busy, setBusy] = useState(false);
+
+  const handle = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!report.file_path && !report.file_url) {
+      toast.error("No file attached to this report.");
+      return;
+    }
+    setBusy(true);
+    try {
+      let href = report.file_url;
+      if (report.file_path) {
+        const { data, error } = await supabase.storage
+          .from("client-reports")
+          .createSignedUrl(report.file_path, 3600);
+        if (error) throw error;
+        href = data.signedUrl;
+      }
+      if (!href) throw new Error("No URL");
+      const a = document.createElement("a");
+      a.href = href;
+      a.download = "";
+      a.target = "_blank";
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Download failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const disabled = busy || (!report.file_path && !report.file_url);
+  return (
+    <Button size={large ? "default" : "sm"} onClick={handle} disabled={disabled}>
+      {busy ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <>
+          <Download className="h-4 w-4 mr-1" /> Download
+        </>
+      )}
+    </Button>
   );
 }
 
@@ -313,27 +343,33 @@ const METRIC_DEFS = [
   { key: "roi", label: "ROI", icon: Percent, prefix: "", suffix: "%" },
 ] as const;
 
-function MetricsGrid({ metrics }: { metrics: Report["metrics"] }) {
+function MetricsGrid({
+  metrics,
+  compact = false,
+}: {
+  metrics: Record<string, any>;
+  compact?: boolean;
+}) {
   const visible = METRIC_DEFS.filter((m) => metrics?.[m.key] != null);
   if (visible.length === 0) {
-    return (
+    return compact ? null : (
       <p className="text-sm text-muted-foreground">No metrics recorded for this report.</p>
     );
   }
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    <div
+      className={`grid gap-3 ${
+        compact ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6" : "grid-cols-2 sm:grid-cols-3"
+      }`}
+    >
       {visible.map((m) => {
         const value = Number(metrics[m.key] ?? 0);
-        const prev = metrics[`prev_${m.key}` as keyof Report["metrics"]];
+        const prev = metrics[`prev_${m.key}`];
         const prevNum = prev == null ? null : Number(prev);
-        const delta =
-          prevNum && prevNum !== 0 ? ((value - prevNum) / prevNum) * 100 : null;
+        const delta = prevNum && prevNum !== 0 ? ((value - prevNum) / prevNum) * 100 : null;
         const Icon = m.icon;
         return (
-          <div
-            key={m.key}
-            className="rounded-lg border border-border/60 bg-background p-3"
-          >
+          <div key={m.key} className="rounded-lg border border-border/60 bg-background p-3">
             <div className="flex items-center justify-between">
               <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
                 {m.label}
@@ -369,8 +405,7 @@ function MetricsGrid({ metrics }: { metrics: Report["metrics"] }) {
 function pickFileIcon(type: string | null) {
   if (!type) return FileText;
   const t = type.toLowerCase();
-  if (t.includes("csv") || t.includes("xls") || t.includes("sheet"))
-    return FileSpreadsheet;
+  if (t.includes("csv") || t.includes("xls") || t.includes("sheet")) return FileSpreadsheet;
   return FileText;
 }
 
