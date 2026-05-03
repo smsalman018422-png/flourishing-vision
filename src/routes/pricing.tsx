@@ -3,6 +3,8 @@ import { getPublicPackages } from "@/functions/packages";
 
 export const Route = createFileRoute("/pricing")({
   loader: () => getPublicPackages(),
+  staleTime: 0,
+  shouldReload: true,
   head: () => ({
     meta: [
       { title: "Pricing — Let Us Grow" },
