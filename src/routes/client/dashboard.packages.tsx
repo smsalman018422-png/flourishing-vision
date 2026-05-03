@@ -377,8 +377,8 @@ function PackageCard({ membership, muted }: { membership: Membership; muted?: bo
             />
           </div>
           <div className="flex justify-between text-[10px] text-muted-foreground">
-            <span>{fmtDate(membership.start_date)}</span>
-            <span>{fmtDate(membership.end_date)}</span>
+            <span>{membership.start_date ? fmtDate(membership.start_date) : "—"}</span>
+            <span>{membership.end_date ? fmtDate(membership.end_date) : "Pending"}</span>
           </div>
         </div>
 
