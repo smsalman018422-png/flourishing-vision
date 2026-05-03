@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { requireAdmin } from "@/lib/admin-auth";
 
 const ALLOWED_TABLES = new Set([
   "team_members",
@@ -14,7 +15,18 @@ const ALLOWED_TABLES = new Set([
 ]);
 
 const TABLE_COLUMNS: Record<string, readonly string[]> = {
-  team_members: ["name", "role", "category", "bio", "photo_url", "linkedin_url", "skills", "is_founder", "is_visible", "sort_order"],
+  team_members: [
+    "name",
+    "role",
+    "category",
+    "bio",
+    "photo_url",
+    "linkedin_url",
+    "skills",
+    "is_founder",
+    "is_visible",
+    "sort_order",
+  ],
   portfolio: [
     "project_title",
     "client_name",
@@ -52,7 +64,17 @@ const TABLE_COLUMNS: Record<string, readonly string[]> = {
     "order_index",
     "is_visible",
   ],
-  testimonials: ["author_name", "author_role", "company", "quote", "rating", "photo_url", "video_url", "video_thumbnail_url", "sort_order"],
+  testimonials: [
+    "author_name",
+    "author_role",
+    "company",
+    "quote",
+    "rating",
+    "photo_url",
+    "video_url",
+    "video_thumbnail_url",
+    "sort_order",
+  ],
   blog_posts: [
     "slug",
     "title",
@@ -107,26 +129,7 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
 async function assertAdmin(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  if (!authHeader?.startsWith("Bearer ")) return { ok: false as const, status: 401, error: "Missing auth token" };
-
-  const token = authHeader.replace("Bearer ", "").trim();
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: userData, error: userError } = await supabaseAdmin.auth.getUser(token);
-  if (userError || !userData.user) {
-    return { ok: false as const, status: 401, error: userError?.message ?? "Invalid auth token" };
-  }
-
-  const { data: roles, error: rolesError } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userData.user.id)
-    .eq("role", "admin")
-    .limit(1);
-
-  if (rolesError) return { ok: false as const, status: 500, error: rolesError.message };
-  if (!roles || roles.length === 0) return { ok: false as const, status: 403, error: "Not authorized" };
-  return { ok: true as const, userId: userData.user.id };
+  return requireAdmin(request);
 }
 
 function cleanValue(column: string, value: unknown) {
@@ -148,7 +151,9 @@ function cleanRow(table: string, row: Record<string, unknown>) {
 
 function cleanRows(table: string, values: AdminWriteRequest["values"]) {
   const rawRows = Array.isArray(values) ? values : values ? [values] : [];
-  const rows = rawRows.map((row) => cleanRow(table, row)).filter((row) => Object.keys(row).length > 0);
+  const rows = rawRows
+    .map((row) => cleanRow(table, row))
+    .filter((row) => Object.keys(row).length > 0);
   if (!rows.length) throw new Error("No valid values were provided");
   return rows;
 }
@@ -172,17 +177,21 @@ export const Route = createFileRoute("/api/admin-write")({
         const body = (await request.json().catch(() => null)) as AdminWriteRequest | null;
         const table = body?.table;
         const op = body?.op;
-        if (!table || !ALLOWED_TABLES.has(table)) return json({ ok: false, error: "Unsupported table" }, 400);
+        if (!table || !ALLOWED_TABLES.has(table))
+          return json({ ok: false, error: "Unsupported table" }, 400);
         if (!op || !["insert", "update", "delete", "upsert"].includes(op)) {
           return json({ ok: false, error: "Unsupported op" }, 400);
         }
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const supabaseAdmin = admin.supabase;
 
         try {
           if (op === "insert") {
             const rows = cleanRows(table, body!.values);
-            const { data, error } = await supabaseAdmin.from(table as any).insert(rows as any).select();
+            const { data, error } = await supabaseAdmin
+              .from(table as any)
+              .insert(rows as any)
+              .select();
             if (error) return json({ ok: false, error: error.message, code: error.code }, 500);
             return json({ ok: true, data: data ?? [] });
           }
