@@ -85,7 +85,7 @@ export const Route = createFileRoute("/api/purchase-checkout")({
         const { data: admins } = await supabaseAdmin
           .from("user_roles")
           .select("user_id")
-          .in("role", ["super_admin", "admin"]);
+          .eq("role", "admin");
         if (admins?.length) {
           await supabaseAdmin.from("client_notifications").insert(
             admins.map((a: { user_id: string }) => ({
