@@ -5,6 +5,7 @@ import { Loader2, Check } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { trackNewsletterSubscribe } from "@/lib/meta-pixel";
 
 const services: { label: string; to: string }[] = [
   { label: "Starter Growth", to: "/pricing" },
@@ -92,6 +93,7 @@ export function Footer() {
     }
     setStatus("success");
     setEmail("");
+    trackNewsletterSubscribe();
     toast.success("Subscribed! Growth tips inbound 🌱");
   };
 

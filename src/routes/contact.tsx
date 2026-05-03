@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mail, MessageCircle, MapPin, Clock, CheckCircle2 } from "lucide-react";
 import { TwitterIcon, LinkedInIcon, InstagramIcon } from "@/components/icons/Brands";
+import { trackFormStart, trackFormSubmit, trackLead } from "@/lib/meta-pixel";
 
 const schema = z.object({
   full_name: z.string().trim().min(1, "Name is required").max(100),
@@ -72,6 +73,8 @@ function ContactPage() {
       return;
     }
     toast.success("Thanks — we'll be in touch within one business day.");
+    trackLead({ content_name: "Contact Form" });
+    trackFormSubmit("Contact Form");
     setSubmitted(true);
     form.reset();
   };
@@ -144,6 +147,7 @@ function ContactPage() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   onSubmit={form.handleSubmit(onSubmit)}
+                  onFocus={() => trackFormStart("Contact Form")}
                   className="space-y-4"
                 >
                   <Field label="Full name" error={form.formState.errors.full_name?.message}>

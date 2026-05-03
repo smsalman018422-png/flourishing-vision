@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Button, Card, Field, PageTitle, TextArea, TextInput } from "@/components/admin/ui";
 import { adminData, adminWrite } from "@/lib/admin-data";
-import { Loader2, Save, Trash2, UserPlus } from "lucide-react";
+import { Loader2, Save, Trash2, UserPlus, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/components/AuthProvider";
+import { resetPixelConfig } from "@/lib/meta-pixel";
 
 type RoleRow = { id: string; user_id: string; role: string; created_at: string };
 
@@ -17,12 +18,13 @@ const TABS = [
   { id: "calendly", label: "Calendly" },
   { id: "legal", label: "Legal pages" },
   { id: "paypal", label: "PayPal" },
+  { id: "pixel", label: "Meta Pixel" },
   { id: "admins", label: "Admins" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
 
-const SECTION_KEYS: Record<Exclude<TabId, "admins">, { key: string; label: string; placeholder?: string; multiline?: boolean }[]> = {
+const SECTION_KEYS: Record<Exclude<TabId, "admins" | "pixel">, { key: string; label: string; placeholder?: string; multiline?: boolean }[]> = {
   contact: [
     { key: "contact_email", label: "Contact email", placeholder: "hello@letusgrow.com" },
     { key: "whatsapp_number", label: "WhatsApp number", placeholder: "+1 555 123 4567" },
@@ -89,7 +91,13 @@ function SettingsAdmin() {
         </div>
       </div>
 
-      {tab === "admins" ? <AdminsSection /> : <SettingsSection key={tab} fields={SECTION_KEYS[tab]} />}
+      {tab === "admins" ? (
+        <AdminsSection />
+      ) : tab === "pixel" ? (
+        <PixelSection />
+      ) : (
+        <SettingsSection key={tab} fields={SECTION_KEYS[tab]} />
+      )}
     </>
   );
 }
@@ -272,6 +280,248 @@ function AdminsSection() {
           )}
         </ul>
       )}
+    </Card>
+  );
+}
+
+type PixelState = {
+  pixel_id: string;
+  pixel_enabled: boolean;
+  pixel_test_mode: boolean;
+  pixel_test_code: string;
+  pixel_test_activated_at: string;
+};
+
+function PixelSection() {
+  const [s, setS] = useState<PixelState>({
+    pixel_id: "",
+    pixel_enabled: false,
+    pixel_test_mode: false,
+    pixel_test_code: "",
+    pixel_test_activated_at: "",
+  });
+  const [initial, setInitial] = useState<PixelState>(s);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const load = () => {
+    setLoading(true);
+    adminData<{ key: string; value: any }>({
+      table: "site_settings",
+      select: "*",
+      filters: [
+        {
+          op: "in",
+          column: "key",
+          value: [
+            "pixel_id",
+            "pixel_enabled",
+            "pixel_test_mode",
+            "pixel_test_code",
+            "pixel_test_activated_at",
+          ],
+        },
+      ],
+    }).then(({ data }) => {
+      const next: PixelState = {
+        pixel_id: "",
+        pixel_enabled: false,
+        pixel_test_mode: false,
+        pixel_test_code: "",
+        pixel_test_activated_at: "",
+      };
+      (data ?? []).forEach((r) => {
+        const v = r.value?.v ?? r.value?.value ?? r.value;
+        if (r.key === "pixel_enabled" || r.key === "pixel_test_mode") {
+          (next as any)[r.key] = v === true || v === "true";
+        } else {
+          (next as any)[r.key] = v ?? "";
+        }
+      });
+      // Auto-expire test mode
+      if (next.pixel_test_mode && next.pixel_test_activated_at) {
+        const t = new Date(next.pixel_test_activated_at).getTime();
+        if (!isNaN(t) && (Date.now() - t) / 36e5 >= 24) {
+          next.pixel_test_mode = false;
+        }
+      }
+      setS(next);
+      setInitial(next);
+      setLoading(false);
+    });
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const dirty = JSON.stringify(s) !== JSON.stringify(initial);
+
+  const save = async (overrides?: Partial<PixelState>) => {
+    setSaving(true);
+    const merged = { ...s, ...overrides };
+    const rows = Object.entries(merged).map(([k, v]) => ({
+      key: k,
+      value: { v },
+    }));
+    const { error } = await adminWrite({
+      table: "site_settings",
+      op: "upsert",
+      values: rows,
+      onConflict: "key",
+    });
+    setSaving(false);
+    if (error) return toast.error(error);
+    setS(merged);
+    setInitial(merged);
+    resetPixelConfig();
+    toast.success("Pixel settings saved");
+  };
+
+  const activateTest = () => {
+    const next = {
+      ...s,
+      pixel_test_mode: true,
+      pixel_test_activated_at: new Date().toISOString(),
+    };
+    setS(next);
+    void save(next);
+  };
+
+  const status = useMemo(() => {
+    if (!s.pixel_enabled || !s.pixel_id)
+      return { color: "bg-red-500", label: "Inactive" };
+    if (s.pixel_test_mode) return { color: "bg-yellow-500", label: "Test Mode" };
+    return { color: "bg-green-500", label: "Active" };
+  }, [s]);
+
+  const remaining = useMemo(() => {
+    if (!s.pixel_test_mode || !s.pixel_test_activated_at) return null;
+    const t = new Date(s.pixel_test_activated_at).getTime();
+    if (isNaN(t)) return null;
+    const ms = t + 24 * 36e5 - now;
+    if (ms <= 0) return "expired";
+    const h = Math.floor(ms / 36e5);
+    const m = Math.floor((ms % 36e5) / 60000);
+    return `${h}h ${m}m`;
+  }, [s.pixel_test_mode, s.pixel_test_activated_at, now]);
+
+  if (loading) {
+    return (
+      <Card>
+        <div className="py-8 grid place-items-center">
+          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <h2 className="font-display font-semibold">Meta Pixel / Facebook Ads</h2>
+          <p className="text-xs text-muted-foreground mt-1">
+            Tracking pixel for Meta Ads optimisation. Loads only when enabled.
+          </p>
+        </div>
+        <span className="inline-flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full bg-muted/40">
+          <span className={`h-2 w-2 rounded-full ${status.color}`} />
+          {status.label}
+          {remaining && remaining !== "expired" && s.pixel_test_mode
+            ? ` · ${remaining} left`
+            : ""}
+        </span>
+      </div>
+
+      <div className="space-y-4">
+        <Field label="Meta Pixel ID">
+          <TextInput
+            value={s.pixel_id}
+            placeholder="e.g. 123456789012345"
+            onChange={(e) => setS({ ...s, pixel_id: e.target.value })}
+          />
+        </Field>
+
+        <label className="flex items-center justify-between gap-3 rounded-xl border border-border/60 p-3">
+          <div>
+            <div className="text-sm font-medium">Pixel enabled</div>
+            <div className="text-xs text-muted-foreground">
+              When off, the pixel script never loads.
+            </div>
+          </div>
+          <input
+            type="checkbox"
+            checked={s.pixel_enabled}
+            onChange={(e) => setS({ ...s, pixel_enabled: e.target.checked })}
+            className="h-5 w-5 accent-primary"
+          />
+        </label>
+
+        <label className="flex items-center justify-between gap-3 rounded-xl border border-border/60 p-3">
+          <div>
+            <div className="text-sm font-medium">Test mode</div>
+            <div className="text-xs text-muted-foreground">
+              Test events valid for 24 hours from activation.
+            </div>
+          </div>
+          <input
+            type="checkbox"
+            checked={s.pixel_test_mode}
+            onChange={(e) => setS({ ...s, pixel_test_mode: e.target.checked })}
+            className="h-5 w-5 accent-primary"
+          />
+        </label>
+
+        {s.pixel_test_mode && (
+          <Field label="Test event code">
+            <TextInput
+              value={s.pixel_test_code}
+              placeholder="TEST12345"
+              onChange={(e) => setS({ ...s, pixel_test_code: e.target.value })}
+            />
+          </Field>
+        )}
+
+        {remaining && (
+          <p className="text-xs text-muted-foreground">
+            {remaining === "expired"
+              ? "Test mode has expired — re-activate to continue testing."
+              : `Test mode expires in: ${remaining}`}
+          </p>
+        )}
+      </div>
+
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-border/60">
+        <div className="flex flex-wrap gap-2">
+          <Button variant="ghost" onClick={activateTest} disabled={saving}>
+            Activate test mode
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() =>
+              window.open(
+                "https://chromewebstore.google.com/detail/meta-pixel-helper/fdgfkebogiimcoedlicjlajpkdmockpc",
+                "_blank",
+                "noreferrer",
+              )
+            }
+          >
+            <ExternalLink className="h-4 w-4" /> Verify pixel
+          </Button>
+        </div>
+        <Button onClick={() => save()} disabled={!dirty || saving}>
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : (
+            <><Save className="h-4 w-4" /> Save pixel settings</>
+          )}
+        </Button>
+      </div>
     </Card>
   );
 }
