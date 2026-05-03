@@ -172,29 +172,64 @@ function PricingPage() {
 
   useEffect(() => {
     let cancelled = false;
+    const normalizeCategory = (c: string | null | undefined) =>
+      !c ? "social_media" : c.toLowerCase().replace(/\s+/g, "_").replace(/-+/g, "_");
     const load = async () => {
       const { data, error } = await supabase
-        .from("packages")
-        .select(
-          "id, category, name, slug, price_monthly, price_yearly, tagline, description, icon_name, features, best_for, is_popular, is_premium, is_visible, order_index, cta_text, cta_link",
-        )
+        .from("membership_plans")
+        .select("*")
         .eq("is_visible", true)
-        .order("category")
-        .order("order_index")
-        .limit(200);
+        .order("sort_order", { ascending: true });
       if (cancelled) return;
       if (!error && data) {
         setPackages(
-          data.map((d) => ({ ...d, features: normalizeFeatures(d.features) })) as Pkg[],
+          (data as any[]).map((r) => {
+            const monthly = Number(r.monthly_price ?? r.price_monthly ?? 0);
+            const yearly = Number(r.yearly_price ?? r.price_yearly ?? 0);
+            const features = Array.isArray(r.features) ? r.features : [];
+            const bonus = Array.isArray(r.bonus_features) ? r.bonus_features : [];
+            const merged: FeatureItem[] = [
+              ...features.map((t: any) => ({
+                text: typeof t === "string" ? t : String(t?.text ?? ""),
+                type: "feature" as const,
+              })),
+              ...bonus.map((t: any) => ({
+                text: typeof t === "string" ? t : String(t?.text ?? ""),
+                type: "bonus" as const,
+              })),
+            ].filter((f) => f.text);
+            return {
+              id: r.id,
+              category: normalizeCategory(r.category),
+              name: r.name,
+              slug: r.slug,
+              price_monthly: monthly,
+              price_yearly: yearly,
+              tagline: null,
+              description: r.description ?? null,
+              icon_name: "Sparkles",
+              features: merged,
+              best_for: r.best_for ?? null,
+              is_popular: !!r.is_popular,
+              is_premium: false,
+              is_visible: r.is_visible !== false,
+              order_index: r.sort_order ?? 0,
+              cta_text: r.cta_text || "Get Started",
+              cta_link: "/contact",
+            } as Pkg;
+          }),
         );
       }
     };
 
+    // Always refetch on mount so admin updates show immediately.
+    load();
+
     const channel = supabase
-      .channel("packages-public")
+      .channel("membership-plans-public")
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "packages" },
+        { event: "*", schema: "public", table: "membership_plans" },
         () => load(),
       )
       .subscribe();
@@ -204,6 +239,7 @@ function PricingPage() {
       supabase.removeChannel(channel);
     };
   }, []);
+
 
   // Always show all known categories so "coming soon" tabs are visible.
   const categories = useMemo(() => {
