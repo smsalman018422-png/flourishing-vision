@@ -898,6 +898,16 @@ function PurchaseModal({
               </div>
             )}
 
+            <ManualPaymentForm
+              plan={plan}
+              cycle={cycle}
+              amount={price}
+              onDone={() => {
+                onClose();
+                navigate({ to: "/client/dashboard/packages" });
+              }}
+            />
+
             <DialogFooter className="flex-col gap-2 sm:flex-col">
               <div className="grid grid-cols-2 gap-2 w-full">
                 <Button asChild variant="outline">
