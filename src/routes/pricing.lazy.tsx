@@ -898,6 +898,16 @@ function PurchaseModal({
               </div>
             )}
 
+            <ManualPaymentForm
+              plan={plan}
+              cycle={cycle}
+              amount={price}
+              onDone={() => {
+                onClose();
+                navigate({ to: "/client/dashboard/packages" });
+              }}
+            />
+
             <DialogFooter className="flex-col gap-2 sm:flex-col">
               <div className="grid grid-cols-2 gap-2 w-full">
                 <Button asChild variant="outline">
@@ -914,5 +924,119 @@ function PurchaseModal({
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ManualPaymentForm({
+  plan,
+  cycle,
+  amount,
+  onDone,
+}: {
+  plan: Pkg;
+  cycle: "monthly" | "yearly";
+  amount: number;
+  onDone: () => void;
+}) {
+  const [method, setMethod] = useState("bkash");
+  const [txn, setTxn] = useState("");
+  const [note, setNote] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!txn.trim()) {
+      toast.error("Please enter the transaction ID / reference");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user.id;
+      if (!uid) {
+        toast.error("Please sign in first");
+        return;
+      }
+      const base: Record<string, unknown> = {
+        client_id: uid,
+        plan_id: plan.id,
+        status: "pending",
+        amount,
+        billing_cycle: cycle,
+        payment_method: method,
+        transaction_id: txn.trim(),
+        payment_status: "awaiting",
+        note: note.trim() || null,
+        start_date: null,
+        end_date: null,
+        is_custom: false,
+        custom_features: [],
+      };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let { error } = await (supabase as any).from("client_memberships").insert(base);
+      if (error) {
+        // Fallback: drop unknown columns
+        const minimal: Record<string, unknown> = {
+          client_id: uid,
+          plan_id: plan.id,
+          status: "pending",
+          amount,
+          billing_cycle: cycle,
+          end_date: new Date(Date.now() + 30 * 86400000).toISOString(),
+          is_custom: false,
+          custom_features: [],
+        };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const r2 = await (supabase as any).from("client_memberships").insert(minimal);
+        error = r2.error;
+      }
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+      toast.success("Your request is pending admin approval");
+      onDone();
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <form onSubmit={submit} className="mt-4 space-y-3 border-t border-border/50 pt-4">
+      <p className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
+        Or pay manually (bKash / Nagad / Bank)
+      </p>
+      <div className="grid grid-cols-2 gap-2">
+        <select
+          value={method}
+          onChange={(e) => setMethod(e.target.value)}
+          className="min-h-[40px] rounded-lg border border-border/60 bg-background px-3 text-sm"
+        >
+          <option value="bkash">bKash</option>
+          <option value="nagad">Nagad</option>
+          <option value="rocket">Rocket</option>
+          <option value="bank">Bank Transfer</option>
+          <option value="card">Card</option>
+          <option value="other">Other</option>
+        </select>
+        <input
+          value={txn}
+          onChange={(e) => setTxn(e.target.value)}
+          placeholder="Transaction ID / Ref"
+          className="min-h-[40px] rounded-lg border border-border/60 bg-background px-3 text-sm"
+        />
+      </div>
+      <textarea
+        value={note}
+        onChange={(e) => setNote(e.target.value)}
+        placeholder="Optional note for admin"
+        rows={2}
+        className="w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm"
+      />
+      <Button type="submit" disabled={busy} className="w-full">
+        {busy ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+        Submit for Approval (${amount}/{cycle})
+      </Button>
+    </form>
   );
 }
