@@ -68,6 +68,13 @@ async function assertSuperAdmin(request: Request, requireServiceRole = false): P
   return { ok: true, userId: userData.user.id, authClient, adminClient };
 }
 
+const createSchema = z.object({
+  email: z.string().trim().email().max(255),
+  password: z.string().min(8).max(128),
+  full_name: z.string().trim().min(1).max(120),
+  role: z.enum(["admin", "manager", "editor"]),
+});
+
 const updateRoleSchema = z.object({
   user_id: z.string().uuid(),
   role: z.enum(STAFF_ROLES),
@@ -116,14 +123,25 @@ export const Route = createFileRoute("/api/admin-users")({
         }));
         return json({ ok: true, users: grouped });
       },
-      POST: async () =>
-        json(
-          {
-            ok: false,
-            error: "Admin user creation now happens via the signup flow on the client. POST is disabled.",
-          },
-          410,
-        ),
+      POST: async ({ request }) => {
+        const auth = await assertSuperAdmin(request, true);
+        if (!auth.ok) return json({ ok: false, error: auth.error }, auth.status);
+        const body = await request.json().catch(() => null);
+        const parsed = createSchema.safeParse(body);
+        if (!parsed.success) return json({ ok: false, error: parsed.error.message }, 400);
+        const { email, password, full_name, role } = parsed.data;
+        const admin = auth.adminClient!;
+        const { data: created, error: createErr } = await admin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+          user_metadata: { full_name },
+        });
+        if (createErr || !created.user) return json({ ok: false, error: createErr?.message ?? "Failed to create user" }, 500);
+        const { error: roleErr } = await admin.from("user_roles").insert({ user_id: created.user.id, role });
+        if (roleErr) return json({ ok: false, error: roleErr.message }, 500);
+        return json({ ok: true, user_id: created.user.id });
+      },
       PATCH: async ({ request }) => {
         const auth = await assertSuperAdmin(request);
         if (!auth.ok) return json({ ok: false, error: auth.error }, auth.status);

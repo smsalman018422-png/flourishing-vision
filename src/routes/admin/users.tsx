@@ -63,55 +63,17 @@ function AdminUsers() {
   const onCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setCreating(true);
-    try {
-      // Preserve current admin session so we can restore it after signUp
-      const { data: currentSession } = await supabase.auth.getSession();
-
-      const email = form.email.trim().toLowerCase();
-      const { data: authData, error: signupError } = await supabase.auth.signUp({
-        email,
-        password: form.password,
-        options: { data: { full_name: form.full_name } },
-      });
-
-      if (signupError || !authData.user) {
-        toast.error("Failed to create user: " + (signupError?.message ?? "unknown error"));
-        return;
-      }
-
-      const newUserId = authData.user.id;
-
-      // Restore the admin session (signUp may have switched the active session)
-      if (currentSession.session) {
-        await supabase.auth.setSession({
-          access_token: currentSession.session.access_token,
-          refresh_token: currentSession.session.refresh_token,
-        });
-      }
-
-      // Assign role via admin API (uses current admin's session token)
-      const res = await authedFetch("/api/admin-users", {
-        method: "PATCH",
-        body: JSON.stringify({ user_id: newUserId, role: form.role }),
-      });
-      const body = await res.json().catch(() => null);
-      if (!res.ok || !body?.ok) {
-        toast.error("User created but failed to assign role: " + (body?.error ?? "unknown"));
-        return;
-      }
-
-      // Best-effort profile upsert
-      await supabase
-        .from("client_profiles")
-        .upsert({ id: newUserId, email, full_name: form.full_name, is_active: true }, { onConflict: "id" });
-
-      toast.success("User created. They can now login at /admin/login with their email and password.");
-      setShowForm(false);
-      setForm({ full_name: "", email: "", password: "", role: "admin" });
-      void refresh();
-    } finally {
-      setCreating(false);
+    const res = await authedFetch("/api/admin-users", { method: "POST", body: JSON.stringify(form) });
+    const body = await res.json().catch(() => null);
+    setCreating(false);
+    if (!res.ok || !body?.ok) {
+      toast.error(body?.error ?? "Failed to create user");
+      return;
     }
+    toast.success("Admin user created");
+    setShowForm(false);
+    setForm({ full_name: "", email: "", password: "", role: "admin" });
+    void refresh();
   };
 
   const onChangeRole = async (user_id: string, role: StaffRole) => {
