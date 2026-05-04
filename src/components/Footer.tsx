@@ -70,6 +70,10 @@ const emailSchema = z.string().trim().email({ message: "Enter a valid email" }).
 export function Footer() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+  const { data: settings } = useSiteSettings();
+  const socials = socialDefs
+    .map((s) => ({ ...s, href: normalizeSocialUrl(settings?.[s.key]) }))
+    .filter((s): s is typeof s & { href: string } => !!s.href);
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
