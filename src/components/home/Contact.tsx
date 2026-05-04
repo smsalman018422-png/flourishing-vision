@@ -69,6 +69,8 @@ const initial: FormState = {
 };
 
 export function Contact() {
+  const { data: settings } = useSiteSettings();
+  const contactEmail = settings?.contact_email;
   const [form, setForm] = useState<FormState>(initial);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
