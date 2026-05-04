@@ -761,6 +761,7 @@ function PurchaseModal({
   const [authState, setAuthState] = useState<"loading" | "in" | "out">("loading");
   const [yearly, setYearly] = useState(initialYearly);
   const [submitting, setSubmitting] = useState(false);
+  const { data: settings } = useSiteSettings();
 
   useEffect(() => {
     if (!plan) return;
@@ -812,7 +813,6 @@ function PurchaseModal({
     }
   };
 
-  const { data: settings } = useSiteSettings();
   const waMessageText = `Hi! I'd like to purchase the ${plan.name} package (${cycle}, $${price}).`;
   const waHref = buildWhatsAppHref(settings?.contact_whatsapp, waMessageText);
   const contactHref = `/contact?subject=${encodeURIComponent("Package: " + plan.name)}`;
@@ -820,7 +820,17 @@ function PurchaseModal({
   return (
     <Dialog open={!!plan} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        {authState === "out" ? (
+        {authState === "loading" ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>{plan.name}</DialogTitle>
+              <DialogDescription>Checking your account before checkout.</DialogDescription>
+            </DialogHeader>
+            <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" /> Preparing checkout…
+            </div>
+          </>
+        ) : authState === "out" ? (
           <>
             <DialogHeader>
               <DialogTitle>Sign in to purchase</DialogTitle>
