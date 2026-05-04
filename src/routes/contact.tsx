@@ -238,3 +238,26 @@ function ContactItem({ icon: Icon, label, value, href }: { icon: any; label: str
   );
   return href ? <a href={href} className="block hover:opacity-80 transition-opacity">{inner}</a> : inner;
 }
+
+function ContactInfo() {
+  const { data: settings, isLoading } = useSiteSettings();
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+      </div>
+    );
+  }
+  const email = settings?.contact_email;
+  const wa = buildWhatsAppHref(settings?.contact_whatsapp);
+  const tel = buildTelHref(settings?.contact_phone);
+  return (
+    <>
+      {email && <ContactItem icon={Mail} label="Email" value={email} href={buildMailHref(email) ?? undefined} />}
+      {wa && <ContactItem icon={MessageCircle} label="WhatsApp" value={settings!.contact_whatsapp!} href={wa} />}
+      {tel && <ContactItem icon={Phone} label="Phone" value={settings!.contact_phone!} href={tel} />}
+    </>
+  );
+}
