@@ -45,8 +45,11 @@ function ClientAuthPage() {
       const { data } = await supabase.auth.getSession();
       const uid = data.session?.user.id;
       if (!uid || cancelled) return;
-      const target = search.redirect === "/pricing" ? "/pricing" : "/client/dashboard";
-      navigate({ to: target, search: target === "/pricing" && search.pkg ? { pkg: search.pkg } : undefined, replace: true });
+      if (search.redirect === "/pricing") {
+        navigate({ to: "/pricing", search: search.pkg ? { pkg: search.pkg } : undefined, replace: true });
+      } else {
+        navigate({ to: "/client/dashboard", replace: true });
+      }
     };
     void route();
     return () => {
@@ -143,8 +146,11 @@ function LoginForm({ redirect, pkg }: { redirect?: string; pkg?: string }) {
       }
 
       toast.success("Welcome back");
-      const target = redirect === "/pricing" ? "/pricing" : "/client/dashboard";
-      await navigate({ to: target, search: target === "/pricing" && pkg ? { pkg } : undefined, replace: true });
+      if (redirect === "/pricing") {
+        await navigate({ to: "/pricing", search: pkg ? { pkg } : undefined, replace: true });
+      } else {
+        await navigate({ to: "/client/dashboard", replace: true });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setBusy(false);
@@ -333,8 +339,11 @@ function SignupForm({
         await createProfile(authData.user.id);
         trackCompleteRegistration({ content_name: "Client Signup" });
         toast.success("Account created! Welcome!");
-        const target = redirect === "/pricing" ? "/pricing" : "/client/dashboard";
-        await navigate({ to: target, search: target === "/pricing" && pkg ? { pkg } : undefined, replace: true });
+        if (redirect === "/pricing") {
+          await navigate({ to: "/pricing", search: pkg ? { pkg } : undefined, replace: true });
+        } else {
+          await navigate({ to: "/client/dashboard", replace: true });
+        }
         return;
       }
 
@@ -349,8 +358,11 @@ function SignupForm({
         await createProfile(loginData.user.id);
         trackCompleteRegistration({ content_name: "Client Signup" });
         toast.success("Account created! Welcome!");
-        const target = redirect === "/pricing" ? "/pricing" : "/client/dashboard";
-        await navigate({ to: target, search: target === "/pricing" && pkg ? { pkg } : undefined, replace: true });
+        if (redirect === "/pricing") {
+          await navigate({ to: "/pricing", search: pkg ? { pkg } : undefined, replace: true });
+        } else {
+          await navigate({ to: "/client/dashboard", replace: true });
+        }
         return;
       }
 
