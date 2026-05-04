@@ -57,13 +57,13 @@ const YoutubeIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-const socials = [
-  { Icon: InstagramIcon, label: "Instagram", href: "#" },
-  { Icon: LinkedinIcon, label: "LinkedIn", href: "#" },
-  { Icon: TwitterIcon, label: "Twitter", href: "#" },
-  { Icon: FacebookIcon, label: "Facebook", href: "#" },
-  { Icon: YoutubeIcon, label: "YouTube", href: "#" },
-];
+const socialDefs = [
+  { key: "social_instagram", Icon: InstagramIcon, label: "Instagram" },
+  { key: "social_linkedin", Icon: LinkedinIcon, label: "LinkedIn" },
+  { key: "social_twitter", Icon: TwitterIcon, label: "Twitter" },
+  { key: "social_facebook", Icon: FacebookIcon, label: "Facebook" },
+  { key: "social_youtube", Icon: YoutubeIcon, label: "YouTube" },
+] as const;
 
 const emailSchema = z.string().trim().email({ message: "Enter a valid email" }).max(255);
 
