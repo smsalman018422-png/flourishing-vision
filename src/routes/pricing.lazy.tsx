@@ -53,6 +53,7 @@ import {
 } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { buildWhatsAppHref, useSiteSettings } from "@/hooks/useSiteSettings";
 import {
   trackInitiateCheckout,
   trackPurchase,
