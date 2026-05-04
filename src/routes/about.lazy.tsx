@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Eye, Sparkles, Lightbulb, Target, Sparkles as SparkIcon } from "lucide-react";
 import { subscribeToTable } from "@/lib/realtime";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Member = {
   id: string;
