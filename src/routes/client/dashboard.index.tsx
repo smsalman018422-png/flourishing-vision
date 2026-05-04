@@ -456,7 +456,7 @@ function ClientDashboardOverview() {
   const waHref = buildWhatsAppHref(
     waSource,
     `Hi, this is ${profile?.full_name ?? "a client"} — I'd like to chat.`,
-  ) ?? "#";
+  );
 
   return (
     <div className="space-y-8">
