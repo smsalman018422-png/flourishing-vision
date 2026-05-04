@@ -67,6 +67,9 @@ function AboutPage() {
     return subscribeToTable("team_members", loadFounders, "public-about-founders-changes");
   }, []);
 
+  const { data: settings, isLoading: settingsLoading } = useSiteSettings();
+  const aboutContent = settings?.about_content?.trim() || "";
+
   return (
     <PageShell>
       <PageHeader
@@ -75,20 +78,25 @@ function AboutPage() {
         subtitle="A team of operators, designers, and strategists who believe great marketing is part craft, part science."
       />
 
-      {/* Mission */}
+      {/* Mission / About content */}
       <section className="mx-auto max-w-4xl px-4 sm:px-6 py-16 sm:py-24">
-        <motion.blockquote
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-2xl sm:text-3xl lg:text-4xl font-display font-medium leading-relaxed text-center"
-        >
-          <span className="text-primary">"</span>
-          We exist to make growth feel less like a guessing game and more like a system you can
-          trust.
-          <span className="text-primary">"</span>
-        </motion.blockquote>
+        {settingsLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-8 w-5/6 mx-auto" />
+            <Skeleton className="h-8 w-4/6 mx-auto" />
+          </div>
+        ) : aboutContent ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-lg sm:text-xl lg:text-2xl font-display font-medium leading-relaxed text-center whitespace-pre-line text-foreground/90"
+          >
+            {aboutContent}
+          </motion.div>
+        ) : null}
       </section>
 
       {/* Values */}
