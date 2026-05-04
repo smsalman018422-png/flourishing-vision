@@ -245,3 +245,34 @@ function ContactInfo() {
     </>
   );
 }
+
+const SOCIAL_DEFS = [
+  { key: "social_twitter", Icon: TwitterIcon, label: "Twitter" },
+  { key: "social_linkedin", Icon: LinkedInIcon, label: "LinkedIn" },
+  { key: "social_instagram", Icon: InstagramIcon, label: "Instagram" },
+  { key: "social_facebook", Icon: FacebookIcon, label: "Facebook" },
+] as const;
+
+function SocialLinks() {
+  const { data: settings } = useSiteSettings();
+  const items = SOCIAL_DEFS
+    .map((s) => ({ ...s, href: normalizeSocialUrl(settings?.[s.key]) }))
+    .filter((s): s is typeof s & { href: string } => !!s.href);
+  if (items.length === 0) return null;
+  return (
+    <div className="flex items-center gap-3">
+      {items.map(({ Icon, href, label }) => (
+        <a
+          key={label}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={label}
+          className="h-11 w-11 rounded-full glass flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
+        >
+          <Icon className="h-4 w-4" />
+        </a>
+      ))}
+    </div>
+  );
+}
