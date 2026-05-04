@@ -64,3 +64,11 @@ export function buildTelHref(phone?: string): string | null {
   if (!phone) return null;
   return `tel:${phone.replace(/\s+/g, "")}`;
 }
+
+/** Normalize a social URL: returns null if empty, otherwise ensures https:// prefix. */
+export function normalizeSocialUrl(u?: string): string | null {
+  if (!u || !u.trim()) return null;
+  const s = u.trim();
+  if (/^https?:\/\//i.test(s)) return s;
+  return `https://${s}`;
+}
