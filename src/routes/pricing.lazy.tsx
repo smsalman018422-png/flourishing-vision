@@ -162,6 +162,8 @@ function PricingPage() {
   const [loading, setLoading] = useState(false);
   const [activeCategory, setActiveCategory] = useState<string>("social_media");
   const [purchaseTarget, setPurchaseTarget] = useState<Pkg | null>(null);
+  const [autoOpenedPkg, setAutoOpenedPkg] = useState<string | null>(null);
+  const search = pricingRouteApi.useSearch();
 
   useEffect(() => {
     trackViewContent({
@@ -240,6 +242,15 @@ function PricingPage() {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  useEffect(() => {
+    if (!search.pkg || autoOpenedPkg === search.pkg || packages.length === 0) return;
+    const match = packages.find((p) => p.slug === search.pkg || p.id === search.pkg);
+    if (!match) return;
+    setActiveCategory(match.category);
+    setPurchaseTarget(match);
+    setAutoOpenedPkg(search.pkg);
+  }, [search.pkg, autoOpenedPkg, packages]);
 
 
   // Always show all known categories so "coming soon" tabs are visible.
@@ -844,7 +855,7 @@ function PurchaseModal({
                   onClose();
                   navigate({
                     to: "/client/login",
-                    search: { redirect: "/pricing", pkg: plan.slug } as never,
+                    search: { tab: "login", redirect: "/pricing", pkg: plan.slug } as never,
                   });
                 }}
               >
@@ -856,7 +867,7 @@ function PurchaseModal({
                   onClose();
                   navigate({
                     to: "/client/login",
-                    search: { signup: "1", redirect: "/pricing", pkg: plan.slug } as never,
+                    search: { tab: "signup", redirect: "/pricing", pkg: plan.slug } as never,
                   });
                 }}
               >
