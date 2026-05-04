@@ -140,6 +140,7 @@ function ClientDashboardOverview() {
   const [recentReports, setRecentReports] = useState<Report[]>([]);
   const [recentTickets, setRecentTickets] = useState<Ticket[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const { data: siteSettings } = useSiteSettings();
 
   // Live clock — minute resolution
   useEffect(() => {
@@ -451,7 +452,6 @@ function ClientDashboardOverview() {
         .filter(Boolean)
     : [];
 
-  const { data: siteSettings } = useSiteSettings();
   const waSource = profile?.account_manager_whatsapp || siteSettings?.contact_whatsapp;
   const waHref = buildWhatsAppHref(
     waSource,
