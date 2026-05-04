@@ -98,23 +98,7 @@ function ContactPage() {
             <ContactItem icon={Clock} label="Office hours" value="Mon–Fri · 9am–7pm local" />
             <div>
               <p className="text-sm uppercase tracking-wider text-muted-foreground mb-3">Follow us</p>
-              <div className="flex items-center gap-3">
-                {[
-                  { Icon: TwitterIcon, href: "https://twitter.com" },
-                  { Icon: LinkedInIcon, href: "https://linkedin.com" },
-                  { Icon: InstagramIcon, href: "https://instagram.com" },
-                ].map(({ Icon, href }, i) => (
-                  <a
-                    key={i}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="h-11 w-11 rounded-full glass flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors"
-                  >
-                    <Icon className="h-4 w-4" />
-                  </a>
-                ))}
-              </div>
+              <SocialLinks />
             </div>
           </div>
 
