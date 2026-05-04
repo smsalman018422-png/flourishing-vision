@@ -95,7 +95,17 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    void initMetaPixel();
+    // Defer pixel init until browser is idle so it doesn't compete with hydration.
+    const w = window as any;
+    const idle: (cb: () => void) => number =
+      w.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 1));
+    const id = idle(() => {
+      void initMetaPixel();
+    });
+    return () => {
+      const cancel = w.cancelIdleCallback ?? window.clearTimeout;
+      cancel(id);
+    };
   }, []);
 
   useEffect(() => {
