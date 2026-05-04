@@ -291,13 +291,15 @@ export function Contact() {
 
         {/* Footer info */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-          <a
-            href="mailto:hello@letusgrow.com"
-            className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition justify-center md:justify-start"
-          >
-            <Mail className="h-5 w-5 text-primary" />
-            <span>hello@letusgrow.com</span>
-          </a>
+          {contactEmail ? (
+            <a
+              href={`mailto:${contactEmail}`}
+              className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition justify-center md:justify-start"
+            >
+              <Mail className="h-5 w-5 text-primary" />
+              <span>{contactEmail}</span>
+            </a>
+          ) : <span />}
           <div className="flex items-center gap-3 text-muted-foreground justify-center md:justify-end flex-wrap">
             <MapPin className="h-5 w-5 text-primary" />
             {LOCATIONS.map((loc, i) => (
