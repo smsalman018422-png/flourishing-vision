@@ -2,6 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { getPublicPackages } from "@/functions/packages";
 
 export const Route = createFileRoute("/pricing")({
+  validateSearch: (s: Record<string, unknown>): { pkg?: string } => ({
+    pkg: typeof s.pkg === "string" && s.pkg.trim() ? s.pkg : undefined,
+  }),
   loader: () => getPublicPackages(),
   staleTime: 0,
   shouldReload: true,

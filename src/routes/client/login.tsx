@@ -10,10 +10,13 @@ import { trackCompleteRegistration } from "@/lib/meta-pixel";
 
 type Tab = "login" | "signup";
 const sb = supabase as any;
+type LoginSearch = { tab?: Tab; redirect?: string; pkg?: string };
 
 export const Route = createFileRoute("/client/login")({
-  validateSearch: (s: Record<string, unknown>): { tab?: Tab } => ({
+  validateSearch: (s: Record<string, unknown>): LoginSearch => ({
     tab: s.tab === "signup" ? "signup" : s.tab === "login" ? "login" : undefined,
+    redirect: typeof s.redirect === "string" && s.redirect.startsWith("/") ? s.redirect : undefined,
+    pkg: typeof s.pkg === "string" && s.pkg.trim() ? s.pkg : undefined,
   }),
   head: () => ({
     meta: [
@@ -42,13 +45,17 @@ function ClientAuthPage() {
       const { data } = await supabase.auth.getSession();
       const uid = data.session?.user.id;
       if (!uid || cancelled) return;
-      navigate({ to: "/client/dashboard", replace: true });
+      if (search.redirect === "/pricing") {
+        navigate({ to: "/pricing", search: search.pkg ? { pkg: search.pkg } : undefined, replace: true });
+      } else {
+        navigate({ to: "/client/dashboard", replace: true });
+      }
     };
     void route();
     return () => {
       cancelled = true;
     };
-  }, [navigate]);
+  }, [navigate, search.redirect, search.pkg]);
 
   return (
     <div className="min-h-screen grid place-items-center bg-background px-4 py-12">
@@ -88,9 +95,9 @@ function ClientAuthPage() {
           </div>
 
           {activeTab === "login" ? (
-            <LoginForm />
+            <LoginForm redirect={search.redirect} pkg={search.pkg} />
           ) : (
-            <SignupForm onSwitchToLogin={() => setActiveTab("login")} />
+            <SignupForm redirect={search.redirect} pkg={search.pkg} onSwitchToLogin={() => setActiveTab("login")} />
           )}
         </div>
 
@@ -106,7 +113,7 @@ function ClientAuthPage() {
 }
 
 /* ---------------- Login Form ---------------- */
-function LoginForm() {
+function LoginForm({ redirect, pkg }: { redirect?: string; pkg?: string }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -139,7 +146,11 @@ function LoginForm() {
       }
 
       toast.success("Welcome back");
-      await navigate({ to: "/client/dashboard", replace: true });
+      if (redirect === "/pricing") {
+        await navigate({ to: "/pricing", search: pkg ? { pkg } : undefined, replace: true });
+      } else {
+        await navigate({ to: "/client/dashboard", replace: true });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setBusy(false);
@@ -231,7 +242,15 @@ const signupSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters").max(72),
 });
 
-function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
+function SignupForm({
+  redirect,
+  pkg,
+  onSwitchToLogin,
+}: {
+  redirect?: string;
+  pkg?: string;
+  onSwitchToLogin: () => void;
+}) {
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -320,7 +339,11 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
         await createProfile(authData.user.id);
         trackCompleteRegistration({ content_name: "Client Signup" });
         toast.success("Account created! Welcome!");
-        await navigate({ to: "/client/dashboard", replace: true });
+        if (redirect === "/pricing") {
+          await navigate({ to: "/pricing", search: pkg ? { pkg } : undefined, replace: true });
+        } else {
+          await navigate({ to: "/client/dashboard", replace: true });
+        }
         return;
       }
 
@@ -335,7 +358,11 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
         await createProfile(loginData.user.id);
         trackCompleteRegistration({ content_name: "Client Signup" });
         toast.success("Account created! Welcome!");
-        await navigate({ to: "/client/dashboard", replace: true });
+        if (redirect === "/pricing") {
+          await navigate({ to: "/pricing", search: pkg ? { pkg } : undefined, replace: true });
+        } else {
+          await navigate({ to: "/client/dashboard", replace: true });
+        }
         return;
       }
 
