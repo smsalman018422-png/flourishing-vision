@@ -812,10 +812,9 @@ function PurchaseModal({
     }
   };
 
-  const waMessage = encodeURIComponent(
-    `Hi! I'd like to purchase the ${plan.name} package (${cycle}, $${price}).`,
-  );
-  const waHref = `https://wa.me/15550000000?text=${waMessage}`;
+  const { data: settings } = useSiteSettings();
+  const waMessageText = `Hi! I'd like to purchase the ${plan.name} package (${cycle}, $${price}).`;
+  const waHref = buildWhatsAppHref(settings?.contact_whatsapp, waMessageText);
   const contactHref = `/contact?subject=${encodeURIComponent("Package: " + plan.name)}`;
 
   return (
