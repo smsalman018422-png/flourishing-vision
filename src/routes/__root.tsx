@@ -55,10 +55,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "preconnect", href: "https://yqrtqeklcinuxgogfilv.supabase.co", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://yqrtqeklcinuxgogfilv.supabase.co" },
+      // Non-blocking font load: preload + apply via onload swap so first paint isn't blocked.
+      {
+        rel: "preload",
+        as: "style",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap",
+      },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap",
-      },
+        media: "print",
+        onLoad: "this.media='all'",
+      } as any,
     ],
   }),
   shellComponent: RootShell,
