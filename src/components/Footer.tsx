@@ -5,6 +5,7 @@ import { Loader2, Check } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useSiteSettings, normalizeSocialUrl } from "@/hooks/useSiteSettings";
 import { trackNewsletterSubscribe } from "@/lib/meta-pixel";
 
 const services: { label: string; to: string }[] = [
@@ -56,19 +57,23 @@ const YoutubeIcon = ({ className }: IconProps) => (
   </svg>
 );
 
-const socials = [
-  { Icon: InstagramIcon, label: "Instagram", href: "#" },
-  { Icon: LinkedinIcon, label: "LinkedIn", href: "#" },
-  { Icon: TwitterIcon, label: "Twitter", href: "#" },
-  { Icon: FacebookIcon, label: "Facebook", href: "#" },
-  { Icon: YoutubeIcon, label: "YouTube", href: "#" },
-];
+const socialDefs = [
+  { key: "social_instagram", Icon: InstagramIcon, label: "Instagram" },
+  { key: "social_linkedin", Icon: LinkedinIcon, label: "LinkedIn" },
+  { key: "social_twitter", Icon: TwitterIcon, label: "Twitter" },
+  { key: "social_facebook", Icon: FacebookIcon, label: "Facebook" },
+  { key: "social_youtube", Icon: YoutubeIcon, label: "YouTube" },
+] as const;
 
 const emailSchema = z.string().trim().email({ message: "Enter a valid email" }).max(255);
 
 export function Footer() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
+  const { data: settings } = useSiteSettings();
+  const socials = socialDefs
+    .map((s) => ({ ...s, href: normalizeSocialUrl(settings?.[s.key]) }))
+    .filter((s): s is typeof s & { href: string } => !!s.href);
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,6 +137,8 @@ export function Footer() {
                 <a
                   key={label}
                   href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={label}
                   className="grid place-items-center h-9 w-9 rounded-xl glass hover:bg-primary/20 hover:scale-105 hover:text-primary transition-all"
                 >
