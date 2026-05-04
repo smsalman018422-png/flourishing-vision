@@ -72,10 +72,17 @@ export const getRouter = () => {
     routeTree,
     context: { queryClient },
     scrollRestoration: true,
-    defaultPreload: "intent",
-    defaultPreloadStaleTime: 0,
+    // Aggressive preloading: prefetch routes when links enter viewport,
+    // not only on hover/focus. Combined with stale data reuse below,
+    // navigation feels instant.
+    defaultPreload: "viewport",
+    // Reuse preloaded route data for 30s instead of re-fetching on click.
+    defaultPreloadStaleTime: 30_000,
+    defaultPreloadGcTime: 5 * 60_000,
     defaultErrorComponent: DefaultErrorComponent,
     defaultStaleTime: Infinity,
+    defaultPendingMs: 50,
+    defaultPendingMinMs: 0,
   });
 
   return router;

@@ -55,6 +55,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "preconnect", href: "https://yqrtqeklcinuxgogfilv.supabase.co", crossOrigin: "anonymous" },
       { rel: "dns-prefetch", href: "https://yqrtqeklcinuxgogfilv.supabase.co" },
+      // Preload font CSS to start the request earlier; display=swap avoids FOIT.
+      {
+        rel: "preload",
+        as: "style",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap",
+      },
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap",
@@ -87,7 +93,17 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    void initMetaPixel();
+    // Defer pixel init until browser is idle so it doesn't compete with hydration.
+    const w = window as any;
+    const idle: (cb: () => void) => number =
+      w.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 1));
+    const id = idle(() => {
+      void initMetaPixel();
+    });
+    return () => {
+      const cancel = w.cancelIdleCallback ?? window.clearTimeout;
+      cancel(id);
+    };
   }, []);
 
   useEffect(() => {
