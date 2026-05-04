@@ -1,46 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, Check, Loader2, Mail, MapPin, Send } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-
-function LazyCalendly({ src }: { src: string }) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [show, setShow] = useState(false);
-  useEffect(() => {
-    if (!ref.current || show) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          setShow(true);
-          io.disconnect();
-        }
-      },
-      { rootMargin: "200px" }
-    );
-    io.observe(ref.current);
-    return () => io.disconnect();
-  }, [show]);
-  return (
-    <div ref={ref} className="absolute inset-0">
-      {show ? (
-        <iframe
-          src={src}
-          title="Schedule a call"
-          className="absolute inset-0 w-full h-full"
-          loading="lazy"
-        />
-      ) : (
-        <div className="absolute inset-0 grid place-items-center text-sm text-muted-foreground">
-          <div className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Loading scheduler…</div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-const CALENDLY_URL = "https://calendly.com/letusgrow/30min";
+import { CalendlyInline } from "@/components/CalendlyEmbed";
 
 const SERVICES = ["Social Media", "Paid Ads", "SEO", "Branding", "Other"];
 const BUDGETS = ["$500-$1K", "$1K-$5K", "$5K-$10K", "$10K+"];
