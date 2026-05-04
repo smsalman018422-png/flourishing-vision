@@ -93,8 +93,7 @@ function ContactPage() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Left */}
           <div className="space-y-8">
-            <ContactItem icon={Mail} label="Email" value="hello@letusgrow.co" href="mailto:hello@letusgrow.co" />
-            <ContactItem icon={MessageCircle} label="WhatsApp" value="+1 (555) 123-4567" href="https://wa.me/15551234567" />
+            <ContactInfo />
             <ContactItem icon={MapPin} label="Offices" value="New York · London · Bangalore" />
             <ContactItem icon={Clock} label="Office hours" value="Mon–Fri · 9am–7pm local" />
             <div>
