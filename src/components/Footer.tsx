@@ -137,6 +137,8 @@ export function Footer() {
                 <a
                   key={label}
                   href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   aria-label={label}
                   className="grid place-items-center h-9 w-9 rounded-xl glass hover:bg-primary/20 hover:scale-105 hover:text-primary transition-all"
                 >
