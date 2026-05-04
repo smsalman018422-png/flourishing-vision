@@ -12,9 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mail, MessageCircle, MapPin, Clock, CheckCircle2 } from "lucide-react";
+import { Mail, MessageCircle, MapPin, Clock, CheckCircle2, Phone } from "lucide-react";
 import { TwitterIcon, LinkedInIcon, InstagramIcon } from "@/components/icons/Brands";
 import { trackFormStart, trackFormSubmit, trackLead } from "@/lib/meta-pixel";
+import { buildMailHref, buildTelHref, buildWhatsAppHref, useSiteSettings } from "@/hooks/useSiteSettings";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const schema = z.object({
   full_name: z.string().trim().min(1, "Name is required").max(100),
@@ -91,8 +93,7 @@ function ContactPage() {
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Left */}
           <div className="space-y-8">
-            <ContactItem icon={Mail} label="Email" value="hello@letusgrow.co" href="mailto:hello@letusgrow.co" />
-            <ContactItem icon={MessageCircle} label="WhatsApp" value="+1 (555) 123-4567" href="https://wa.me/15551234567" />
+            <ContactInfo />
             <ContactItem icon={MapPin} label="Offices" value="New York · London · Bangalore" />
             <ContactItem icon={Clock} label="Office hours" value="Mon–Fri · 9am–7pm local" />
             <div>
@@ -236,4 +237,27 @@ function ContactItem({ icon: Icon, label, value, href }: { icon: any; label: str
     </div>
   );
   return href ? <a href={href} className="block hover:opacity-80 transition-opacity">{inner}</a> : inner;
+}
+
+function ContactInfo() {
+  const { data: settings, isLoading } = useSiteSettings();
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+      </div>
+    );
+  }
+  const email = settings?.contact_email;
+  const wa = buildWhatsAppHref(settings?.contact_whatsapp);
+  const tel = buildTelHref(settings?.contact_phone);
+  return (
+    <>
+      {email && <ContactItem icon={Mail} label="Email" value={email} href={buildMailHref(email) ?? undefined} />}
+      {wa && <ContactItem icon={MessageCircle} label="WhatsApp" value={settings!.contact_whatsapp!} href={wa} />}
+      {tel && <ContactItem icon={Phone} label="Phone" value={settings!.contact_phone!} href={tel} />}
+    </>
+  );
 }

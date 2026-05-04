@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { buildWhatsAppHref, useSiteSettings } from "@/hooks/useSiteSettings";
 import {
   AlertTriangle,
   Bell,
@@ -450,10 +451,12 @@ function ClientDashboardOverview() {
         .filter(Boolean)
     : [];
 
-  const waNumber = profile?.account_manager_whatsapp?.replace(/\D/g, "") || "15550000000";
-  const waHref = `https://wa.me/${waNumber}?text=${encodeURIComponent(
+  const { data: siteSettings } = useSiteSettings();
+  const waSource = profile?.account_manager_whatsapp || siteSettings?.contact_whatsapp;
+  const waHref = buildWhatsAppHref(
+    waSource,
     `Hi, this is ${profile?.full_name ?? "a client"} — I'd like to chat.`,
-  )}`;
+  ) ?? "#";
 
   return (
     <div className="space-y-8">

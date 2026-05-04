@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, Check, Loader2, Mail, MapPin, Send } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 function LazyCalendly({ src }: { src: string }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -68,6 +69,8 @@ const initial: FormState = {
 };
 
 export function Contact() {
+  const { data: settings } = useSiteSettings();
+  const contactEmail = settings?.contact_email;
   const [form, setForm] = useState<FormState>(initial);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -288,13 +291,15 @@ export function Contact() {
 
         {/* Footer info */}
         <div className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-          <a
-            href="mailto:hello@letusgrow.com"
-            className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition justify-center md:justify-start"
-          >
-            <Mail className="h-5 w-5 text-primary" />
-            <span>hello@letusgrow.com</span>
-          </a>
+          {contactEmail ? (
+            <a
+              href={`mailto:${contactEmail}`}
+              className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition justify-center md:justify-start"
+            >
+              <Mail className="h-5 w-5 text-primary" />
+              <span>{contactEmail}</span>
+            </a>
+          ) : <span />}
           <div className="flex items-center gap-3 text-muted-foreground justify-center md:justify-end flex-wrap">
             <MapPin className="h-5 w-5 text-primary" />
             {LOCATIONS.map((loc, i) => (

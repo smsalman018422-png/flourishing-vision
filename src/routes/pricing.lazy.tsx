@@ -53,6 +53,7 @@ import {
 } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { buildWhatsAppHref, useSiteSettings } from "@/hooks/useSiteSettings";
 import {
   trackInitiateCheckout,
   trackPurchase,
@@ -811,10 +812,9 @@ function PurchaseModal({
     }
   };
 
-  const waMessage = encodeURIComponent(
-    `Hi! I'd like to purchase the ${plan.name} package (${cycle}, $${price}).`,
-  );
-  const waHref = `https://wa.me/15550000000?text=${waMessage}`;
+  const { data: settings } = useSiteSettings();
+  const waMessageText = `Hi! I'd like to purchase the ${plan.name} package (${cycle}, $${price}).`;
+  const waHref = buildWhatsAppHref(settings?.contact_whatsapp, waMessageText);
   const contactHref = `/contact?subject=${encodeURIComponent("Package: " + plan.name)}`;
 
   return (
@@ -910,8 +910,8 @@ function PurchaseModal({
 
             <DialogFooter className="flex-col gap-2 sm:flex-col">
               <div className="grid grid-cols-2 gap-2 w-full">
-                <Button asChild variant="outline">
-                  <a href={waHref} target="_blank" rel="noreferrer">
+                <Button asChild variant="outline" disabled={!waHref}>
+                  <a href={waHref ?? "#"} target="_blank" rel="noopener noreferrer" aria-disabled={!waHref}>
                     <MessageCircle className="h-4 w-4 mr-2" /> WhatsApp
                   </a>
                 </Button>

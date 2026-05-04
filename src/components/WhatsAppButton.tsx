@@ -1,11 +1,14 @@
 import { motion } from "framer-motion";
 import { trackContact, trackWhatsAppClick } from "@/lib/meta-pixel";
+import { buildWhatsAppHref, useSiteSettings } from "@/hooks/useSiteSettings";
 
-const PHONE = "15550000000"; // replace with real number
 const MESSAGE = "Hi Let Us Grow team, I'd like to discuss...";
 
 export function WhatsAppButton() {
-  const href = `https://wa.me/${PHONE}?text=${encodeURIComponent(MESSAGE)}`;
+  const { data: settings, isLoading } = useSiteSettings();
+  const href = buildWhatsAppHref(settings?.contact_whatsapp, MESSAGE);
+
+  if (isLoading || !href) return null;
 
   const handleClick = () => {
     const page = typeof window !== "undefined" ? window.location.pathname : "Unknown";
