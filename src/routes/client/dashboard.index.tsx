@@ -456,7 +456,7 @@ function ClientDashboardOverview() {
   const waHref = buildWhatsAppHref(
     waSource,
     `Hi, this is ${profile?.full_name ?? "a client"} — I'd like to chat.`,
-  ) ?? "#";
+  );
 
   return (
     <div className="space-y-8">
@@ -677,10 +677,17 @@ function ClientDashboardOverview() {
           </Link>
         </Button>
         <a
-          href={waHref}
+          href={waHref ?? "#"}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-start gap-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground px-4 py-4 text-sm font-medium shadow-sm transition-colors"
+          aria-disabled={!waHref}
+          onClick={(e) => {
+            if (!waHref) {
+              e.preventDefault();
+              toast.error("WhatsApp number not configured yet");
+            }
+          }}
+          className={`inline-flex items-center justify-start gap-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground px-4 py-4 text-sm font-medium shadow-sm transition-colors ${!waHref ? "opacity-60 pointer-events-auto cursor-not-allowed" : ""}`}
         >
           <MessageCircle className="h-4 w-4" />
           WhatsApp Support
