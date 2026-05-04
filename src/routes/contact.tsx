@@ -13,9 +13,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mail, MessageCircle, MapPin, Clock, CheckCircle2, Phone } from "lucide-react";
-import { TwitterIcon, LinkedInIcon, InstagramIcon } from "@/components/icons/Brands";
+import { TwitterIcon, LinkedInIcon, InstagramIcon, FacebookIcon } from "@/components/icons/Brands";
+import { Youtube } from "lucide-react";
 import { trackFormStart, trackFormSubmit, trackLead } from "@/lib/meta-pixel";
-import { buildMailHref, buildTelHref, buildWhatsAppHref, useSiteSettings } from "@/hooks/useSiteSettings";
+import { buildMailHref, buildTelHref, buildWhatsAppHref, useSiteSettings, normalizeSocialUrl } from "@/hooks/useSiteSettings";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const schema = z.object({
