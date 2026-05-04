@@ -17,6 +17,7 @@ import { TwitterIcon, LinkedInIcon, InstagramIcon, FacebookIcon } from "@/compon
 import { trackFormStart, trackFormSubmit, trackLead } from "@/lib/meta-pixel";
 import { buildMailHref, buildTelHref, buildWhatsAppHref, useSiteSettings, normalizeSocialUrl } from "@/hooks/useSiteSettings";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CalendlyInline } from "@/components/CalendlyEmbed";
 
 const schema = z.object({
   full_name: z.string().trim().min(1, "Name is required").max(100),
