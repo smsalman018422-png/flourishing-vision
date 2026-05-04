@@ -110,7 +110,7 @@ function ClientAuthPage() {
 }
 
 /* ---------------- Login Form ---------------- */
-function LoginForm() {
+function LoginForm({ redirect, pkg }: { redirect?: string; pkg?: string }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -143,7 +143,8 @@ function LoginForm() {
       }
 
       toast.success("Welcome back");
-      await navigate({ to: "/client/dashboard", replace: true });
+      const target = redirect === "/pricing" ? "/pricing" : "/client/dashboard";
+      await navigate({ to: target, search: target === "/pricing" && pkg ? { pkg } : undefined, replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setBusy(false);
@@ -235,7 +236,15 @@ const signupSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters").max(72),
 });
 
-function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
+function SignupForm({
+  redirect,
+  pkg,
+  onSwitchToLogin,
+}: {
+  redirect?: string;
+  pkg?: string;
+  onSwitchToLogin: () => void;
+}) {
   const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -324,7 +333,8 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
         await createProfile(authData.user.id);
         trackCompleteRegistration({ content_name: "Client Signup" });
         toast.success("Account created! Welcome!");
-        await navigate({ to: "/client/dashboard", replace: true });
+        const target = redirect === "/pricing" ? "/pricing" : "/client/dashboard";
+        await navigate({ to: target, search: target === "/pricing" && pkg ? { pkg } : undefined, replace: true });
         return;
       }
 
@@ -339,7 +349,8 @@ function SignupForm({ onSwitchToLogin }: { onSwitchToLogin: () => void }) {
         await createProfile(loginData.user.id);
         trackCompleteRegistration({ content_name: "Client Signup" });
         toast.success("Account created! Welcome!");
-        await navigate({ to: "/client/dashboard", replace: true });
+        const target = redirect === "/pricing" ? "/pricing" : "/client/dashboard";
+        await navigate({ to: target, search: target === "/pricing" && pkg ? { pkg } : undefined, replace: true });
         return;
       }
 
