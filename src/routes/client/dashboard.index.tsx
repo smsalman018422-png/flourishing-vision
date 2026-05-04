@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { buildWhatsAppHref, useSiteSettings } from "@/hooks/useSiteSettings";
 import {
   AlertTriangle,
   Bell,
