@@ -910,8 +910,8 @@ function PurchaseModal({
 
             <DialogFooter className="flex-col gap-2 sm:flex-col">
               <div className="grid grid-cols-2 gap-2 w-full">
-                <Button asChild variant="outline">
-                  <a href={waHref} target="_blank" rel="noreferrer">
+                <Button asChild variant="outline" disabled={!waHref}>
+                  <a href={waHref ?? "#"} target="_blank" rel="noopener noreferrer" aria-disabled={!waHref}>
                     <MessageCircle className="h-4 w-4 mr-2" /> WhatsApp
                   </a>
                 </Button>
