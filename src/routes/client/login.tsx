@@ -10,10 +10,13 @@ import { trackCompleteRegistration } from "@/lib/meta-pixel";
 
 type Tab = "login" | "signup";
 const sb = supabase as any;
+type LoginSearch = { tab?: Tab; redirect?: string; pkg?: string };
 
 export const Route = createFileRoute("/client/login")({
-  validateSearch: (s: Record<string, unknown>): { tab?: Tab } => ({
+  validateSearch: (s: Record<string, unknown>): LoginSearch => ({
     tab: s.tab === "signup" ? "signup" : s.tab === "login" ? "login" : undefined,
+    redirect: typeof s.redirect === "string" && s.redirect.startsWith("/") ? s.redirect : undefined,
+    pkg: typeof s.pkg === "string" && s.pkg.trim() ? s.pkg : undefined,
   }),
   head: () => ({
     meta: [
@@ -42,13 +45,14 @@ function ClientAuthPage() {
       const { data } = await supabase.auth.getSession();
       const uid = data.session?.user.id;
       if (!uid || cancelled) return;
-      navigate({ to: "/client/dashboard", replace: true });
+      const target = search.redirect === "/pricing" ? "/pricing" : "/client/dashboard";
+      navigate({ to: target, search: target === "/pricing" && search.pkg ? { pkg: search.pkg } : undefined, replace: true });
     };
     void route();
     return () => {
       cancelled = true;
     };
-  }, [navigate]);
+  }, [navigate, search.redirect, search.pkg]);
 
   return (
     <div className="min-h-screen grid place-items-center bg-background px-4 py-12">
@@ -88,9 +92,9 @@ function ClientAuthPage() {
           </div>
 
           {activeTab === "login" ? (
-            <LoginForm />
+            <LoginForm redirect={search.redirect} pkg={search.pkg} />
           ) : (
-            <SignupForm onSwitchToLogin={() => setActiveTab("login")} />
+            <SignupForm redirect={search.redirect} pkg={search.pkg} onSwitchToLogin={() => setActiveTab("login")} />
           )}
         </div>
 
