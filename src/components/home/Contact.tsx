@@ -116,17 +116,9 @@ export function Contact() {
             </div>
 
             <div className="mt-6 flex-1 rounded-2xl overflow-hidden border border-border/60 bg-background/40 min-h-[460px] relative">
-              <LazyCalendly src={CALENDLY_URL} />
+              <CalendlyInline height={460} className="w-full h-full" />
             </div>
 
-            <a
-              href={CALENDLY_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 inline-flex items-center justify-center gap-2 h-12 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90 transition shadow-lg shadow-primary/30"
-            >
-              Schedule on Calendly →
-            </a>
           </motion.div>
 
           {/* RIGHT — Contact form */}
