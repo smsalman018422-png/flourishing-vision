@@ -186,12 +186,7 @@ function ContactPage() {
       <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-20">
         <h2 className="text-2xl sm:text-3xl font-display font-semibold mb-4">Or book a call directly</h2>
         <div className="rounded-2xl overflow-hidden glass">
-          <iframe
-            src="https://calendly.com/letusgrow/intro?hide_event_type_details=1&background_color=0a0a0a&text_color=ffffff&primary_color=22c55e"
-            title="Book a call"
-            className="w-full h-[700px]"
-            loading="lazy"
-          />
+          <CalendlyInline height={700} className="w-full" />
         </div>
       </section>
     </PageShell>
