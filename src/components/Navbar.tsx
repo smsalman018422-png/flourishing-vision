@@ -283,6 +283,13 @@ export function Navbar() {
                 transition={{ delay: 0.08 + links.length * 0.05, duration: 0.3 }}
                 className="mt-6 space-y-3"
               >
+                <Link
+                  to="/free-trial"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-center min-h-12 px-4 rounded-xl text-sm font-bold bg-gradient-to-r from-emerald-500 to-green-400 text-[#0a0f0d] shadow-[0_0_20px_rgba(74,222,128,0.45)]"
+                >
+                  🎁 Start Free Trial
+                </Link>
                 {authState.kind === "anon" && (
                   <Link
                     to="/client/login"
