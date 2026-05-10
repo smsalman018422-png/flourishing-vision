@@ -72,7 +72,7 @@ const FreeTrialRoute = FreeTrialRouteImport.update({
   id: '/free-trial',
   path: '/free-trial',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/free-trial.lazy').then((d) => d.Route))
 const CookiesRoute = CookiesRouteImport.update({
   id: '/cookies',
   path: '/cookies',

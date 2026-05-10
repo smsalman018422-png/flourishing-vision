@@ -155,6 +155,13 @@ export function Navbar() {
                 </AnimatePresence>
               </button>
 
+              <Link
+                to="/free-trial"
+                className="hidden md:inline-flex items-center h-9 px-4 rounded-xl text-sm font-bold bg-gradient-to-r from-emerald-500 to-green-400 text-[#0a0f0d] shadow-[0_0_20px_rgba(74,222,128,0.45)] hover:shadow-[0_0_30px_rgba(74,222,128,0.7)] hover:-translate-y-0.5 active:translate-y-0 transition-all animate-pulse"
+              >
+                Start Free Trial
+              </Link>
+
               {authState.kind === "anon" ? (
                 <Link
                   to="/client/login"
