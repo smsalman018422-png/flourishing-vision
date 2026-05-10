@@ -15,6 +15,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
+import { Route as FreeTrialRouteImport } from './routes/free-trial'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BlogRouteImport } from './routes/blog'
@@ -65,6 +66,11 @@ const PricingRoute = PricingRouteImport.update({
 const PortfolioRoute = PortfolioRouteImport.update({
   id: '/portfolio',
   path: '/portfolio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreeTrialRoute = FreeTrialRouteImport.update({
+  id: '/free-trial',
+  path: '/free-trial',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiesRoute = CookiesRouteImport.update({
@@ -180,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
+  '/free-trial': typeof FreeTrialRoute
   '/portfolio': typeof PortfolioRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
+  '/free-trial': typeof FreeTrialRoute
   '/portfolio': typeof PortfolioRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -238,6 +246,7 @@ export interface FileRoutesById {
   '/blog': typeof BlogRouteWithChildren
   '/contact': typeof ContactRoute
   '/cookies': typeof CookiesRoute
+  '/free-trial': typeof FreeTrialRoute
   '/portfolio': typeof PortfolioRouteWithChildren
   '/pricing': typeof PricingRoute
   '/privacy': typeof PrivacyRoute
@@ -269,6 +278,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/contact'
     | '/cookies'
+    | '/free-trial'
     | '/portfolio'
     | '/pricing'
     | '/privacy'
@@ -298,6 +308,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/contact'
     | '/cookies'
+    | '/free-trial'
     | '/portfolio'
     | '/pricing'
     | '/privacy'
@@ -326,6 +337,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/contact'
     | '/cookies'
+    | '/free-trial'
     | '/portfolio'
     | '/pricing'
     | '/privacy'
@@ -356,6 +368,7 @@ export interface RootRouteChildren {
   BlogRoute: typeof BlogRouteWithChildren
   ContactRoute: typeof ContactRoute
   CookiesRoute: typeof CookiesRoute
+  FreeTrialRoute: typeof FreeTrialRoute
   PortfolioRoute: typeof PortfolioRouteWithChildren
   PricingRoute: typeof PricingRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -412,6 +425,13 @@ declare module '@tanstack/react-router' {
       path: '/portfolio'
       fullPath: '/portfolio'
       preLoaderRoute: typeof PortfolioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/free-trial': {
+      id: '/free-trial'
+      path: '/free-trial'
+      fullPath: '/free-trial'
+      preLoaderRoute: typeof FreeTrialRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookies': {
@@ -618,6 +638,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogRoute: BlogRouteWithChildren,
   ContactRoute: ContactRoute,
   CookiesRoute: CookiesRoute,
+  FreeTrialRoute: FreeTrialRoute,
   PortfolioRoute: PortfolioRouteWithChildren,
   PricingRoute: PricingRoute,
   PrivacyRoute: PrivacyRoute,
