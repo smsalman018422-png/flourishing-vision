@@ -509,3 +509,56 @@ function ThemeToggleRow() {
     </button>
   );
 }
+
+function TrialBanner({ clientId }: { clientId: string }) {
+  const [trial, setTrial] = useState<{ ends: string } | null>(null);
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    let mounted = true;
+    void (async () => {
+      const { data } = await sb
+        .from("client_memberships")
+        .select("trial_ends_at,is_trial,status")
+        .eq("client_id", clientId)
+        .eq("is_trial", true)
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!mounted) return;
+      if (data?.trial_ends_at) setTrial({ ends: data.trial_ends_at });
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [clientId]);
+
+  useEffect(() => {
+    if (!trial) return;
+    const t = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(t);
+  }, [trial]);
+
+  if (!trial) return null;
+  const msLeft = new Date(trial.ends).getTime() - now;
+  if (msLeft <= 0) return null;
+  const daysLeft = Math.ceil(msLeft / 86_400_000);
+
+  return (
+    <div className="sticky top-14 z-10 bg-gradient-to-r from-emerald-500 to-green-400 text-[#0a0f0d]">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2.5 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div className="text-sm font-semibold">
+          🎉 7-Day Free Trial Active — {daysLeft} {daysLeft === 1 ? "day" : "days"} remaining
+        </div>
+        <Link
+          to="/pricing"
+          className="inline-flex items-center gap-1 h-8 px-4 rounded-lg bg-[#0a0f0d] text-emerald-300 text-xs font-bold hover:bg-[#0d1612] transition-colors"
+        >
+          Upgrade to Paid Plan →
+        </Link>
+      </div>
+    </div>
+  );
+}
+
