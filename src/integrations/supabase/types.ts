@@ -168,6 +168,7 @@ export type Database = {
           end_date: string
           id: string
           is_custom: boolean
+          is_trial: boolean
           note: string | null
           package_id: string | null
           payment_method: string | null
@@ -176,6 +177,8 @@ export type Database = {
           start_date: string | null
           status: string
           transaction_id: string | null
+          trial_ends_at: string | null
+          trial_started_at: string | null
           updated_at: string
         }
         Insert: {
@@ -190,6 +193,7 @@ export type Database = {
           end_date: string
           id?: string
           is_custom?: boolean
+          is_trial?: boolean
           note?: string | null
           package_id?: string | null
           payment_method?: string | null
@@ -198,6 +202,8 @@ export type Database = {
           start_date?: string | null
           status?: string
           transaction_id?: string | null
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -212,6 +218,7 @@ export type Database = {
           end_date?: string
           id?: string
           is_custom?: boolean
+          is_trial?: boolean
           note?: string | null
           package_id?: string | null
           payment_method?: string | null
@@ -220,6 +227,8 @@ export type Database = {
           start_date?: string | null
           status?: string
           transaction_id?: string | null
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -332,12 +341,15 @@ export type Database = {
           country: string | null
           created_at: string
           email: string | null
+          facebook_url: string | null
           full_name: string
           id: string
+          instagram_handle: string | null
           is_active: boolean
           name: string | null
           phone: string | null
           timezone: string | null
+          trial_source: string | null
           updated_at: string
           whatsapp_number: string | null
         }
@@ -350,12 +362,15 @@ export type Database = {
           country?: string | null
           created_at?: string
           email?: string | null
+          facebook_url?: string | null
           full_name: string
           id: string
+          instagram_handle?: string | null
           is_active?: boolean
           name?: string | null
           phone?: string | null
           timezone?: string | null
+          trial_source?: string | null
           updated_at?: string
           whatsapp_number?: string | null
         }
@@ -368,12 +383,15 @@ export type Database = {
           country?: string | null
           created_at?: string
           email?: string | null
+          facebook_url?: string | null
           full_name?: string
           id?: string
+          instagram_handle?: string | null
           is_active?: boolean
           name?: string | null
           phone?: string | null
           timezone?: string | null
+          trial_source?: string | null
           updated_at?: string
           whatsapp_number?: string | null
         }
