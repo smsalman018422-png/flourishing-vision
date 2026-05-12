@@ -120,8 +120,9 @@ function FreeTrialPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0f0d] text-white overflow-x-hidden">
+      <Navbar />
       {/* HERO */}
-      <section className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
+      <section className="relative lg:min-h-screen flex items-center pt-24 pb-12 lg:pb-16 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#0a0f0d] via-[#0d1612] to-[#0f1a14]" />
         <div
           className="absolute inset-0 opacity-[0.07]"
