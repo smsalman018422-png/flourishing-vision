@@ -51,7 +51,7 @@ const FAQS = [
   },
   {
     q: "What do I need to provide?",
-    a: "Just your brand details, social handles, and a 30-min strategy call.",
+    a: "Just your brand details, social handles, and a 10-min strategy call/Texting. Whatever you do prefer.",
   },
   {
     q: "Can I cancel anytime?",
