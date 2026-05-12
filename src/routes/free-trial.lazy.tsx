@@ -32,6 +32,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Navbar } from "@/components/Navbar";
 
 export const Route = createLazyFileRoute("/free-trial")({
   component: FreeTrialPage,
@@ -50,7 +51,7 @@ const FAQS = [
   },
   {
     q: "What do I need to provide?",
-    a: "Just your brand details, social handles, and a 30-min strategy call.",
+    a: "Just your brand details, social handles, and a 10-min strategy call/Texting. Whatever you do prefer.",
   },
   {
     q: "Can I cancel anytime?",
@@ -119,8 +120,9 @@ function FreeTrialPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0f0d] text-white overflow-x-hidden">
+      <Navbar />
       {/* HERO */}
-      <section className="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
+      <section className="relative lg:min-h-screen flex items-center pt-24 pb-12 lg:pb-16 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#0a0f0d] via-[#0d1612] to-[#0f1a14]" />
         <div
           className="absolute inset-0 opacity-[0.07]"
