@@ -32,6 +32,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Navbar } from "@/components/Navbar";
 
 export const Route = createLazyFileRoute("/free-trial")({
   component: FreeTrialPage,
