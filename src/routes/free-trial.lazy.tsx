@@ -287,56 +287,6 @@ function FreeTrialPage() {
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
-      <section className="py-24">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <h2 className="font-display font-bold text-3xl sm:text-4xl lg:text-5xl">
-              How It Works
-            </h2>
-          </div>
-          <div className="relative grid md:grid-cols-3 gap-8">
-            <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent" />
-            {[
-              {
-                n: "01",
-                title: "Sign Up in 30 Seconds",
-                body: "Just your name, contact, and brand details",
-                icon: Rocket,
-              },
-              {
-                n: "02",
-                title: "Strategy Call within 24 Hours",
-                body: "We deeply understand your brand",
-                icon: Phone,
-              },
-              {
-                n: "03",
-                title: "We Start Working — Day 1",
-                body: "Content, growth, results begin immediately",
-                icon: Sparkles,
-              },
-            ].map((s, i) => (
-              <motion.div
-                key={s.n}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.15 }}
-                className="relative text-center"
-              >
-                <div className="relative z-10 mx-auto h-24 w-24 rounded-full bg-gradient-to-br from-emerald-500 to-green-600 grid place-items-center shadow-[0_0_40px_rgba(74,222,128,0.3)]">
-                  <s.icon className="h-10 w-10 text-[#0a0f0d]" />
-                </div>
-                <div className="mt-6 text-emerald-400 text-sm font-mono font-bold">{s.n}</div>
-                <h3 className="mt-2 font-display text-xl font-semibold">{s.title}</h3>
-                <p className="mt-2 text-sm text-white/65">{s.body}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* SOCIAL PROOF */}
       <section className="py-24 bg-gradient-to-b from-transparent via-emerald-950/20 to-transparent">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
