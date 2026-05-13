@@ -33,6 +33,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Navbar } from "@/components/Navbar";
+import { lazy, Suspense } from "react";
+const CinematicJourney = lazy(() => import("@/components/CinematicJourney"));
 
 export const Route = createLazyFileRoute("/free-trial")({
   component: FreeTrialPage,
@@ -207,6 +209,11 @@ function FreeTrialPage() {
           </motion.div>
         </div>
       </section>
+
+      {/* CINEMATIC 7-DAY JOURNEY */}
+      <Suspense fallback={<div className="h-screen bg-[#0a0f0d]" />}>
+        <CinematicJourney onCTAClick={openSignup} />
+      </Suspense>
 
       {/* WHY */}
       <section className="py-24 relative">
