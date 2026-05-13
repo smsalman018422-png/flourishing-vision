@@ -33,6 +33,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Navbar } from "@/components/Navbar";
+import { Roadmap } from "@/components/free-trial/Roadmap";
 
 export const Route = createLazyFileRoute("/free-trial")({
   component: FreeTrialPage,
@@ -207,6 +208,9 @@ function FreeTrialPage() {
           </motion.div>
         </div>
       </section>
+
+      {/* 7-DAY ROADMAP */}
+      <Roadmap onCtaClick={openSignup} />
 
       {/* WHY */}
       <section className="py-24 relative">
