@@ -33,6 +33,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Navbar } from "@/components/Navbar";
+import { Roadmap } from "@/components/free-trial/Roadmap";
 
 export const Route = createLazyFileRoute("/free-trial")({
   component: FreeTrialPage,
