@@ -209,6 +209,9 @@ function FreeTrialPage() {
         </div>
       </section>
 
+      {/* 7-DAY ROADMAP */}
+      <Roadmap onCtaClick={openSignup} />
+
       {/* WHY */}
       <section className="py-24 relative">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
