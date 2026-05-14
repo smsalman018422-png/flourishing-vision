@@ -29,14 +29,47 @@ type Project = {
 };
 
 export const Route = createFileRoute("/portfolio/$slug")({
-  head: ({ params }) => ({
-    meta: [
-      { title: `Case study — ${params.slug} — Let Us Grow` },
-      { name: "description", content: "A Let Us Grow case study: challenge, solution, and measurable results." },
-      { property: "og:title", content: `Case study — ${params.slug}` },
-      { property: "og:description", content: "Challenge, solution, results." },
-    ],
-  }),
+  loader: async ({ params }) => {
+    let { data } = await supabase.from("portfolio").select("*").eq("slug", params.slug).maybeSingle();
+    if (!data) {
+      const byId = await supabase.from("portfolio").select("*").eq("id", params.slug).maybeSingle();
+      data = byId.data;
+    }
+    return { project: (data ?? null) as Project | null };
+  },
+  head: ({ params, loaderData }) => {
+    const p = loaderData?.project;
+    const title = p
+      ? `${p.project_title} — ${p.client_name} case study`
+      : `Case study — ${params.slug} — Let Us Grow`;
+    const baseDesc =
+      p?.challenge ||
+      p?.solution ||
+      p?.results ||
+      p?.testimonial_quote ||
+      (p ? `How we helped ${p.client_name} with ${p.project_title}.` : "A Let Us Grow case study: challenge, solution, and measurable results.");
+    const description = baseDesc.replace(/\s+/g, " ").trim().slice(0, 157) + (baseDesc.length > 157 ? "…" : "");
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:type", content: "article" },
+    ];
+    if (p?.cover_image_url) {
+      meta.push({ property: "og:image", content: p.cover_image_url });
+      meta.push({ name: "twitter:image", content: p.cover_image_url });
+    }
+    return {
+      meta,
+      links: [
+        {
+          rel: "canonical",
+          href: `https://let-us-grow-8ee47452.lovable.app/portfolio/${params.slug}`,
+        },
+      ],
+    };
+  },
   errorComponent: ({ error }) => (
     <PageShell>
       <div className="mx-auto max-w-3xl px-4 py-32 text-center">
