@@ -12,11 +12,11 @@ let pixelInitialized = false;
 let configPromise: Promise<PixelConfig> | null = null;
 
 const KEYS = [
-  "pixel_id",
-  "pixel_enabled",
-  "pixel_test_mode",
-  "pixel_test_code",
-  "pixel_test_activated_at",
+  "meta_pixel_id",
+  "meta_pixel_enabled",
+  "meta_pixel_test_mode",
+  "meta_pixel_test_code",
+  "meta_pixel_test_activated_at",
 ];
 
 function readVal(v: unknown): string | boolean | null {
@@ -42,19 +42,19 @@ export async function getPixelConfig(): Promise<PixelConfig> {
       });
 
       let testMode =
-        settings.pixel_test_mode === true || settings.pixel_test_mode === "true";
-      const activatedAt = settings.pixel_test_activated_at;
+        settings.meta_pixel_test_mode === true || settings.meta_pixel_test_mode === "true";
+      const activatedAt = settings.meta_pixel_test_activated_at;
       if (testMode && activatedAt) {
         const t = new Date(activatedAt).getTime();
         if (!isNaN(t) && (Date.now() - t) / 36e5 >= 24) testMode = false;
       }
 
       pixelConfig = {
-        pixelId: settings.pixel_id || "",
+        pixelId: settings.meta_pixel_id || "",
         enabled:
-          settings.pixel_enabled === true || settings.pixel_enabled === "true",
+          settings.meta_pixel_enabled === true || settings.meta_pixel_enabled === "true",
         testMode,
-        testCode: settings.pixel_test_code || "",
+        testCode: settings.meta_pixel_test_code || "",
       };
       return pixelConfig;
     } catch (err) {
