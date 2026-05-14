@@ -101,6 +101,7 @@ function RootComponent() {
       w.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 1));
     const id = idle(() => {
       void initMetaPixel();
+      void initGoogleAnalytics();
     });
     return () => {
       const cancel = w.cancelIdleCallback ?? window.clearTimeout;
@@ -110,7 +111,10 @@ function RootComponent() {
 
   useEffect(() => {
     trackPageView();
+    gaTrackPageView(pathname);
   }, [pathname]);
+
+  useGAEngagementTracking();
 
   return (
     <QueryClientProvider client={queryClient}>
