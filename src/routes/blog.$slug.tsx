@@ -33,7 +33,15 @@ export const Route = createFileRoute("/blog/$slug")({
       meta.push({ property: "og:image", content: post.image });
       meta.push({ name: "twitter:image", content: post.image });
     }
-    return { meta };
+    return {
+      meta,
+      links: [
+        {
+          rel: "canonical",
+          href: `https://let-us-grow-8ee47452.lovable.app/blog/${params.slug}`,
+        },
+      ],
+    };
   },
   errorComponent: ({ error }) => (
     <PageShell>
