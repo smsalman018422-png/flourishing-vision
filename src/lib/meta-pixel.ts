@@ -12,11 +12,11 @@ let pixelInitialized = false;
 let configPromise: Promise<PixelConfig> | null = null;
 
 const KEYS = [
-  "pixel_id",
-  "pixel_enabled",
-  "pixel_test_mode",
-  "pixel_test_code",
-  "pixel_test_activated_at",
+  "meta_pixel_id",
+  "meta_pixel_enabled",
+  "meta_pixel_test_mode",
+  "meta_pixel_test_code",
+  "meta_pixel_test_activated_at",
 ];
 
 function readVal(v: unknown): string | boolean | null {
