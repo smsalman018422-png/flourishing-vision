@@ -167,9 +167,9 @@ function GrassBlade({ className = "", delay = 0, color = "#4ade80" }: { classNam
   );
 }
 
-function Flower({ className = "", color = "#fbbf24" }: { className?: string; color?: string }) {
+function Flower({ className = "", color = "#fbbf24", style }: { className?: string; color?: string; style?: React.CSSProperties }) {
   return (
-    <svg viewBox="0 0 20 20" className={className}>
+    <svg viewBox="0 0 20 20" className={className} style={style}>
       <circle cx="10" cy="6" r="2.5" fill={color} />
       <circle cx="6" cy="10" r="2.5" fill={color} />
       <circle cx="14" cy="10" r="2.5" fill={color} />
@@ -179,12 +179,12 @@ function Flower({ className = "", color = "#fbbf24" }: { className?: string; col
   );
 }
 
-function Leaf({ className = "", delay = 0 }: { className?: string; delay?: number }) {
+function Leaf({ className = "", delay = 0, style }: { className?: string; delay?: number; style?: React.CSSProperties }) {
   return (
     <svg
       viewBox="0 0 20 20"
       className={`leaf-float ${className}`}
-      style={{ animationDelay: `${delay}s` }}
+      style={{ animationDelay: `${delay}s`, ...style }}
     >
       <path d="M10 2 Q 16 8, 14 16 Q 8 18, 4 12 Q 4 6, 10 2 Z" fill="#84cc16" opacity="0.7" />
       <path d="M10 2 Q 10 10, 12 16" stroke="#65a30d" strokeWidth="0.5" fill="none" />
@@ -192,9 +192,9 @@ function Leaf({ className = "", delay = 0 }: { className?: string; delay?: numbe
   );
 }
 
-function Rock({ className = "", size = 16 }: { className?: string; size?: number }) {
+function Rock({ className = "", size = 16, style }: { className?: string; size?: number; style?: React.CSSProperties }) {
   return (
-    <svg viewBox="0 0 20 14" width={size} height={size * 0.7} className={className}>
+    <svg viewBox="0 0 20 14" width={size} height={size * 0.7} className={className} style={style}>
       <ellipse cx="10" cy="10" rx="9" ry="4" fill="#6b7280" />
       <ellipse cx="8" cy="8" rx="6" ry="3" fill="#9ca3af" />
       <ellipse cx="7" cy="7" rx="2" ry="1" fill="#d1d5db" opacity="0.6" />
