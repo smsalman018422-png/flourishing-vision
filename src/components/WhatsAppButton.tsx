@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { trackContact, trackWhatsAppClick } from "@/lib/meta-pixel";
+import { trackWhatsAppClick as gaTrackWhatsAppClick } from "@/lib/google-analytics";
 import { buildWhatsAppHref, useSiteSettings } from "@/hooks/useSiteSettings";
 
 const MESSAGE = "Hi Let Us Grow team, I'd like to discuss...";
@@ -14,6 +15,7 @@ export function WhatsAppButton() {
     const page = typeof window !== "undefined" ? window.location.pathname : "Unknown";
     trackWhatsAppClick(page);
     trackContact({ content_name: "WhatsApp" });
+    gaTrackWhatsAppClick(page);
   };
 
   return (

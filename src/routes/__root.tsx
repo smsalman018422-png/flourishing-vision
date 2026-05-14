@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { initMetaPixel, trackPageView } from "@/lib/meta-pixel";
+import { initGoogleAnalytics, trackPageView as gaTrackPageView } from "@/lib/google-analytics";
+import { useGAEngagementTracking } from "@/hooks/useGATracking";
 
 import appCss from "../styles.css?url";
 
@@ -99,6 +101,7 @@ function RootComponent() {
       w.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 1));
     const id = idle(() => {
       void initMetaPixel();
+      void initGoogleAnalytics();
     });
     return () => {
       const cancel = w.cancelIdleCallback ?? window.clearTimeout;
@@ -108,7 +111,10 @@ function RootComponent() {
 
   useEffect(() => {
     trackPageView();
+    gaTrackPageView(pathname);
   }, [pathname]);
+
+  useGAEngagementTracking();
 
   return (
     <QueryClientProvider client={queryClient}>
